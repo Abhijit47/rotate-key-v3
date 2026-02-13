@@ -1,5 +1,6 @@
 import LocaleToggler from '@/components/shared/locale-toggler';
 import ThemeToggler from '@/components/shared/theme-toggler';
+import TestJobs from '@/components/test-jobs';
 import { Button } from '@/components/ui/button';
 import { getTranslations } from 'next-intl/server';
 
@@ -7,12 +8,14 @@ export default async function Home() {
   const t = await getTranslations();
 
   return (
-    <div>
+    <div className={'space-y-6'}>
       <div>
         <Button>Click me</Button>
         <ThemeToggler />
         <LocaleToggler />
       </div>
+
+      <TestJobs />
 
       <div className={'space-y-5'}>
         <h1 className={'font-display text-7xl font-extrabold'}>

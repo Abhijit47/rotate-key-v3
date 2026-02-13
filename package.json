@@ -17,7 +17,9 @@
     "db:studio": "pnpm exec drizzle-kit studio",
     "db:seed": "pnpm exec tsx src/drizzle/seed.ts",
     "better-auth:generate": "pnpm dlx @better-auth/cli@latest generate --config ./src/lib/auth.ts --output ./src/lib/auth.generated.ts --yes",
-    "locales:lint": "pnpm dlx @lingual/i18n-check@latest --source en --locales locales"
+    "locales:lint": "pnpm dlx @lingual/i18n-check@latest --source en --locales locales",
+    "inngest:dev": "pnpm dlx inngest-cli@latest dev",
+    "dev:all": "mprocs"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
@@ -35,6 +37,7 @@
     "drizzle-seed": "^0.3.1",
     "embla-carousel-react": "^8.6.0",
     "facehash": "^0.0.7",
+    "inngest": "^3.52.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
