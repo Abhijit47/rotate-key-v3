@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
 import { Baumans, Freehand, Poppins } from 'next/font/google';
 
 import { Toaster } from '@/components/ui/sonner';
@@ -45,7 +46,9 @@ export default function AppLayout({
           defaultTheme='system'
           enableSystem
           disableTransitionOnChange>
-          <TooltipProvider>{children}</TooltipProvider>
+          <NextIntlClientProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </NextIntlClientProvider>
           <Toaster position='top-center' richColors closeButton />
         </ThemeProvider>
       </body>
