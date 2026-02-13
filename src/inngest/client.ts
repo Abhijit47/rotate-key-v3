@@ -1,3 +1,4 @@
+import { env } from '@/env';
 import { EventSchemas, Inngest } from 'inngest';
 
 type UserSignup = {
@@ -14,8 +15,11 @@ type Events = {
   'user/new.signup': UserSignup;
 };
 
-// Create a client to send and receive events
+const isDev = process.env.NODE_ENV === 'development';
+
 export const inngest = new Inngest({
   id: 'rotate-key',
+  name: 'Rotate Key',
   schemas: new EventSchemas().fromRecord<Events>(),
+  eventKey: isDev ? undefined : env.INNGEST_EVENT_KEY,
 });
