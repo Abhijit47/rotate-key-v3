@@ -10,10 +10,6 @@ export const env = createEnv({
     FACEBOOK_CLIENT_SECRET: z.string().min(1),
     GOOGLE_CLIENT_ID: z.string().min(1),
     GOOGLE_CLIENT_SECRET: z.string().min(1),
-    INNGEST_BASE_URL: z.url(),
-    INNGEST_SERVE_PATH: z.string().min(1),
-    INNGEST_EVENT_KEY: z.string().min(1),
-    INNGEST_SIGNING_KEY: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_BETTER_AUTH_URL: z.url(),
