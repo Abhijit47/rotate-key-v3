@@ -1,6 +1,7 @@
 import './src/env';
 
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -15,4 +16,7 @@ const nextConfig: NextConfig = {
   // transpilePackages: ["@t3-oss/env-nextjs", "@t3-oss/env-core"],
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin();
+
+// export default nextConfig;
+export default withNextIntl(nextConfig);
