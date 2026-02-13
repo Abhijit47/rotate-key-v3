@@ -7,7 +7,7 @@ import {
 import { inngest } from './client';
 
 /**
- ** Helpers
+ * Helpers
  - The TS SDK exports some helper types to allow you to access the type of particular Inngest internals outside of an Inngest function.
  */
 
