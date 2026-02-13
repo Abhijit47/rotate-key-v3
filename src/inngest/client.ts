@@ -17,4 +17,5 @@ type Events = {
 export const inngest = new Inngest({
   id: 'rotate-key',
   schemas: new EventSchemas().fromRecord<Events>(),
+  eventKey: process.env.INNGEST_EVENT_KEY,
 });
