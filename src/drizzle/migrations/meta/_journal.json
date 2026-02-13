@@ -8,6 +8,13 @@
       "when": 1770948151235,
       "tag": "0000_bouncy_the_fury",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770957354605,
+      "tag": "0001_glorious_kylun",
+      "breakpoints": true
     }
   ]
 }
