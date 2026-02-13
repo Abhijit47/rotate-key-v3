@@ -66,22 +66,29 @@ export default function LoginForm({
   const onSubmit: SubmitHandler<LoginValues> = (values) => {
     // console.log('Form submitted successfully with data:', data);
     startSignInTransition(async () => {
-      const result = await signIn.email({
-        email: values.email,
-        password: values.password,
-        rememberMe: values.rememberMe,
-        callbackURL: `${window.location.origin}/`,
-      });
-      if (result.error) {
-        toast.error(result.error.message, {
+      try {
+        const result = await signIn.email({
+          email: values.email,
+          password: values.password,
+          rememberMe: values.rememberMe,
+          callbackURL: `${window.location.origin}/`,
+        });
+        if (result.error) {
+          toast.error(result.error.message, {
+            duration: 3000,
+          });
+          return;
+        }
+        toast.success('Login successful! Redirecting...', {
           duration: 3000,
         });
-        return;
+        form.reset();
+      } catch (error) {
+        console.error('Login error:', error);
+        toast.error('An unexpected error occurred. Please try again.', {
+          duration: 3000,
+        });
       }
-      toast.success('Login successful! Redirecting...', {
-        duration: 3000,
-      });
-      form.reset();
     });
   };
 
@@ -188,11 +195,11 @@ export default function LoginForm({
           <Field>
             <Button variant='outline' type='button' disabled={isSignInPending}>
               <IconBrandGoogle className='mr-2 size-4' />
-              Sign up with Google
+              Log in with Google
             </Button>
             <Button variant='outline' type='button' disabled={isSignInPending}>
               <IconBrandFacebook className='mr-2 size-4' />
-              Sign up with Facebook
+              Log in with Facebook
             </Button>
             <FieldDescription className='text-center'>
               Don&apos;t have an account?{' '}

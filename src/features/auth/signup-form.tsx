@@ -84,6 +84,8 @@ export default function SignupForm({
 
   const onSubmit: SubmitHandler<SignupValues> = (values) => {
     setIsSignUpTransition(true);
+    let signUpSucceeded = false;
+
     toast.promise(
       signUp.email({
         email: values.email,
@@ -95,8 +97,8 @@ export default function SignupForm({
         loading: 'Creating Account...',
         success: ({ data }) => {
           const name = data?.user?.name || 'User';
+          signUpSucceeded = true;
           form.reset();
-          router.push('/onboarding');
           return (
             <p className={'text-sm'}>
               Account created successfully! Welcome, <strong>{name}</strong>!
@@ -107,6 +109,11 @@ export default function SignupForm({
         error: (err) => err.message || 'Failed to create account',
         finally: () => {
           setIsSignUpTransition(false);
+          if (signUpSucceeded) {
+            setTimeout(() => {
+              router.push('/onboarding');
+            }, 1500);
+          }
         },
       },
     );

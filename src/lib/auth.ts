@@ -6,24 +6,17 @@ import { nextCookies } from 'better-auth/next-js';
 
 import { db } from '@/drizzle/db';
 import * as schema from '@/drizzle/schema';
+import { env } from '@/env';
 
-const facebookClientId = process.env.FACEBOOK_CLIENT_ID;
-const facebookClientSecret = process.env.FACEBOOK_CLIENT_SECRET;
-const googleClientId = process.env.GOOGLE_CLIENT_ID;
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-if (!facebookClientId || !facebookClientSecret) {
-  throw new Error(
-    'Facebook client ID or secret is missing. Please set the environment variables FACEBOOK_CLIENT_ID and FACEBOOK_CLIENT_SECRET.',
-  );
-}
-if (!googleClientId || !googleClientSecret) {
-  throw new Error(
-    'Google client ID or secret is missing. Please set the environment variables GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.',
-  );
-}
+const facebookClientId = env.FACEBOOK_CLIENT_ID;
+const facebookClientSecret = env.FACEBOOK_CLIENT_SECRET;
+const googleClientId = env.GOOGLE_CLIENT_ID;
+const googleClientSecret = env.GOOGLE_CLIENT_SECRET;
+
 const isDev = process.env.NODE_ENV === 'development';
+
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: env.BETTER_AUTH_URL,
   advanced: {
     database: {
       generateId: 'uuid',

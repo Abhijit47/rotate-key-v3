@@ -8,9 +8,6 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 
-const baseUrl = process.env.BETTER_AUTH_URL;
-const avatarFallbackUrl = `${baseUrl}/api/avatar?name=user`;
-
 export const user = pgTable('user', {
   id: uuid('id')
     .default(sql`pg_catalog.gen_random_uuid()`)
@@ -18,7 +15,7 @@ export const user = pgTable('user', {
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').default(false).notNull(),
-  image: text('image').default(avatarFallbackUrl).notNull(),
+  image: text('image').default('/api/avatar?name=user').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at')
     .defaultNow()

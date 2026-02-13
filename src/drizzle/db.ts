@@ -1,11 +1,10 @@
-import '../../envConfig';
-
 import { Pool } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 
 import * as schema from '@/drizzle/schema';
+import { env } from '@/env';
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = env.DATABASE_URL;
 if (!databaseUrl) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
