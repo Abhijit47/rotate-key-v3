@@ -13,8 +13,9 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import { signUp } from '@/lib/auth-client';
+import { signIn, signUp } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
+import { signupSchema, SignupValues } from '@/lib/validators/auth-schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IconBrandFacebook, IconBrandGoogle } from '@tabler/icons-react';
 import Link from 'next/link';
@@ -27,35 +28,14 @@ import {
   useForm,
 } from 'react-hook-form';
 import { toast } from 'sonner';
-import z from 'zod';
-
-const signupSchema = z
-  .object({
-    fullName: z
-      .string()
-      .min(2, 'Full name must be at least 2 characters long')
-      .max(100, 'Full name must be less than 100 characters long'),
-    email: z.email('Please enter a valid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters long'),
-    confirmPassword: z
-      .string()
-      .min(8, 'Confirm password must be at least 8 characters long'),
-    privacyAndTerms: z.boolean().refine((value) => value === true, {
-      message: 'You must accept the privacy policy and terms of service',
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
-
-type SignupValues = z.infer<typeof signupSchema>;
 
 export default function SignupForm({
   className,
   ...props
 }: React.ComponentProps<'form'>) {
-  const [isSignUpPending, setIsSignUpTransition] = useState(false);
+  const [isSignUpPending, setIsSignUpPending] = useState(false);
+  const [isPendingGoogleSignUp, setIsGoogleSignUp] = useState(false);
+  const [isPendingFacebookSignUp, setIsFacebookSignUp] = useState(false);
 
   const router = useRouter();
 
@@ -83,7 +63,7 @@ export default function SignupForm({
   };
 
   const onSubmit: SubmitHandler<SignupValues> = (values) => {
-    setIsSignUpTransition(true);
+    setIsSignUpPending(true);
     let signUpSucceeded = false;
 
     toast.promise(
@@ -108,7 +88,7 @@ export default function SignupForm({
         },
         error: (err) => err.message || 'Failed to create account',
         finally: () => {
-          setIsSignUpTransition(false);
+          setIsSignUpPending(false);
           if (signUpSucceeded) {
             setTimeout(() => {
               router.push('/onboarding');
@@ -119,12 +99,70 @@ export default function SignupForm({
     );
   };
 
+  function handleGoogleSignUp() {
+    setIsGoogleSignUp(true);
+    toast.promise(
+      signIn.social({
+        provider: 'google',
+        callbackURL: `${window.location.origin}/`,
+        newUserCallbackURL: `${window.location.origin}/onboarding`,
+        errorCallbackURL: `${window.location.origin}/login?error=google_auth_failed`,
+        requestSignUp: true,
+      }),
+      {
+        loading: 'Redirecting to Google...',
+        success: () => {
+          return 'Redirected to Google for authentication';
+        },
+        error: (error) => {
+          return (
+            error?.message || 'Failed to redirect to Google. Please try again.'
+          );
+        },
+        finally: () => {
+          setIsGoogleSignUp(false);
+        },
+      },
+    );
+  }
+
+  function handleFacebookSignUp() {
+    setIsFacebookSignUp(true);
+    toast.promise(
+      signIn.social({
+        provider: 'facebook',
+        callbackURL: `${window.location.origin}/`,
+        newUserCallbackURL: `${window.location.origin}/onboarding`,
+        errorCallbackURL: `${window.location.origin}/login?error=facebook_auth_failed`,
+        requestSignUp: true,
+      }),
+      {
+        loading: 'Redirecting to Facebook...',
+        success: () => {
+          return 'Redirected to Facebook for authentication';
+        },
+        error: (error) => {
+          return (
+            error?.message ||
+            'Failed to redirect to Facebook. Please try again.'
+          );
+        },
+        finally: () => {
+          setIsFacebookSignUp(false);
+        },
+      },
+    );
+  }
+
+  const disabledState =
+    isPendingGoogleSignUp || isPendingFacebookSignUp || isSignUpPending;
+
   return (
     <form
       className={cn('flex flex-col gap-6', className)}
       {...props}
       onSubmit={form.handleSubmit(onSubmit, onError)}>
-      <FieldSet disabled={isSignUpPending}>
+      <FieldSet disabled={disabledState}>
         <FieldGroup className='gap-4'>
           <Controller
             name='fullName'
@@ -265,7 +303,7 @@ export default function SignupForm({
             )}
           />
           <Field>
-            <Button type='submit' disabled={isSignUpPending}>
+            <Button type='submit' disabled={disabledState}>
               {isSignUpPending ? (
                 <span className={'inline-flex items-center gap-2'}>
                   Creating Account...
@@ -278,11 +316,19 @@ export default function SignupForm({
           </Field>
           <FieldSeparator>Or continue with</FieldSeparator>
           <Field>
-            <Button variant='outline' type='button' disabled={isSignUpPending}>
+            <Button
+              variant='outline'
+              type='button'
+              disabled={disabledState}
+              onClick={handleGoogleSignUp}>
               <IconBrandGoogle className='mr-2 size-4' />
               Sign up with Google
             </Button>
-            <Button variant='outline' type='button' disabled={isSignUpPending}>
+            <Button
+              variant='outline'
+              type='button'
+              disabled={disabledState}
+              onClick={handleFacebookSignUp}>
               <IconBrandFacebook className='mr-2 size-4' />
               Sign up with Facebook
             </Button>

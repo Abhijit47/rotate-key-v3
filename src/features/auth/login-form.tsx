@@ -13,10 +13,11 @@ import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { signIn } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
+import { loginSchema, LoginValues } from '@/lib/validators/auth-schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IconBrandFacebook, IconBrandGoogle } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import {
   Controller,
   SubmitErrorHandler,
@@ -24,21 +25,14 @@ import {
   useForm,
 } from 'react-hook-form';
 import { toast } from 'sonner';
-import * as z from 'zod';
-
-const loginSchema = z.object({
-  email: z.email('Provide correct email id').min(1, 'Email is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters long'),
-  rememberMe: z.boolean(),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
 
 export default function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'form'>) {
   const [isSignInPending, startSignInTransition] = useTransition();
+  const [isPendingGoogleSignIn, setIsGoogleSignIn] = useState(false);
+  const [isPendingFacebookSignIn, setIsFacebookSignIn] = useState(false);
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -91,12 +85,70 @@ export default function LoginForm({
     });
   };
 
+  function handleGoogleSignIn() {
+    setIsGoogleSignIn(true);
+    toast.promise(
+      signIn.social({
+        provider: 'google',
+        callbackURL: `${window.location.origin}/`,
+        newUserCallbackURL: `${window.location.origin}/onboarding`,
+        errorCallbackURL: `${window.location.origin}/login?error=google_auth_failed`,
+        requestSignUp: true,
+      }),
+      {
+        loading: 'Redirecting to Google...',
+        success: () => {
+          return 'Redirected to Google for authentication';
+        },
+        error: (error) => {
+          return (
+            error?.message || 'Failed to redirect to Google. Please try again.'
+          );
+        },
+        finally: () => {
+          setIsGoogleSignIn(false);
+        },
+      },
+    );
+  }
+
+  function handleFacebookSignIn() {
+    setIsFacebookSignIn(true);
+    toast.promise(
+      signIn.social({
+        provider: 'facebook',
+        callbackURL: `${window.location.origin}/`,
+        newUserCallbackURL: `${window.location.origin}/onboarding`,
+        errorCallbackURL: `${window.location.origin}/login?error=facebook_auth_failed`,
+        requestSignUp: true,
+      }),
+      {
+        loading: 'Redirecting to Facebook...',
+        success: () => {
+          return 'Redirected to Facebook for authentication';
+        },
+        error: (error) => {
+          return (
+            error?.message ||
+            'Failed to redirect to Facebook. Please try again.'
+          );
+        },
+        finally: () => {
+          setIsFacebookSignIn(false);
+        },
+      },
+    );
+  }
+
+  const disabledState =
+    isPendingGoogleSignIn || isPendingFacebookSignIn || isSignInPending;
+
   return (
     <form
       className={cn('flex flex-col gap-6', className)}
       {...props}
       onSubmit={form.handleSubmit(onSubmit, onError)}>
-      <FieldSet disabled={isSignInPending}>
+      <FieldSet disabled={disabledState}>
         <FieldGroup className={'gap-3'}>
           <Controller
             name='email'
@@ -192,14 +244,16 @@ export default function LoginForm({
               <Button
                 variant='outline'
                 type='button'
-                disabled={isSignInPending}>
+                disabled={disabledState}
+                onClick={handleGoogleSignIn}>
                 <IconBrandGoogle className='mr-2 size-4' />
                 Log in with Google
               </Button>
               <Button
                 variant='outline'
                 type='button'
-                disabled={isSignInPending}>
+                disabled={disabledState}
+                onClick={handleFacebookSignIn}>
                 <IconBrandFacebook className='mr-2 size-4' />
                 Log in with Facebook
               </Button>
