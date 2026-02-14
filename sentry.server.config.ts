@@ -26,6 +26,6 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
 
-  profileSessionSampleRate: 1.0,
+  profileSessionSampleRate: isDev ? 1.0 : 0.1,
   profileLifecycle: 'trace',
 });

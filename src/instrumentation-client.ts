@@ -5,6 +5,8 @@
 import * as Sentry from '@sentry/nextjs';
 import { env } from './env';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 Sentry.init({
   dsn: env.NEXT_PUBLIC_SENTRY_DSN,
 
@@ -23,7 +25,7 @@ Sentry.init({
   ],
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
+  tracesSampleRate: isDev ? 1.0 : 0.1,
   // Enable logs to be sent to Sentry
   enableLogs: true,
 
@@ -47,7 +49,7 @@ Sentry.init({
 
   // Set profileSessionSampleRate to 1.0 to profile during every session.
   // The decision, whether to profile or not, is made once per session (when the SDK is initialized).
-  profileSessionSampleRate: 1.0,
+  profileSessionSampleRate: isDev ? 1.0 : 0.1,
   profileLifecycle: 'trace',
 });
 
