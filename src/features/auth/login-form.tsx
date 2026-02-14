@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -98,13 +97,7 @@ export default function LoginForm({
       {...props}
       onSubmit={form.handleSubmit(onSubmit, onError)}>
       <FieldSet disabled={isSignInPending}>
-        <FieldGroup>
-          <div className='flex flex-col items-center gap-1 text-center'>
-            <h1 className='text-2xl font-bold'>Login to your account</h1>
-            <p className='text-muted-foreground text-sm text-balance'>
-              Enter your email below to login to your account
-            </p>
-          </div>
+        <FieldGroup className={'gap-3'}>
           <Controller
             name='email'
             control={form.control}
@@ -137,7 +130,7 @@ export default function LoginForm({
                 <div className='flex items-center'>
                   <FieldLabel htmlFor='password'>Password</FieldLabel>
                   <Link
-                    href='#'
+                    href='/forgot-password'
                     className='ml-auto text-sm underline-offset-4 hover:underline'>
                     Forgot your password?
                   </Link>
@@ -191,23 +184,27 @@ export default function LoginForm({
               )}
             </Button>
           </Field>
-          <FieldSeparator>Or continue with</FieldSeparator>
-          <Field>
-            <Button variant='outline' type='button' disabled={isSignInPending}>
-              <IconBrandGoogle className='mr-2 size-4' />
-              Log in with Google
-            </Button>
-            <Button variant='outline' type='button' disabled={isSignInPending}>
-              <IconBrandFacebook className='mr-2 size-4' />
-              Log in with Facebook
-            </Button>
-            <FieldDescription className='text-center'>
-              Don&apos;t have an account?{' '}
-              <Link href='/sign-up' className='underline underline-offset-4'>
-                Sign up
-              </Link>
-            </FieldDescription>
-          </Field>
+
+          <FieldGroup>
+            <FieldSeparator>Or continue with</FieldSeparator>
+
+            <Field>
+              <Button
+                variant='outline'
+                type='button'
+                disabled={isSignInPending}>
+                <IconBrandGoogle className='mr-2 size-4' />
+                Log in with Google
+              </Button>
+              <Button
+                variant='outline'
+                type='button'
+                disabled={isSignInPending}>
+                <IconBrandFacebook className='mr-2 size-4' />
+                Log in with Facebook
+              </Button>
+            </Field>
+          </FieldGroup>
         </FieldGroup>
       </FieldSet>
     </form>

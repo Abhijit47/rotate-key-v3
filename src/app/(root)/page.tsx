@@ -1,8 +1,9 @@
 import LocaleToggler from '@/components/shared/locale-toggler';
 import ThemeToggler from '@/components/shared/theme-toggler';
 import TestJobs from '@/components/test-jobs';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 
 export default async function Home() {
   const t = await getTranslations();
@@ -16,6 +17,24 @@ export default async function Home() {
       </div>
 
       <TestJobs />
+
+      <div className={'space-x-4'}>
+        <Link
+          href={'/login'}
+          className={buttonVariants({
+            variant: 'outline',
+            className: 'rounded-full!',
+          })}>
+          Continue to Login
+        </Link>
+        <Link
+          href={'/sign-up'}
+          className={buttonVariants({
+            className: 'rounded-full!',
+          })}>
+          Get Started
+        </Link>
+      </div>
 
       <div className={'space-y-5'}>
         <h1 className={'font-display text-7xl font-extrabold'}>

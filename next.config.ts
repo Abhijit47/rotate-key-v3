@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
   experimental: {
     typedEnv: true,
   },
+  typedRoutes: true,
 
   async headers() {
     return [
