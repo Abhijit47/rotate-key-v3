@@ -24,7 +24,7 @@ export const user = pgTable('user', {
     .notNull(),
   whereAreYouFrom: varchar('where_are_you_from'),
   whereDoYouWantToGo: varchar('where_do_you_want_to_go'),
-  isOnboarded: boolean('is_onboarded'),
+  isOnboarded: boolean('is_onboarded').default(false).notNull(),
 });
 
 export const session = pgTable(

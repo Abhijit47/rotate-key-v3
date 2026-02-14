@@ -55,15 +55,13 @@ export default function OnboardingForm() {
     toast.promise(mutateAsync(values), {
       loading: 'Onboarding in progress...',
       success: () => {
+        setTimeout(() => {
+          router.push('/');
+        }, 1000);
         return 'Onboarding successful! Redirecting...';
       },
       error: (error) => {
         return error?.message || 'Onboarding failed. Please try again.';
-      },
-      finally: () => {
-        setTimeout(() => {
-          router.push('/');
-        }, 1000);
       },
     });
 
@@ -112,7 +110,7 @@ export default function OnboardingForm() {
               <FieldLabel
                 htmlFor={'where-are-you-going'}
                 className={cn(inputLabelClassName)}>
-                Where are you from?
+                Where do you want to go?
               </FieldLabel>
               <Input
                 id={'where-are-you-going'}

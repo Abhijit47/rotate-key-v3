@@ -22,6 +22,13 @@
       "when": 1771080565772,
       "tag": "0002_productive_nuke",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1771091014621,
+      "tag": "0003_condemned_wasp",
+      "breakpoints": true
     }
   ]
 }
