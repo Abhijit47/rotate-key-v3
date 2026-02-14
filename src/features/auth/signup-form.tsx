@@ -286,9 +286,6 @@ export default function SignupForm({
               <IconBrandFacebook className='mr-2 size-4' />
               Sign up with Facebook
             </Button>
-            {/* <FieldDescription className='px-6 text-center'>
-              Already have an account? <Link href='/login'>Sign in</Link>
-            </FieldDescription> */}
           </Field>
         </FieldGroup>
       </FieldSet>

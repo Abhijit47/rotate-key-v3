@@ -15,12 +15,12 @@ export default function VerifyOtpForm() {
       <FieldSet>
         <FieldGroup className={'gap-3'}>
           <div className='flex items-center justify-between gap-1'>
-            <Label htmlFor='recoveryCode' className='text-base'>
+            <Label htmlFor='otpCode' className='text-base'>
               Code*
             </Label>
           </div>
 
-          <InputOTP id='recoveryCode' maxLength={6}>
+          <InputOTP id='otpCode' maxLength={6}>
             <InputOTPGroup className='w-full justify-center gap-4 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border'>
               <InputOTPSlot index={0} />
               <InputOTPSlot index={1} />
@@ -39,7 +39,7 @@ export default function VerifyOtpForm() {
             Didn&apos;t get the email?
           </p>
 
-          <Button className='w-full' variant={'outline'}>
+          <Button className='w-full' variant={'outline'} type='button'>
             Resend
           </Button>
         </FieldGroup>

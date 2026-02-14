@@ -20,8 +20,8 @@ export default function ResetPasswordPage() {
         <div>
           <CardTitle className='mb-1.5 text-2xl'>Reset Password</CardTitle>
           <CardDescription className='text-base'>
-            Please enter your current password and choose a new password to
-            update your account security.
+            Enter your email and choose a new password to update your account
+            security.
           </CardDescription>
         </div>
       </CardHeader>

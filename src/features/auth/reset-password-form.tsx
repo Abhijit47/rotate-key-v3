@@ -40,6 +40,7 @@ export default function ResetPasswordForm() {
             className='pr-9'
           />
           <Button
+            type='button'
             variant='ghost'
             size='icon'
             onClick={() => setIsPasswordVisible((prevState) => !prevState)}
@@ -65,6 +66,7 @@ export default function ResetPasswordForm() {
             className='pr-9'
           />
           <Button
+            type='button'
             variant='ghost'
             size='icon'
             onClick={() =>

@@ -22,7 +22,7 @@ export default function OnboardingForm() {
         </Label>
         <Input
           id={'where-are-you-from'}
-          type='email'
+          type='text'
           placeholder=' '
           className='dark:bg-background'
         />
@@ -33,12 +33,12 @@ export default function OnboardingForm() {
           htmlFor={'where-are-you-going'}
           className={cn(inputLabelClassName)}>
           <span className='bg-background inline-flex px-1'>
-            Where are you want to go?
+            Where do you want to go?
           </span>
         </Label>
         <Input
           id={'where-are-you-going'}
-          type='email'
+          type='text'
           placeholder=' '
           className='dark:bg-background'
         />

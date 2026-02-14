@@ -22,8 +22,7 @@ export default function OnboardingPage() {
             Welcome, let&apos;s get you set up!
           </CardTitle>
           <CardDescription className='text-base'>
-            We just need a few more details to give you more personalized
-            experience.
+            We just need a few more details to give you a more personalized
           </CardDescription>
         </div>
       </CardHeader>
