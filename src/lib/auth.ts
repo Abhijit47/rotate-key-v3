@@ -23,6 +23,7 @@ export const auth = betterAuth({
     },
     useSecureCookies: isDev ? false : true,
   },
+
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema,
@@ -42,10 +43,59 @@ export const auth = betterAuth({
     facebook: {
       clientId: facebookClientId,
       clientSecret: facebookClientSecret,
+      prompt: 'select_account',
+      redirectURI: `${env.BETTER_AUTH_URL}/api/auth/callback/facebook`,
+      disableImplicitSignUp: true,
+      mapProfileToUser: (profile) => {
+        return {
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture.data.url,
+          emailVerified: profile.email_verified, // Facebook doesn't provide this by default, but if it did, you could map it here
+        };
+      },
     },
     google: {
       clientId: googleClientId,
       clientSecret: googleClientSecret,
+      prompt: 'select_account',
+      redirectURI: `${env.BETTER_AUTH_URL}/api/auth/callback/google`,
+      disableImplicitSignUp: true,
+      mapProfileToUser: (profile) => {
+        return {
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          emailVerified: profile.email_verified, // Google provides this field, so we can map it directly
+        };
+      },
+    },
+  },
+
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ['facebook', 'google', 'email-password'], // Only allow linking accounts from these providers
+    },
+    storeStateStrategy: 'cookie',
+    storeAccountCookie: true, // Store account data after OAuth flow in a cookie (useful for database-less flows)
+  },
+
+  user: {
+    additionalFields: {
+      whereAreYouFrom: {
+        type: 'string',
+        required: false,
+      },
+      whereDoYouWantToGo: {
+        type: 'string',
+        required: false,
+      },
+      isOnboarded: {
+        type: 'boolean',
+        required: false,
+        default: false,
+      },
     },
   },
 
@@ -60,6 +110,8 @@ export const auth = betterAuth({
       // },
     },
   },
+
+  trustedOrigins: [env.BETTER_AUTH_URL],
 
   plugins: [nextCookies()],
 });

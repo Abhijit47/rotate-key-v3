@@ -15,6 +15,13 @@
       "when": 1770957354605,
       "tag": "0001_glorious_kylun",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771080565772,
+      "tag": "0002_productive_nuke",
+      "breakpoints": true
     }
   ]
 }

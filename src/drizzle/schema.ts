@@ -6,6 +6,7 @@ import {
   text,
   timestamp,
   uuid,
+  varchar,
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
@@ -21,6 +22,9 @@ export const user = pgTable('user', {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  whereAreYouFrom: varchar('where_are_you_from'),
+  whereDoYouWantToGo: varchar('where_do_you_want_to_go'),
+  isOnboarded: boolean('is_onboarded'),
 });
 
 export const session = pgTable(
