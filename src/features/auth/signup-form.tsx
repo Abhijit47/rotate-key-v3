@@ -125,13 +125,7 @@ export default function SignupForm({
       {...props}
       onSubmit={form.handleSubmit(onSubmit, onError)}>
       <FieldSet disabled={isSignUpPending}>
-        <FieldGroup className={'gap-2'}>
-          <div className='flex flex-col items-center gap-1 text-center'>
-            <h1 className='text-2xl font-bold'>Create your account</h1>
-            <p className='text-muted-foreground text-sm text-balance'>
-              Fill in the form below to create your account
-            </p>
-          </div>
+        <FieldGroup className='gap-4'>
           <Controller
             name='fullName'
             control={form.control}
@@ -238,30 +232,36 @@ export default function SignupForm({
             name='privacyAndTerms'
             control={form.control}
             render={({ field, fieldState }) => (
-              <Field
-                orientation='horizontal'
-                data-invalid={fieldState.invalid}
-                aria-invalid={fieldState.invalid}>
-                <Checkbox
-                  id='privacyAndTerms'
-                  checked={field.value}
-                  onCheckedChange={(checked) => field.onChange(checked)}
-                  aria-invalid={fieldState.invalid}
-                />
-                <FieldLabel htmlFor='privacyAndTerms' className='font-normal'>
-                  I agree to the{' '}
-                  <Link href='#' className='underline-offset-4 hover:underline'>
-                    Privacy Policy
-                  </Link>{' '}
-                  and{' '}
-                  <Link href='#' className='underline-offset-4 hover:underline'>
-                    Terms of Service
-                  </Link>
-                </FieldLabel>
+              <FieldGroup className={'gap-1'}>
+                <Field
+                  orientation='horizontal'
+                  data-invalid={fieldState.invalid}
+                  aria-invalid={fieldState.invalid}>
+                  <Checkbox
+                    id='privacyAndTerms'
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(checked)}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  <FieldLabel htmlFor='privacyAndTerms' className='font-normal'>
+                    I agree to the{' '}
+                    <Link
+                      href='#'
+                      className='underline-offset-4 hover:underline'>
+                      Privacy Policy
+                    </Link>{' '}
+                    and{' '}
+                    <Link
+                      href='#'
+                      className='underline-offset-4 hover:underline'>
+                      Terms of Service
+                    </Link>
+                  </FieldLabel>
+                </Field>
                 {fieldState.error && (
                   <FieldError role='alert' errors={[fieldState.error]} />
                 )}
-              </Field>
+              </FieldGroup>
             )}
           />
           <Field>
@@ -286,9 +286,9 @@ export default function SignupForm({
               <IconBrandFacebook className='mr-2 size-4' />
               Sign up with Facebook
             </Button>
-            <FieldDescription className='px-6 text-center'>
+            {/* <FieldDescription className='px-6 text-center'>
               Already have an account? <Link href='/login'>Sign in</Link>
-            </FieldDescription>
+            </FieldDescription> */}
           </Field>
         </FieldGroup>
       </FieldSet>
