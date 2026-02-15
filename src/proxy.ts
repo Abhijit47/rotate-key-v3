@@ -22,7 +22,7 @@ export const config = {
     '/settings/:path*',
     {
       source:
-        '/((?!api|!_next/static|_next/image|favicon.ico|.*\\.png|.*\\.webp|.well-known/workflow/).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.webp|.well-known/workflow/).*)',
     },
   ],
 };
