@@ -17,9 +17,10 @@ const handler = c15tInstance({
   basePath: '/api/c15t',
   adapter: drizzleAdapter({ provider: 'postgresql', db: db }),
 
-  trustedOrigins: ['localhost', 'vercel.app'],
+  trustedOrigins: ['localhost', '*.vercel.app'],
   advanced: {
-    disableGeoLocation: true,
+    branding: 'none',
+    disableGeoLocation: isDev,
     openapi: {
       enabled: true,
     },
