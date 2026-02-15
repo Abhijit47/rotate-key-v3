@@ -20,5 +20,9 @@ export const config = {
     '/dashboard/:path*',
     '/profile/:path*',
     '/settings/:path*',
+    {
+      source:
+        '/((?!api|!_next/static|_next/image|favicon.ico|.*\\.png|.*\\.webp|.well-known/workflow/).*)',
+    },
   ],
 };
