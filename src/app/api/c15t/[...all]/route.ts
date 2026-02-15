@@ -34,5 +34,6 @@ const handleRequest = async (request: NextRequest) => handler.handler(request);
 export {
   handleRequest as GET,
   handleRequest as OPTIONS,
+  handleRequest as PATCH,
   handleRequest as POST,
 };

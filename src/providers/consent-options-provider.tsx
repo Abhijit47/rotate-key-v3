@@ -2,6 +2,7 @@
 
 import { ClientSideOptionsProvider } from '@c15t/nextjs/client';
 import type { ReactNode } from 'react';
+import { toast } from 'sonner';
 
 /**
  * Client-side consent manager wrapper for handling scripts and callbacks
@@ -39,14 +40,17 @@ export function ConsentOptionsProvider({ children }: { children: ReactNode }) {
       // Callbacks allow you to react to consent events
       callbacks={{
         // Example:
-        onBannerFetched(response) {
-          console.log('Consent banner fetched', response);
-        },
-        onConsentSet(response) {
-          console.log('Consent has been saved locally', response);
-        },
+        // onBannerFetched(response) {
+        //   console.log('Consent banner fetched', response);
+        // },
+        // onConsentSet(response) {
+        //   console.log('Consent has been saved locally', response);
+        // },
         onError(response) {
           console.log('Error', response);
+          toast.error(
+            'An error occurred while managing your consent preferences. Please try again.',
+          );
         },
       }}>
       {children}

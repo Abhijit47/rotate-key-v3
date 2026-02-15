@@ -58,7 +58,7 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
   const locale = useLocale();
   const { theme } = useTheme();
 
-  const currentTheme = theme as 'light' | 'dark' | 'system';
+  const currentTheme = (theme ?? 'system') as 'light' | 'dark' | 'system';
 
   return (
     <ConsentManagerProvider
@@ -66,7 +66,7 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
         mode: 'c15t',
         backendURL: '/api/c15t',
         consentCategories: ['necessary', 'marketing'], // Optional: Specify which consent categories to show in the banner.
-        ignoreGeoLocation: true, // Useful for development to always view the banner.
+        ignoreGeoLocation: isDev, // Only ignore geo-location in development.
         translations: getTranslatedCookieBanner(locale), // Provide translations for the consent banner and dialog.
         react: {
           colorScheme: currentTheme,

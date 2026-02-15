@@ -17,7 +17,10 @@ export const subject = pgTable('subject', {
   lastIpAddress: text('lastIpAddress'),
   subjectTimezone: text('subjectTimezone'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt')
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
 export const subjectRelations = relations(subject, ({ many }) => ({
@@ -181,7 +184,7 @@ export const auditLogRelations = relations(auditLog, ({ one }) => ({
 export const consentRecord = pgTable(
   'consentRecord',
   {
-    id: varchar('id', { length: 255 }).notNull(),
+    id: text('id').primaryKey().unique().notNull(),
     subjectId: text('subjectId').notNull(),
     consentId: text('consentId'),
     actionType: text('actionType').notNull(),

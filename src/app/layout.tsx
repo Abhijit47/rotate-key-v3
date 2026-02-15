@@ -44,18 +44,18 @@ export default function AppLayout({
       suppressHydrationWarning>
       <body className='font-body'>
         <NextIntlClientProvider>
-          <ConsentProvider>
-            <TRPCReactProvider>
-              <ThemeProvider
-                attribute='class'
-                defaultTheme='system'
-                enableSystem
-                disableTransitionOnChange>
+          <ThemeProvider
+            attribute='class'
+            defaultTheme='system'
+            enableSystem
+            disableTransitionOnChange>
+            <ConsentProvider>
+              <TRPCReactProvider>
                 <TooltipProvider>{children}</TooltipProvider>
                 <Toaster position='top-center' richColors closeButton />
-              </ThemeProvider>
-            </TRPCReactProvider>
-          </ConsentProvider>
+              </TRPCReactProvider>
+            </ConsentProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

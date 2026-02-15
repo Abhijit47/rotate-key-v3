@@ -64,56 +64,56 @@ export function getTranslatedCookieBanner(
 
       'bn-IN': {
         common: {
-          acceptAll: 'Accept all',
-          rejectAll: 'Reject all',
-          customize: 'Customize',
-          save: 'Save',
+          acceptAll: 'সব গ্রহণ করুন',
+          rejectAll: 'সব প্রত্যাখ্যান করুন',
+          customize: 'কাস্টমাইজ করুন',
+          save: 'সংরক্ষণ করুন',
         },
         consentManagerDialog: {
-          title: 'Cookie Preferences',
+          title: 'কুকি পছন্দসমূহ',
           description:
-            'Manage your cookie preferences. You can change these settings at any time.',
+            'আপনার কুকি পছন্দগুলি পরিচালনা করুন। আপনি যে কোনো সময় এই সেটিংস পরিবর্তন করতে পারেন।',
         },
         consentTypes: {
           necessary: {
-            title: 'Necessary Cookies',
+            title: 'প্রয়োজনীয় কুকিজ',
             description:
-              'These cookies are essential for the website to function and cannot be switched off in our systems.',
+              'এই কুকিগুলি ওয়েবসাইটটি কাজ করার জন্য অপরিহার্য এবং আমাদের সিস্টেমে এগুলি বন্ধ করা যায় না।',
           },
           marketing: {
-            title: 'Marketing Cookies',
+            title: 'মার্কেটিং কুকিজ',
             description:
-              'These cookies are used to track visitors across websites. The intention is to display ads that are relevant and engaging for the individual user.',
+              'এই কুকিগুলি ওয়েবসাইট জুড়ে দর্শকদের ট্র্যাক করতে ব্যবহৃত হয়। উদ্দেশ্য হল স্বতন্ত্র ব্যবহারকারীর জন্য প্রাসঙ্গিক এবং আকর্ষণীয় বিজ্ঞাপন প্রদর্শন করা।',
           },
           experience: {
-            title: 'Experience Cookies',
+            title: 'অভিজ্ঞতা কুকিজ',
             description:
-              'These cookies allow us to remember your preferences and provide a more personalized experience.',
+              'এই কুকিগুলি আমাদের আপনার পছন্দগুলি মনে রাখতে এবং আরও ব্যক্তিগতকৃত অভিজ্ঞতা প্রদান করতে সহায়তা করে।',
           },
           functionality: {
-            title: 'Functionality Cookies',
+            title: 'কার্যকারিতা কুকিজ',
             description:
-              'These cookies enable enhanced functionality and personalization, such as videos and live chats.',
+              'এই কুকিগুলি উন্নত কার্যকারিতা এবং ব্যক্তিগতকরণ সক্ষম করে, যেমন ভিডিও এবং লাইভ চ্যাট।',
           },
           measurement: {
-            title: 'Measurement Cookies',
+            title: 'পরিমাপ কুকিজ',
             description:
-              'These cookies help us understand how visitors interact with our website by collecting and reporting information anonymously.',
+              'এই কুকিগুলি আমাদের বেনামে তথ্য সংগ্রহ এবং রিপোর্ট করে দর্শকরা আমাদের ওয়েবসাইটের সাথে কীভাবে ইন্টারঅ্যাক্ট করে তা বুঝতে সাহায্য করে।',
           },
         },
         cookieBanner: {
-          title: 'We value your privacy',
+          title: 'আমরা আপনার গোপনীয়তার মূল্য দিই',
           description:
-            "We use cookies to enhance your experience. By clicking 'Accept all', you consent to the use of all cookies. You can manage your preferences in the settings.",
+            "'সব গ্রহণ করুন' ক্লিক করে, আপনি সমস্ত কুকির ব্যবহারে সম্মতি দিচ্ছেন। আপনি সেটিংসে আপনার পছন্দগুলি পরিচালনা করতে পারেন।",
         },
         frame: {
-          title: 'This content requires additional consent',
-          actionButton: 'Manage Consent',
+          title: 'এই বিষয়বস্তুর জন্য অতিরিক্ত সম্মতি প্রয়োজন',
+          actionButton: 'সম্মতি পরিচালনা করুন',
         },
         legalLinks: {
-          privacyPolicy: 'Privacy Policy',
-          cookiePolicy: 'Cookie Policy',
-          termsOfService: 'Terms of Service',
+          privacyPolicy: 'গোপনীয়তা নীতি',
+          cookiePolicy: 'কুকি নীতি',
+          termsOfService: 'সেবার শর্তাবলী',
         },
       },
 
