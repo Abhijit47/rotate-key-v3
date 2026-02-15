@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
   },
   typedRoutes: true,
 
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/c15t/:path*',
+  //       destination: `${process.env.NEXT_PUBLIC_C15T_URL}/:path*`,
+  //     },
+  //   ];
+  // },
+
   async headers() {
     return [
       {

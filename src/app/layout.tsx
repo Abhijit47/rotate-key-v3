@@ -4,6 +4,7 @@ import { Baumans, Freehand, Poppins } from 'next/font/google';
 
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { ConsentProvider } from '@/providers/consent-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { TRPCReactProvider } from '@/trpc/client';
 import './globals.css';
@@ -42,18 +43,20 @@ export default function AppLayout({
       className={`${poppins.variable} ${freehand.variable} ${baumans.variable} antialiased selection:bg-primary/50 selection:text-primary-foreground/90`}
       suppressHydrationWarning>
       <body className='font-body'>
-        <TRPCReactProvider>
+        <NextIntlClientProvider>
           <ThemeProvider
             attribute='class'
             defaultTheme='system'
             enableSystem
             disableTransitionOnChange>
-            <NextIntlClientProvider>
-              <TooltipProvider>{children}</TooltipProvider>
-            </NextIntlClientProvider>
-            <Toaster position='top-center' richColors closeButton />
+            <ConsentProvider>
+              <TRPCReactProvider>
+                <TooltipProvider>{children}</TooltipProvider>
+                <Toaster position='top-center' richColors closeButton />
+              </TRPCReactProvider>
+            </ConsentProvider>
           </ThemeProvider>
-        </TRPCReactProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
