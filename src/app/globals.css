@@ -245,3 +245,8 @@
   font-family: var(--font-mono-family);
   font-weight: 400;
 }
+
+/* C15t */
+.c15t-devtool-wrapper-button-container {
+  @apply left-4!;
+}

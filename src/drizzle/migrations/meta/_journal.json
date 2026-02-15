@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1770948151235,
-      "tag": "0000_bouncy_the_fury",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1770957354605,
-      "tag": "0001_glorious_kylun",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1771080565772,
-      "tag": "0002_productive_nuke",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1771091014621,
-      "tag": "0003_condemned_wasp",
+      "when": 1771131571273,
+      "tag": "0000_curious_outlaw_kid",
       "breakpoints": true
     }
   ]
