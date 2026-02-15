@@ -49,3 +49,7 @@ next-env.d.ts
 .env.sentry-build-plugin
 
 .nogic
+
+# Workflow Local World Data
+.swc
+src/app/.well-known/

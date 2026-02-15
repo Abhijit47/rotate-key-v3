@@ -1,5 +1,7 @@
-import { withSentryConfig } from '@sentry/nextjs';
 import './src/env';
+
+import { type SentryBuildOptions, withSentryConfig } from '@sentry/nextjs';
+import { withWorkflow } from 'workflow/next';
 
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
@@ -43,8 +45,7 @@ const nextConfig: NextConfig = {
 
 const withNextIntl = createNextIntlPlugin();
 
-// export default nextConfig;
-export default withSentryConfig(withNextIntl(nextConfig), {
+const sentryConfigs: SentryBuildOptions = {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
@@ -80,4 +81,14 @@ export default withSentryConfig(withNextIntl(nextConfig), {
       removeDebugLogging: true,
     },
   },
-});
+};
+
+// not required but allows configuring workflow options
+const workflowConfig = {};
+
+// export default nextConfig;
+// export default withSentryConfig(withNextIntl(nextConfig), sentryConfigs);
+export default withSentryConfig(
+  withWorkflow(withNextIntl(nextConfig), workflowConfig),
+  sentryConfigs,
+);
