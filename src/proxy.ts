@@ -22,7 +22,7 @@ const publicAPIRoutes = [
   '/api/sentry-example-api',
 ];
 
-export default async function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // THIS IS NOT SECURE!
   // This is the recommended approach to optimistically redirect users
   // We recommend handling auth checks in each page/route
@@ -44,20 +44,20 @@ export default async function proxy(request: NextRequest) {
   );
 
   // If no session and trying to access protected route, redirect to login
-  if (!sessionCookie && !isPublicRoute) {
-    const loginUrl = new URL('/login', request.url);
-    // Store the attempted URL to redirect back after login
-    loginUrl.searchParams.set('callbackUrl', pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+  // if (!sessionCookie && !isPublicRoute) {
+  //   const loginUrl = new URL('/login', request.url);
+  //   // Store the attempted URL to redirect back after login
+  //   loginUrl.searchParams.set('callbackUrl', pathname);
+  //   return NextResponse.redirect(loginUrl);
+  // }
 
   // If has session and trying to access auth pages, redirect to home
-  if (sessionCookie && ['/login', '/sign-up'].includes(pathname)) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
+  // if (sessionCookie && ['/login', '/sign-up'].includes(pathname)) {
+  //   return NextResponse.redirect(new URL('/login', request.url));
+  // }
 
   // if (!sessionCookie) {
-  //   return NextResponse.redirect(new URL('/', request.url));
+  //   return NextResponse.redirect(new URL('/sign-up', request.url));
   // }
 
   return NextResponse.next();

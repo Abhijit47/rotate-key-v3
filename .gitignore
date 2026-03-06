@@ -53,3 +53,4 @@ next-env.d.ts
 # Workflow Local World Data
 .swc
 src/app/.well-known/
+.env*.local
