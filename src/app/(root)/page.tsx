@@ -1,4 +1,5 @@
 import { ClientGreeting } from '@/components/client-greeting';
+import OTPForm from '@/components/otp';
 import LocaleToggler from '@/components/shared/locale-toggler';
 import ThemeToggler from '@/components/shared/theme-toggler';
 import TestJobs from '@/components/test-jobs';
@@ -34,6 +35,8 @@ export default async function Home() {
         </ErrorBoundary>
 
         <TestJobs />
+
+        <OTPForm />
 
         <div className={'space-x-4'}>
           <Link
