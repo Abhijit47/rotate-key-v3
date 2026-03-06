@@ -1,6 +1,5 @@
 import '../../envConfig';
 
-import { dash } from '@better-auth/infra';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
@@ -114,12 +113,7 @@ export const auth = betterAuth({
 
   trustedOrigins: [env.BETTER_AUTH_URL],
 
-  plugins: [
-    dash({
-      apiKey: env.BETTER_AUTH_API_KEY,
-    }),
-    nextCookies(),
-  ],
+  plugins: [nextCookies()],
 });
 
 export type ServerSession = (typeof auth.$Infer)['Session'];
