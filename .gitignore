@@ -55,4 +55,4 @@ next-env.d.ts
 src/app/.well-known/
 .env*.local
 
-certificates
++/certificates/

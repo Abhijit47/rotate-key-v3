@@ -23,15 +23,15 @@ const googleClientSecret = env.GOOGLE_CLIENT_SECRET;
 
 const products = [
   {
-    productId: 'a345249d-b5df-4f97-ad62-e23ee88e53fa',
+    productId: env.POLAR_PRODUCT_FREE_ID,
     slug: 'free',
   },
   {
-    productId: 'd8839644-f591-4ae4-b4cf-5df7eebe1005',
+    productId: env.POLAR_PRODUCT_BASIC_ID,
     slug: 'basic',
   },
   {
-    productId: '44057f38-5c6b-431d-9633-be7ef9433c0e',
+    productId: env.POLAR_PRODUCT_PRO_ID,
     slug: 'pro',
   },
 ];
@@ -143,7 +143,7 @@ export const auth = betterAuth({
       use: [
         checkout({
           products: products,
-          successUrl: '/success?checkout_id={CHECKOUT_ID}',
+          successUrl: env.POLAR_SUCCESS_URL,
           authenticatedUsersOnly: true,
           returnUrl: '/pricing',
           theme: 'dark',
