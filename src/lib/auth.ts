@@ -1,17 +1,40 @@
 import '../../envConfig';
 
+import {
+  checkout,
+  polar,
+  portal,
+  usage,
+  webhooks,
+} from '@polar-sh/better-auth';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { nextCookies } from 'better-auth/next-js';
 
 import { db } from '@/drizzle/db';
 import * as schema from '@/drizzle/schema';
 import { env } from '@/env';
+import { nextCookies } from 'better-auth/next-js';
+import { polarClient } from './polar';
 
 const facebookClientId = env.FACEBOOK_CLIENT_ID;
 const facebookClientSecret = env.FACEBOOK_CLIENT_SECRET;
 const googleClientId = env.GOOGLE_CLIENT_ID;
 const googleClientSecret = env.GOOGLE_CLIENT_SECRET;
+
+const products = [
+  {
+    productId: 'a345249d-b5df-4f97-ad62-e23ee88e53fa',
+    slug: 'free',
+  },
+  {
+    productId: 'd8839644-f591-4ae4-b4cf-5df7eebe1005',
+    slug: 'basic',
+  },
+  {
+    productId: '44057f38-5c6b-431d-9633-be7ef9433c0e',
+    slug: 'pro',
+  },
+];
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -113,7 +136,52 @@ export const auth = betterAuth({
 
   trustedOrigins: [env.BETTER_AUTH_URL],
 
-  plugins: [nextCookies()],
+  plugins: [
+    polar({
+      client: polarClient,
+      createCustomerOnSignUp: true,
+      use: [
+        checkout({
+          products: products,
+          successUrl: '/success?checkout_id={CHECKOUT_ID}',
+          authenticatedUsersOnly: true,
+          returnUrl: '/pricing',
+          theme: 'dark',
+        }),
+        portal(),
+        usage(),
+        webhooks({
+          secret: env.POLAR_WEBHOOK_SECRET,
+          onCustomerStateChanged: (payload) => {
+            return new Promise((resolve) => {
+              // Handle the event, e.g. update user in database based on payload.customer.id
+              console.log('Customer state changed:', payload);
+              resolve();
+            });
+          },
+          // Triggered when anything regarding a customer changes
+          onOrderPaid: (payload) => {
+            return new Promise((resolve) => {
+              // Handle the event, e.g. grant user access to product based on payload.order.id
+              console.log('Order paid:', payload);
+              resolve();
+            });
+          },
+          // Triggered when an order was paid (purchase, subscription renewal, etc.)
+          // Over 25 granular webhook handlers
+          onPayload: (payload) => {
+            return new Promise((resolve) => {
+              // Handle the event, e.g. log all events for analytics
+              console.log('Received Polar webhook event:', payload);
+              resolve();
+            });
+          },
+          // Catch-all for all events
+        }),
+      ],
+    }),
+    nextCookies(),
+  ],
 });
 
 export type ServerSession = (typeof auth.$Infer)['Session'];

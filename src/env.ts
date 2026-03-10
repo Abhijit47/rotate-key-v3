@@ -11,6 +11,9 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: z.string().min(1),
     GOOGLE_CLIENT_SECRET: z.string().min(1),
     SENTRY_DSN: z.url(),
+    POLAR_ACCESS_TOKEN: z.string().min(1),
+    POLAR_SUCCESS_URL: z.url(),
+    POLAR_WEBHOOK_SECRET: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_BETTER_AUTH_URL: z.url(),

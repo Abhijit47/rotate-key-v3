@@ -54,3 +54,5 @@ next-env.d.ts
 .swc
 src/app/.well-known/
 .env*.local
+
+certificates
