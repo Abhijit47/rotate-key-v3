@@ -19,15 +19,11 @@
     "better-auth:generate": "pnpm dlx @better-auth/cli@latest generate --config ./src/lib/auth.ts --output ./src/lib/auth.generated.ts --yes",
     "locales:lint": "pnpm dlx @lingual/i18n-check@latest --source en --locales locales",
     "inngest:dev": "pnpm dlx inngest-cli@latest dev",
-    "dev:all": "mprocs",
-    "workflow:runs": "pnpm dlx workflow inspect runs",
-    "workflow:ui": "pnpm dlx workflow inspect runs --web",
-    "workflow:help": "pnpm dlx workflow inspect --help"
+    "dev:all": "mprocs"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
     "@better-auth/drizzle-adapter": "^1.5.4",
-    "@better-auth/infra": "^0.1.8",
     "@c15t/backend": "^1.8.0",
     "@c15t/dev-tools": "^1.8.3",
     "@c15t/nextjs": "^1.8.3",
@@ -43,10 +39,7 @@
     "@trpc/client": "^11.10.0",
     "@trpc/server": "^11.10.0",
     "@trpc/tanstack-react-query": "^11.10.0",
-    "@workflow/world-local": "4.1.0-beta.32",
-    "@workflow/world-postgres": "4.1.0-beta.34",
-    "@workflow/world-vercel": "4.1.0-beta.32",
-    "better-auth": "^1.4.18",
+    "better-auth": "^1.5.4",
     "class-variance-authority": "^0.7.1",
     "client-only": "^0.0.1",
     "clsx": "^2.1.1",
@@ -74,7 +67,6 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "vaul": "^1.1.2",
-    "workflow": "4.1.0-beta.57",
     "zod": "^4.3.6"
   },
   "devDependencies": {

@@ -1,7 +1,6 @@
 import './src/env';
 
 import { type SentryBuildOptions, withSentryConfig } from '@sentry/nextjs';
-// import { withWorkflow } from 'workflow/next';
 
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
@@ -83,12 +82,5 @@ const sentryConfigs: SentryBuildOptions = {
   },
 };
 
-// not required but allows configuring workflow options
-// const workflowConfig = {};
-
 // export default nextConfig;
 export default withSentryConfig(withNextIntl(nextConfig), sentryConfigs);
-// export default withSentryConfig(
-//   withWorkflow(withNextIntl(nextConfig), workflowConfig),
-//   sentryConfigs,
-// );
