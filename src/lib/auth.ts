@@ -9,11 +9,11 @@ import {
 } from '@polar-sh/better-auth';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { nextCookies } from 'better-auth/next-js';
 
 import { db } from '@/drizzle/db';
 import * as schema from '@/drizzle/schema';
 import { env } from '@/env';
-import { nextCookies } from 'better-auth/next-js';
 import { polarClient } from './polar';
 
 const facebookClientId = env.FACEBOOK_CLIENT_ID;
@@ -55,7 +55,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    autoSignIn: false, //defaults to true
+    autoSignIn: true, //defaults to true
   },
 
   experimental: {

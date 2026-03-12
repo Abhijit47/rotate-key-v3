@@ -1,10 +1,12 @@
+import { ServerSession } from '@/lib/auth';
 import { EventSchemas, Inngest } from 'inngest';
 
 type UserSignup = {
-  data: {
-    email: string;
-    name: string;
-  };
+  data: ServerSession['user'];
+};
+
+type UserOnboarding = {
+  data: ServerSession['user'];
 };
 
 type Events = {
@@ -12,6 +14,7 @@ type Events = {
     data: { email: string };
   };
   'user/new.signup': UserSignup;
+  'user/onboarding.complete': UserOnboarding;
 };
 
 export const inngest = new Inngest({

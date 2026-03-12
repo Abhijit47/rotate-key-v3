@@ -29,6 +29,9 @@ export async function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
   const { pathname } = request.nextUrl;
 
+  // api/novu is a public API route, so we should allow it to be accessed without authentication
+  if (request.nextUrl.pathname.startsWith('/api/novu')) NextResponse.next();
+
   // CRITICAL: Never redirect API calls - they need to return proper responses
   const isPublicAPI = publicAPIRoutes.some((route) =>
     pathname.startsWith(route),
@@ -74,7 +77,7 @@ export const config = {
     // '/(api|trpc)(.*)',
 
     // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|.well-known/workflow/)).*)',
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|.well-known/workflow/|.well-known/novu/)).*)',
     // {
     //   source:
     //     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.webp|.well-known/workflow/).*)',

@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import { signIn, signUp } from '@/lib/auth-client';
+import { signIn } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 import { signupSchema, SignupValues } from '@/lib/validators/auth-schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,6 +28,7 @@ import {
   useForm,
 } from 'react-hook-form';
 import { toast } from 'sonner';
+import { useSignUpUser } from './hooks/use-auth';
 
 export default function SignupForm({
   className,
@@ -38,6 +39,8 @@ export default function SignupForm({
   const [isPendingFacebookSignUp, setIsFacebookSignUp] = useState(false);
 
   const router = useRouter();
+
+  const { mutateAsync: signUpWithEmail } = useSignUpUser();
 
   const form = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
@@ -66,37 +69,61 @@ export default function SignupForm({
     setIsSignUpPending(true);
     let signUpSucceeded = false;
 
-    toast.promise(
-      signUp.email({
-        email: values.email,
-        password: values.password,
-        name: values.fullName,
-        callbackURL: `${window.location.origin}/onboarding`,
-      }),
-      {
-        loading: 'Creating Account...',
-        success: ({ data }) => {
-          const name = data?.user?.name || 'User';
-          signUpSucceeded = true;
-          form.reset();
-          return (
-            <p className={'text-sm'}>
-              Account created successfully! Welcome, <strong>{name}</strong>!
-              Redirecting to onboarding...
-            </p>
-          );
-        },
-        error: (err) => err.message || 'Failed to create account',
-        finally: () => {
-          setIsSignUpPending(false);
-          if (signUpSucceeded) {
-            setTimeout(() => {
-              router.push('/onboarding');
-            }, 1500);
-          }
-        },
+    toast.promise(signUpWithEmail(values), {
+      loading: 'Creating Account...',
+      success: ({ user }) => {
+        const name = user?.name || 'User';
+        signUpSucceeded = true;
+        form.reset();
+        return (
+          <p className={'text-sm'}>
+            Account created successfully! Welcome, <strong>{name}</strong>!
+            Redirecting to onboarding...
+          </p>
+        );
       },
-    );
+      error: (err) => err.message || 'Failed to create account',
+      finally: () => {
+        setIsSignUpPending(false);
+        if (signUpSucceeded) {
+          setTimeout(() => {
+            router.push('/onboarding');
+          }, 1500);
+        }
+      },
+    });
+
+    // toast.promise(
+    //   signUp.email({
+    //     email: values.email,
+    //     password: values.password,
+    //     name: values.fullName,
+    //     callbackURL: `${window.location.origin}/onboarding`,
+    //   }),
+    //   {
+    //     loading: 'Creating Account...',
+    //     success: ({ data }) => {
+    //       const name = data?.user?.name || 'User';
+    //       signUpSucceeded = true;
+    //       form.reset();
+    //       return (
+    //         <p className={'text-sm'}>
+    //           Account created successfully! Welcome, <strong>{name}</strong>!
+    //           Redirecting to onboarding...
+    //         </p>
+    //       );
+    //     },
+    //     error: (err) => err.message || 'Failed to create account',
+    //     finally: () => {
+    //       setIsSignUpPending(false);
+    //       if (signUpSucceeded) {
+    //         setTimeout(() => {
+    //           router.push('/onboarding');
+    //         }, 1500);
+    //       }
+    //     },
+    //   },
+    // );
   };
 
   function handleGoogleSignUp() {

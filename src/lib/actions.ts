@@ -6,6 +6,8 @@ import { Locale } from 'next-intl';
 import { cookies } from 'next/headers';
 import { sleep } from './utils';
 
+import { novuClient } from '@/novu/client';
+
 export async function changeLocaleAction(locale: Locale) {
   if (!locales.includes(locale)) {
     throw new Error(`Invalid locale: ${locale}`);
@@ -40,4 +42,20 @@ export async function mockSignUpWithOutInngest() {
 
   // we could return the start time and end time to show the difference in the UI
   return { startTime, endTime };
+}
+
+export async function sendTestNotification() {
+  const welcomeNotification = await novuClient.trigger({
+    to: {
+      subscriberId: 'data.subscriberId',
+      firstName: 'data.firstName',
+      lastName: 'data.lastName',
+      email: 'data.email',
+      phone: ' data.phone',
+    },
+    workflowId: 'welcome-user',
+    payload: {
+      name: 'data.firstName',
+    },
+  });
 }
