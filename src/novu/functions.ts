@@ -1,9 +1,10 @@
 'use server';
 
+import { SelectUser } from '@/drizzle/schema';
 import { ServerSession } from '@/lib/auth';
 import { novuClient } from './client';
 
-export async function createSubscriber(user: ServerSession['user']) {
+export async function createSubscriber(user: Pick<SelectUser,"id"|"name"|"email">) {
   const firstName = user.name.split(' ')[0];
   const lastName = user.name.split(' ')[1] || '';
   const subscriber = await novuClient.subscribers.create({

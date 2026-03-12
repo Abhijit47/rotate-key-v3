@@ -21,19 +21,6 @@ export const userSignUpComplete = inngest.createFunction(
   { id: 'user-new-signup', retries: 5, optimizeParallelism: true },
   { event: 'user/new.signup' },
   async ({ event, step }) => {
-    await step.run('subscriber-creating', async () => {
-      const subscriber = await createSubscriber(event.data);
-      return subscriber.result;
-    });
-
-    await step.run('stream-user-creating', async () => {
-      console.log('stream user creating for:', event.data.name);
-    });
-
-    await step.run('stream-user-token-creating', async () => {
-      console.log('stream user token creating for:', event.data.name);
-    });
-
     const foundUser = await step.run('find-the-user', async () => {
       return db.query.user.findFirst({
         where: (user, { eq }) => eq(user.email, event.data.email),
@@ -43,6 +30,24 @@ export const userSignUpComplete = inngest.createFunction(
     if (!foundUser) {
       throw new NonRetriableError('User no longer exists; stopping');
     }
+
+    await step.run('subscriber-creating', async () => {
+      const subscriber = await createSubscriber({
+        id: foundUser.id,
+        name: foundUser.name,
+        email: foundUser.email,
+      });
+      return subscriber.result;
+    });
+    
+    await step.run('stream-user-creating', async () => {
+      console.log('stream user creating for:', event.data.name);
+    });
+
+    await step.run('stream-user-token-creating', async () => {
+      console.log('stream user token creating for:', event.data.name);
+    });
+    
 
     // update the token,expiredAt,issuedAt for the user in the database
   },
