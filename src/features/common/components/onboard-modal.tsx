@@ -54,9 +54,6 @@ export default function OnboardModal({
       whereDoYouWantToGo: '',
     },
     mode: 'onChange',
-    context: {
-      userId: '123',
-    },
   });
 
   const { mutateAsync, isPending } = useOnboardUser();
@@ -87,6 +84,7 @@ export default function OnboardModal({
     toast.promise(mutateAsync(values), {
       loading: 'Onboarding in progress...',
       success: () => {
+        onOpenChange(false);
         setTimeout(() => {
           router.refresh();
         }, 1000);
@@ -96,7 +94,7 @@ export default function OnboardModal({
         return error?.message || 'Onboarding failed. Please try again.';
       },
       finally: () => {
-        onOpenChange(false);
+        form.reset();
       },
     });
 

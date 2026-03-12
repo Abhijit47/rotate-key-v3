@@ -34,20 +34,16 @@ export const userSignUpComplete = inngest.createFunction(
       console.log('stream user token creating for:', event.data.name);
     });
 
-    await step
-      .run('find-the-user', async () => {
-        return db.query.user.findFirst({
-          where: (user, { eq }) => eq(user.email, event.data.email),
-        });
-      })
-      .catch((err) => {
-        if (err.name === 'UserNotFoundError') {
-          throw new NonRetriableError('User no longer exists; stopping');
-        }
-
-        throw err;
+    const foundUser = await step.run('find-the-user', async () => {
+      return db.query.user.findFirst({
+        where: (user, { eq }) => eq(user.email, event.data.email),
       });
-    
+    });
+
+    if (!foundUser) {
+      throw new NonRetriableError('User no longer exists; stopping');
+    }
+
     // update the token,expiredAt,issuedAt for the user in the database
   },
 );

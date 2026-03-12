@@ -36,13 +36,15 @@ export const usersRouter = createTRPCRouter({
       });
     }
 
-    const responseData = (await response.json()) as ServerSession;
+    const responseClone = response.clone();
+    const responseData = (await responseClone.json()) as ServerSession;
 
     // start the background task
     await inngest.send({
       name: 'user/new.signup',
       data: responseData.user,
     });
+    
     return responseData;
   }),
 
@@ -106,7 +108,12 @@ export const usersRouter = createTRPCRouter({
 
       await inngest.send({
         name: 'user/onboarding.complete',
-        data: user,
+        data: {
+          ...user,
+          whereAreYouFrom,
+          whereDoYouWantToGo,
+          isOnboarded: true,
+        },
       });
     }),
 });

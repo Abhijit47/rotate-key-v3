@@ -31,7 +31,7 @@ export default function NotificationInbox() {
   return (
     <Inbox
       applicationIdentifier={env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER}
-      subscriberId={data?.user.id}
+      subscriber={data?.user.id}
       appearance={appearance}>
       <Popover>
         <PopoverTrigger asChild>

@@ -35,10 +35,25 @@ export default function UserButton() {
             <Button
               variant={'ghost'}
               size={'icon-sm'}
-              className={'rounded-full'}>
+              className={'rounded-full'}
+              aria-label={
+                data?.user?.name
+                  ? `${data.user.name} account menu`
+                  : 'Account menu'
+              }>
               <Avatar className={'size-8'}>
-                <AvatarImage src='https://github.com/shadcn.png' />
-                <AvatarFallback>CN</AvatarFallback>
+                <AvatarImage
+                  src={data?.user?.image ?? undefined}
+                  alt={data?.user?.name ?? 'User avatar'}
+                />
+                <AvatarFallback>
+                  {data?.user?.name
+                    ?.split(' ')
+                    .map((part) => part[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase() ?? 'U'}
+                </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
