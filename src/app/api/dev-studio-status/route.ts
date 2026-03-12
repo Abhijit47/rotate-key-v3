@@ -21,9 +21,20 @@ export async function GET() {
 
     if (response.ok) {
       // const data = await response.json();
-      const data = JSON.parse(raw);
-      if (data.port && data.route) {
-        return Response.json({ connected: true, data });
+      // const data = JSON.parse(raw);
+      // if (data.port && data.route) {
+      //   return Response.json({ connected: true, data });
+      // }
+      try {
+        const data = JSON.parse(raw) as { port?: unknown; route?: unknown };
+        if (data.port && data.route) {
+          return Response.json({ connected: true, data });
+        }
+      } catch {
+        return Response.json({
+          connected: false,
+          error: raw || 'Invalid JSON from Novu Dev Studio',
+        });
       }
     }
 

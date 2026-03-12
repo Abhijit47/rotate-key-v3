@@ -30,7 +30,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // api/novu is a public API route, so we should allow it to be accessed without authentication
-  if (request.nextUrl.pathname.startsWith('/api/novu')) {
+  if (pathname === '/api/novu' || pathname.startsWith('/api/novu/')) {
     return NextResponse.next();
   }
   // CRITICAL: Never redirect API calls - they need to return proper responses

@@ -35,7 +35,10 @@ export default function NotificationInbox() {
       appearance={appearance}>
       <Popover>
         <PopoverTrigger asChild>
-          <Button size={'icon-sm'} variant={'outline'}>
+          <Button
+            size={'icon-sm'}
+            variant={'outline'}
+            aria-label='Open notifications'>
             <Bell />
           </Button>
         </PopoverTrigger>
@@ -46,3 +49,5 @@ export default function NotificationInbox() {
     </Inbox>
   );
 }
+
+//** FUTURE UPDATE */ Line 34 passes only the raw user ID to subscriber. To prevent subscriber impersonation, Novu requires HMAC authentication: generate a SHA256 hash of the subscriber ID using your server-side NOVU_SECRET_KEY, then pass it via the subscriberHash prop alongside subscriber. Create an API endpoint that computes this hash after authenticating the user, return it to the client, and update the Inbox component to accept both props. Ensure HMAC encryption is enabled in your Novu Dashboard settings.

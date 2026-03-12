@@ -65,7 +65,7 @@ export const userOnboardingComplete = inngest.createFunction(
         console.log(
           'welcome notification sent for:',
           event.data.email,
-          welcomeNotification.result.status,
+          welcomeNotification?.result?.status,
         );
       });
     } else {
