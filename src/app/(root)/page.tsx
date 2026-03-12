@@ -1,11 +1,7 @@
 import { ClientGreeting } from '@/components/client-greeting';
-import LocaleToggler from '@/components/shared/locale-toggler';
-import ThemeToggler from '@/components/shared/theme-toggler';
 import TestJobs from '@/components/test-jobs';
-import { Button, buttonVariants } from '@/components/ui/button';
 import { caller, HydrateClient, prefetch, trpc } from '@/trpc/server';
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
 import { ErrorBoundary } from 'react-error-boundary';
 
 export default async function Home() {
@@ -21,12 +17,6 @@ export default async function Home() {
   return (
     <HydrateClient>
       <div className={'space-y-6'}>
-        <div>
-          <Button>Click me</Button>
-          <ThemeToggler />
-          <LocaleToggler />
-        </div>
-
         <div>{greeting.greeting}</div>
 
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
@@ -34,24 +24,6 @@ export default async function Home() {
         </ErrorBoundary>
 
         <TestJobs />
-
-        <div className={'space-x-4'}>
-          <Link
-            href={'/login'}
-            className={buttonVariants({
-              variant: 'outline',
-              className: 'rounded-full!',
-            })}>
-            Continue to Login
-          </Link>
-          <Link
-            href={'/sign-up'}
-            className={buttonVariants({
-              className: 'rounded-full!',
-            })}>
-            Get Started
-          </Link>
-        </div>
 
         <div className={'space-y-5'}>
           <h1 className={'font-display text-7xl font-extrabold'}>

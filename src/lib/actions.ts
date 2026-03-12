@@ -6,6 +6,7 @@ import { Locale } from 'next-intl';
 import { cookies } from 'next/headers';
 import { sleep } from './utils';
 
+
 export async function changeLocaleAction(locale: Locale) {
   if (!locales.includes(locale)) {
     throw new Error(`Invalid locale: ${locale}`);

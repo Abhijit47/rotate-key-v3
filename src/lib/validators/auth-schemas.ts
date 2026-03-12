@@ -26,9 +26,15 @@ export const loginSchema = z.object({
   rememberMe: z.boolean(),
 });
 
+// export const onboardingSchema = z.object({
+//   whereAreYouFrom: z.string().optional(),
+//   whereDoYouWantToGo: z.string().optional(),
+// });
+
+// src/lib/validators/auth-schemas.ts
 export const onboardingSchema = z.object({
-  whereAreYouFrom: z.string().optional(),
-  whereDoYouWantToGo: z.string().optional(),
+  whereAreYouFrom: z.string().trim().min(1, 'This field is required'),
+  whereDoYouWantToGo: z.string().trim().min(1, 'This field is required'),
 });
 
 export type SignupValues = z.infer<typeof signupSchema>;
