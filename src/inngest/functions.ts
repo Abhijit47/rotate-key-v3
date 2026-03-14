@@ -76,6 +76,7 @@ export const userSignUpComplete = inngest.createFunction(
         expireTime,
         issuedAt,
       );
+      await Promise.resolve();
       return { token, expireTime, issuedAt };
     });
 
