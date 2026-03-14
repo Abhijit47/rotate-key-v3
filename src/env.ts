@@ -20,6 +20,7 @@ export const env = createEnv({
     NOVU_SECRET_KEY: z.string().min(1),
     NOVU_US_API_URL: z.url(),
     NOVU_EU_API_URL: z.url(),
+    STREAM_API_SECRET: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_BETTER_AUTH_URL: z.url(),
@@ -27,6 +28,7 @@ export const env = createEnv({
     NEXT_PUBLIC_C15T_URL: z.url(),
     NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER: z.string().min(1),
     NEXT_PUBLIC_NOVU_SUBSCRIBER_ID: z.string().min(1),
+    NEXT_PUBLIC_STREAM_API_KEY: z.string().min(1),
   },
   // For Next.js >= 13.4.4, you only need to destructure client variables:
   experimental__runtimeEnv: {
@@ -36,5 +38,6 @@ export const env = createEnv({
     NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER:
       process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER,
     NEXT_PUBLIC_NOVU_SUBSCRIBER_ID: process.env.NEXT_PUBLIC_NOVU_SUBSCRIBER_ID,
+    NEXT_PUBLIC_STREAM_API_KEY: process.env.NEXT_PUBLIC_STREAM_API_KEY,
   },
 });

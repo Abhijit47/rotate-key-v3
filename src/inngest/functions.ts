@@ -1,6 +1,12 @@
-import { db } from '@/drizzle/db';
-import { createSubscriber, sendWelcomeNotification } from '@/novu/functions';
+import { format } from 'date-fns';
 import { NonRetriableError } from 'inngest';
+import { StreamChat, UserResponse } from 'stream-chat';
+
+import { db } from '@/drizzle/db';
+import { user } from '@/drizzle/schema';
+import { env } from '@/env';
+import { createSubscriber, sendWelcomeNotification } from '@/novu/functions';
+import { eq } from 'drizzle-orm';
 import { inngest } from './client';
 
 export const helloWorld = inngest.createFunction(
@@ -21,6 +27,11 @@ export const userSignUpComplete = inngest.createFunction(
   { id: 'user-new-signup', retries: 5, optimizeParallelism: true },
   { event: 'user/new.signup' },
   async ({ event, step }) => {
+    const serverClient = StreamChat.getInstance(
+      env.NEXT_PUBLIC_STREAM_API_KEY,
+      env.STREAM_API_SECRET,
+    );
+
     const foundUser = await step.run('find-the-user', async () => {
       return db.query.user.findFirst({
         where: (user, { eq }) => eq(user.email, event.data.email),
@@ -31,6 +42,23 @@ export const userSignUpComplete = inngest.createFunction(
       throw new NonRetriableError('User no longer exists; stopping');
     }
 
+    await step.run('chat-user-update', async () => {
+      const streamUser = {
+        id: foundUser.id,
+        anon: false,
+        banned: false,
+        name: foundUser.name,
+        image: foundUser.image,
+        language: 'en',
+        last_active: format(foundUser.createdAt, "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+        notifications_muted: false,
+        role: 'user',
+        username: event.data.name,
+      } as UserResponse;
+
+      await serverClient.upsertUsers([streamUser]);
+    });
+
     await step.run('subscriber-creating', async () => {
       const subscriber = await createSubscriber({
         id: foundUser.id,
@@ -39,17 +67,30 @@ export const userSignUpComplete = inngest.createFunction(
       });
       return subscriber.result;
     });
-    
-    await step.run('stream-user-creating', async () => {
-      console.log('stream user creating for:', event.data.name);
-    });
 
-    await step.run('stream-user-token-creating', async () => {
-      console.log('stream user token creating for:', event.data.name);
+    const streamResult = await step.run('chat-token-creating', async () => {
+      const expireTime = Math.floor(Date.now() / 1000) + 60 * 60 * 24; // 24 hours from now
+      const issuedAt = Math.floor(new Date().getTime() / 1000);
+      const token = serverClient.createToken(
+        foundUser.id,
+        expireTime,
+        issuedAt,
+      );
+      await Promise.resolve();
+      return { token, expireTime, issuedAt };
     });
-    
 
     // update the token,expiredAt,issuedAt for the user in the database
+    await step.run('update-user-with-token', async () => {
+      return db
+        .update(user)
+        .set({
+          chatToken: streamResult.token,
+          chatTokenExpireAt: new Date(streamResult.expireTime * 1000),
+          chatTokenIssuedAt: new Date(streamResult.issuedAt * 1000),
+        })
+        .where(eq(user.id, foundUser.id));
+    });
   },
 );
 
