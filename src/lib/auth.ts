@@ -119,6 +119,21 @@ export const auth = betterAuth({
         required: false,
         default: false,
       },
+      chatToken: {
+        type: 'string',
+        required: false,
+        defaultValue: 'n/a',
+      },
+      chatTokenExpireAt: {
+        type: 'date',
+        required: false,
+        defaultValue: null,
+      },
+      chatTokenIssuedAt: {
+        type: 'date',
+        required: false,
+        defaultValue: null,
+      },
     },
   },
 

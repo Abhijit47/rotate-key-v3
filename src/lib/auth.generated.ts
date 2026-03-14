@@ -24,6 +24,9 @@ export const user = pgTable("user", {
   whereAreYouFrom: text("where_are_you_from"),
   whereDoYouWantToGo: text("where_do_you_want_to_go"),
   isOnboarded: boolean("is_onboarded"),
+  chatToken: text("chat_token").default("n/a"),
+  chatTokenExpireAt: timestamp("chat_token_expire_at"),
+  chatTokenIssuedAt: timestamp("chat_token_issued_at"),
 });
 
 export const session = pgTable(
