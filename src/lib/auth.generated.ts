@@ -31,6 +31,8 @@ export const user = pgTable("user", {
   chatToken: text("chat_token").default("n/a"),
   chatTokenExpireAt: timestamp("chat_token_expire_at"),
   chatTokenIssuedAt: timestamp("chat_token_issued_at"),
+  isSubscribed: boolean("is_subscribed").default(false),
+  plan: text("plan").default("free"),
 });
 
 export const session = pgTable(
