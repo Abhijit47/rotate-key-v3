@@ -10,10 +10,12 @@ import {
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
+import { admin as adminPlugin } from 'better-auth/plugins';
 
 import { db } from '@/drizzle/db';
 import * as schema from '@/drizzle/schema';
 import { env } from '@/env';
+import { ac, admin, moderator, user } from './permissions';
 import { polarClient } from './polar';
 
 const facebookClientId = env.FACEBOOK_CLIENT_ID;
@@ -134,6 +136,11 @@ export const auth = betterAuth({
         required: false,
         defaultValue: null,
       },
+      role: {
+        type: 'string',
+        required: false,
+        defaultValue: 'user',
+      },
     },
   },
 
@@ -152,6 +159,14 @@ export const auth = betterAuth({
   trustedOrigins: [env.BETTER_AUTH_URL],
 
   plugins: [
+    adminPlugin({
+      ac,
+      roles: {
+        admin,
+        moderator,
+        user,
+      },
+    }),
     polar({
       client: polarClient,
       createCustomerOnSignUp: true,
