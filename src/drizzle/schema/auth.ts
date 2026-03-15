@@ -1,13 +1,18 @@
+import { plans, roles } from '@/constants/db-constants';
 import { relations, sql } from 'drizzle-orm';
 import {
   boolean,
   index,
+  pgEnum,
   pgTable,
   text,
   timestamp,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
+
+export const rolesEnum = pgEnum('role', roles);
+export const plansEnum = pgEnum('plan', plans);
 
 export const user = pgTable('user', {
   id: uuid('id')
@@ -22,12 +27,18 @@ export const user = pgTable('user', {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  role: rolesEnum().default('user').notNull(),
+  banned: boolean('banned').default(false),
+  banReason: text('ban_reason'),
+  banExpires: timestamp('ban_expires'),
   whereAreYouFrom: varchar('where_are_you_from'),
   whereDoYouWantToGo: varchar('where_do_you_want_to_go'),
   isOnboarded: boolean('is_onboarded').default(false).notNull(),
   chatToken: text('chat_token').default('n/a'),
   chatTokenExpireAt: timestamp('chat_token_expire_at'),
   chatTokenIssuedAt: timestamp('chat_token_issued_at'),
+  isSubscribed: boolean('is_subscribed').default(false).notNull(),
+  plan: plansEnum(),
 });
 
 export const session = pgTable(
@@ -47,6 +58,7 @@ export const session = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
+    impersonatedBy: text('impersonated_by'),
   },
   (table) => [index('session_userId_idx').on(table.userId)],
 );

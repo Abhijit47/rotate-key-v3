@@ -21,12 +21,18 @@ export const user = pgTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  role: text("role").default("user"),
+  banned: boolean("banned").default(false),
+  banReason: text("ban_reason"),
+  banExpires: timestamp("ban_expires"),
   whereAreYouFrom: text("where_are_you_from"),
   whereDoYouWantToGo: text("where_do_you_want_to_go"),
   isOnboarded: boolean("is_onboarded"),
   chatToken: text("chat_token").default("n/a"),
   chatTokenExpireAt: timestamp("chat_token_expire_at"),
   chatTokenIssuedAt: timestamp("chat_token_issued_at"),
+  isSubscribed: boolean("is_subscribed").default(false),
+  plan: text("plan").default("free"),
 });
 
 export const session = pgTable(
@@ -46,6 +52,7 @@ export const session = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    impersonatedBy: text("impersonated_by"),
   },
   (table) => [index("session_userId_idx").on(table.userId)],
 );

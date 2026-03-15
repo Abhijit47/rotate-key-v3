@@ -1,3 +1,5 @@
+CREATE TYPE "public"."plan" AS ENUM('free', 'basic', 'pro');--> statement-breakpoint
+CREATE TYPE "public"."role" AS ENUM('admin', 'moderator', 'user');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
 	"account_id" text NOT NULL,
@@ -23,6 +25,7 @@ CREATE TABLE "session" (
 	"ip_address" text,
 	"user_agent" text,
 	"user_id" uuid NOT NULL,
+	"impersonated_by" text,
 	CONSTRAINT "session_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
@@ -34,9 +37,18 @@ CREATE TABLE "user" (
 	"image" text DEFAULT '/api/avatar?name=user' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"role" "role" DEFAULT 'user' NOT NULL,
+	"banned" boolean DEFAULT false,
+	"ban_reason" text,
+	"ban_expires" timestamp,
 	"where_are_you_from" varchar,
 	"where_do_you_want_to_go" varchar,
 	"is_onboarded" boolean DEFAULT false NOT NULL,
+	"chat_token" text DEFAULT 'n/a',
+	"chat_token_expire_at" timestamp,
+	"chat_token_issued_at" timestamp,
+	"is_subscribed" boolean DEFAULT false NOT NULL,
+	"plan" "plan",
 	CONSTRAINT "user_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
@@ -110,12 +122,13 @@ CREATE TABLE "consentPurpose" (
 );
 --> statement-breakpoint
 CREATE TABLE "consentRecord" (
-	"id" varchar(255) NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"subjectId" text NOT NULL,
 	"consentId" text,
 	"actionType" text NOT NULL,
 	"details" json,
-	"createdAt" timestamp DEFAULT now() NOT NULL
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "consentRecord_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
 CREATE TABLE "domain" (
