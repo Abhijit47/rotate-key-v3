@@ -1,4 +1,5 @@
 import { ServerSession } from '@/lib/auth';
+import { CreateUserValues } from '@/lib/validators/admin-schemas';
 import { EventSchemas, Inngest } from 'inngest';
 
 type UserSignup = {
@@ -9,12 +10,22 @@ type UserOnboarding = {
   data: ServerSession['user'];
 };
 
+type UserCreated = {
+  data: CreateUserValues;
+};
+
+type UserDeleted = {
+  data: { id: string };
+};
+
 type Events = {
   'test/hello.world': {
     data: { email: string };
   };
   'user/new.signup': UserSignup;
   'user/onboarding.complete': UserOnboarding;
+  'admin-user/created': UserCreated;
+  'admin-user/deleted': UserDeleted;
 };
 
 export const inngest = new Inngest({

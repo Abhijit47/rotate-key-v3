@@ -248,5 +248,12 @@
 
 /* C15t */
 .c15t-devtool-wrapper-button-container {
-  @apply left-4!;
+  /* @apply top-4! left-4!; */
+  /* top: 1rem !important; */
+  bottom: 1rem !important;
+  left: 1rem !important;
+  width: fit-content;
+  height: fit-content;
+  background-color: var(--background) !important;
+  border-radius: 50px !important;
 }
