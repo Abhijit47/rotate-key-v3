@@ -137,13 +137,13 @@ export const userCreated = inngest.createFunction(
     );
 
     const newUser = await step.run('create-user-in-db', async () => {
-      const { email, password, name } = event.data;
+      const { email, password, name, role } = event.data;
       return await auth.api.createUser({
         body: {
           email, // required
           password, // required
           name, // required
-          role: 'user',
+          role: role ?? 'user',
           // data: { customField: 'customValue' },
         },
       });
