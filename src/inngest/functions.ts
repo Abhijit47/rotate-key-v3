@@ -209,15 +209,14 @@ export const userDeleted = inngest.createFunction(
       env.STREAM_API_SECRET,
     );
 
-    const foundUser = await db.query.user.findFirst({
-      where: eq(user.id, event.data.id),
-    });
-
-    if (!foundUser) {
-      throw new NonRetriableError('User no longer exists; stopping');
-    }
-
     const removedUser = await step.run('delete-user-from-db', async () => {
+      const foundUser = await db.query.user.findFirst({
+        where: eq(user.id, event.data.id),
+      });
+
+      if (!foundUser) {
+        throw new NonRetriableError('User no longer exists; stopping');
+      }
       const removeUser = await db
         .delete(user)
         .where(eq(user.id, foundUser.id))
@@ -242,9 +241,9 @@ export const userDeleted = inngest.createFunction(
 
     await step.run('delete-user-from-payment-provider', async () => {
       return await polarClient.customers
-        .deleteExternal({ externalId: event.data.id })
+        .deleteExternal({ externalId: removedUser.id })
         .then(async () => {
-          console.log('User deleted from payment provider:', event.data.id);
+          console.log('User deleted from payment provider:', removedUser.id);
           // const res1 = await polarClient.subscriptions.revoke({
           //   id: event.data.id,
           // });
