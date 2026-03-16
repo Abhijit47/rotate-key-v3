@@ -39,7 +39,7 @@ export const adminRouter = createTRPCRouter({
     if (!user) {
       throw new TRPCError({
         code: 'NOT_FOUND',
-        message: `No user found with id ${input}`,
+        message: `No user found with id ${input.id}`,
       });
     }
 
@@ -59,17 +59,6 @@ export const adminRouter = createTRPCRouter({
   }),
 
   deleteUser: baseProcedure.input(getUserSchema).mutation(async ({ input }) => {
-    const oldUser = await db.query.user.findFirst({
-      where: eq(user.id, input.id),
-    });
-
-    if (!oldUser) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: `No user found with id ${input}`,
-      });
-    }
-
     await inngest.send({
       name: 'admin-user/deleted',
       data: {

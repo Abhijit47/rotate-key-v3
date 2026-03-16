@@ -191,7 +191,7 @@ export default function AddUserModal() {
                       id='role'
                       data-invalid={fieldState.invalid}
                       aria-invalid={fieldState.invalid}>
-                      <SelectValue placeholder='Theme' />
+                      <SelectValue placeholder='Select a role' />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>

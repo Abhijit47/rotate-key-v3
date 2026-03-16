@@ -209,10 +209,18 @@ export const userDeleted = inngest.createFunction(
       env.STREAM_API_SECRET,
     );
 
+    const foundUser = await db.query.user.findFirst({
+      where: eq(user.id, event.data.id),
+    });
+
+    if (!foundUser) {
+      throw new NonRetriableError('User no longer exists; stopping');
+    }
+
     const removedUser = await step.run('delete-user-from-db', async () => {
       const removeUser = await db
         .delete(user)
-        .where(eq(user.id, event.data.id))
+        .where(eq(user.id, foundUser.id))
         .returning();
       if (removeUser.length === 0) {
         throw new NonRetriableError('User no longer exists; stopping');

@@ -26,9 +26,9 @@ export async function createSubscriber(
 }
 
 export async function deleteSubscriber(subscriberId: string) {
-  const removeSuscriber = await novuClient.subscribers.delete(subscriberId);
+  const removeSubscriber = await novuClient.subscribers.delete(subscriberId);
 
-  return removeSuscriber.result;
+  return removeSubscriber.result;
 }
 
 export async function sendWelcomeNotification(user: ServerSession['user']) {
