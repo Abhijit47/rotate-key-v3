@@ -5,7 +5,13 @@ import { StreamChat, UserResponse } from 'stream-chat';
 import { db } from '@/drizzle/db';
 import { user } from '@/drizzle/schema';
 import { env } from '@/env';
-import { createSubscriber, sendWelcomeNotification } from '@/novu/functions';
+import { auth } from '@/lib/auth';
+import { polarClient } from '@/lib/polar';
+import {
+  createSubscriber,
+  deleteSubscriber,
+  sendWelcomeNotification,
+} from '@/novu/functions';
 import { eq } from 'drizzle-orm';
 import { inngest } from './client';
 
@@ -118,5 +124,127 @@ export const userOnboardingComplete = inngest.createFunction(
       console.log('User is not onboarded yet, skipping welcome notification');
       // notify to the team that a user has signed up but not onboarded yet, so they can reach out to them and help them onboard
     }
+  },
+);
+
+export const userCreated = inngest.createFunction(
+  { id: 'admin-user-created' },
+  { event: 'admin-user/created' },
+  async ({ event, step }) => {
+    const serverClient = StreamChat.getInstance(
+      env.NEXT_PUBLIC_STREAM_API_KEY,
+      env.STREAM_API_SECRET,
+    );
+
+    const newUser = await step.run('create-user-in-db', async () => {
+      const { email, password, name } = event.data;
+      return await auth.api.createUser({
+        body: {
+          email, // required
+          password, // required
+          name, // required
+          role: 'user',
+          // data: { customField: 'customValue' },
+        },
+      });
+    });
+
+    await step.run('chat-user-update', async () => {
+      const streamUser = {
+        id: newUser.user.id,
+        anon: false,
+        banned: false,
+        name: newUser.user.name,
+        image: newUser.user.image,
+        language: 'en',
+        last_active: format(newUser.user.createdAt, "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+        notifications_muted: false,
+        role: 'user',
+        username: event.data.name,
+      } as UserResponse;
+
+      await serverClient.upsertUsers([streamUser]);
+    });
+
+    await step.run('subscriber-creating', async () => {
+      const subscriber = await createSubscriber({
+        id: newUser.user.id,
+        name: newUser.user.name,
+        email: newUser.user.email,
+      });
+      return subscriber.result;
+    });
+
+    const streamResult = await step.run('chat-token-creating', async () => {
+      const expireTime = Math.floor(Date.now() / 1000) + 60 * 60 * 24; // 24 hours from now
+      const issuedAt = Math.floor(new Date().getTime() / 1000);
+      const token = serverClient.createToken(
+        newUser.user.id,
+        expireTime,
+        issuedAt,
+      );
+      await Promise.resolve();
+      return { token, expireTime, issuedAt };
+    });
+
+    await step.run('update-user-with-token', async () => {
+      return db
+        .update(user)
+        .set({
+          chatToken: streamResult.token,
+          chatTokenExpireAt: new Date(streamResult.expireTime * 1000),
+          chatTokenIssuedAt: new Date(streamResult.issuedAt * 1000),
+        })
+        .where(eq(user.id, newUser.user.id));
+    });
+  },
+);
+
+export const userDeleted = inngest.createFunction(
+  { id: 'admin-user-deleted' },
+  { event: 'admin-user/deleted' },
+  async ({ event, step }) => {
+    const serverClient = StreamChat.getInstance(
+      env.NEXT_PUBLIC_STREAM_API_KEY,
+      env.STREAM_API_SECRET,
+    );
+
+    const removedUser = await step.run('delete-user-from-db', async () => {
+      const removeUser = await db
+        .delete(user)
+        .where(eq(user.id, event.data.id))
+        .returning();
+      if (removeUser.length === 0) {
+        throw new NonRetriableError('User no longer exists; stopping');
+      }
+      return removeUser[0];
+    });
+
+    await step.run('delete-user-from-chat-provider', async () => {
+      return await serverClient.deleteUser(removedUser.id, {
+        delete_conversation_channels: true,
+        hard_delete: true,
+        mark_messages_deleted: true,
+      });
+    });
+
+    await step.run('delete-user-from-notification-provider', async () => {
+      return await deleteSubscriber(removedUser.id);
+    });
+
+    await step.run('delete-user-from-payment-provider', async () => {
+      return await polarClient.customers
+        .deleteExternal({ externalId: event.data.id })
+        .then(async () => {
+          console.log('User deleted from payment provider:', event.data.id);
+          // const res1 = await polarClient.subscriptions.revoke({
+          //   id: event.data.id,
+          // });
+          // console.log('User deleted from payment provider:', res1);
+        })
+        .catch((err) => {
+          console.error('Error deleting user from payment provider:', err);
+        });
+    });
   },
 );

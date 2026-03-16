@@ -22,6 +22,18 @@ const nextConfig: NextConfig = {
   //   ];
   // },
 
+  images: {
+    localPatterns: [
+      // {
+      //   pathname: '/assets/**',
+      // },
+      {
+        pathname: '/api/avatar/**',
+        // search is omitted, so ?v=123, ?t=456, or no query string are all allowed
+      },
+    ],
+  },
+
   async headers() {
     return [
       {
