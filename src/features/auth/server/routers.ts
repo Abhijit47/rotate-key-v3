@@ -224,11 +224,27 @@ export const authRouter = createTRPCRouter({
   oauthSignUpComplete: protectedProcedure.mutation(async ({ ctx }) => {
     const { user } = ctx.auth;
 
-    const result = await inngest.send({
-      name: 'user/oauth.signup.complete',
-      data: user,
-    });
+    // const result = await inngest.send({
+    //   name: 'user/oauth.signup.complete',
+    //   data: user,
+    // });
 
-    return result;
+    // return result;
+    // best-effort background task; don't fail if dispatch fails
+    try {
+      const result = await inngest.send({
+        name: 'user/oauth.signup.complete',
+        data: user,
+      });
+      return result;
+    } catch (dispatchError) {
+      logger.error('Failed to dispatch user/oauth.signup.complete', {
+        errorMessage:
+          dispatchError instanceof Error
+            ? dispatchError.message
+            : 'Unknown error',
+      });
+      return { dispatched: false };
+    }
   }),
 });
