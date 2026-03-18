@@ -180,7 +180,7 @@ export const authRouter = createTRPCRouter({
       return response;
     } catch (error) {
       if (isAPIError(error)) {
-        // console.log('login with facebook->', error.message, error.status);
+        // console.log('login with google->', error.message, error.status);
         logger.error('Failed to sign in user with google', {
           errorMessage: error.message,
           statusCode: error.status,
