@@ -9,6 +9,7 @@ import { auth } from '@/lib/auth';
 import { polarClient } from '@/lib/polar';
 import {
   createSubscriber,
+  deleteSubscriber,
   // deleteSubscriber,
   sendWelcomeNotification,
 } from '@/novu/functions';
@@ -302,17 +303,17 @@ export const userDeleted = inngest.createFunction(
       return removeUser[0];
     });
 
-    // await step.run('delete-user-from-chat-provider', async () => {
-    //   return await serverClient.deleteUser(removedUser.id, {
-    //     delete_conversation_channels: true,
-    //     hard_delete: true,
-    //     mark_messages_deleted: true,
-    //   });
-    // });
+    await step.run('delete-user-from-chat-provider', async () => {
+      return await serverClient.deleteUser(removedUser.id, {
+        delete_conversation_channels: true,
+        hard_delete: true,
+        mark_messages_deleted: true,
+      });
+    });
 
-    // await step.run('delete-user-from-notification-provider', async () => {
-    //   return await deleteSubscriber(removedUser.id);
-    // });
+    await step.run('delete-user-from-notification-provider', async () => {
+      return await deleteSubscriber(removedUser.id);
+    });
 
     await step.run('delete-user-from-payment-provider', async () => {
       return await polarClient.customers

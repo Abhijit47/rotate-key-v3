@@ -46,11 +46,21 @@ export const authRouter = createTRPCRouter({
       const responseClone = response.clone();
       const responseData = (await responseClone.json()) as ServerSession;
 
-      // start the background task
-      await inngest.send({
-        name: 'user/new.signup.complete',
-        data: responseData.user,
-      });
+      // best-effort background task; don't fail signup if dispatch fails
+      try {
+        // start the background task
+        await inngest.send({
+          name: 'user/new.signup.complete',
+          data: responseData.user,
+        });
+      } catch (dispatchError) {
+        logger.error('Failed to dispatch user/new.signup.complete', {
+          errorMessage:
+            dispatchError instanceof Error
+              ? dispatchError.message
+              : 'Unknown error',
+        });
+      }
 
       return responseData;
     } catch (error) {
@@ -92,7 +102,10 @@ export const authRouter = createTRPCRouter({
         });
       }
 
-      return response;
+      const responseClone = response.clone();
+      const responseData = (await responseClone.json()) as ServerSession;
+
+      return responseData;
     } catch (error) {
       if (isAPIError(error)) {
         // console.log('login with email->', error.message, error.status);
@@ -185,8 +198,8 @@ export const authRouter = createTRPCRouter({
       const response = await auth.api.signInSocial({
         body: {
           provider: 'facebook',
-          callbackURL: `${env.NEXT_PUBLIC_BETTER_AUTH_URL}/`,
-          newUserCallbackURL: `${env.NEXT_PUBLIC_BETTER_AUTH_URL}/onboarding`,
+          callbackURL: `${env.NEXT_PUBLIC_BETTER_AUTH_URL}/oauth-redirect`,
+          // newUserCallbackURL: `${env.NEXT_PUBLIC_BETTER_AUTH_URL}/onboarding`,
           errorCallbackURL: `${env.NEXT_PUBLIC_BETTER_AUTH_URL}/login?error=facebook_auth_failed`,
           requestSignUp: true,
         },
