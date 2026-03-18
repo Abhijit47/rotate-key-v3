@@ -34,7 +34,7 @@ export type GenericEvents = GetEvents<typeof inngest, true>;
 export type InputArg = GetFunctionInput<typeof inngest>;
 export type InputArgWithTrigger = GetFunctionInput<
   typeof inngest,
-  'user/new.signup'
+  'user/new.signup.complete'
 >;
 
 /**
@@ -45,7 +45,7 @@ export type InputArgWithTrigger = GetFunctionInput<
 export type StepTools = GetStepTools<typeof inngest>;
 export type StepToolsWithTrigger = GetStepTools<
   typeof inngest,
-  'user/new.signup'
+  'user/new.signup.complete'
 >;
 
 /**

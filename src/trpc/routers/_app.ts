@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { adminRouter } from '@/features/admin/server/routers';
-import { usersRouter } from '@/features/auth/server/routers';
+import { authRouter } from '@/features/auth/server/routers';
 import { baseProcedure, createTRPCRouter } from '../init';
 
 export const appRouter = createTRPCRouter({
@@ -17,7 +17,7 @@ export const appRouter = createTRPCRouter({
       };
     }),
 
-  users: usersRouter,
+  auth: authRouter,
   admin: adminRouter,
 });
 

@@ -3,6 +3,7 @@ import { serve } from 'inngest/next';
 import { inngest } from '@/inngest/client';
 import {
   helloWorld,
+  oauthSignUpComplete,
   userCreated,
   userDeleted,
   userOnboardingComplete,
@@ -16,6 +17,7 @@ export const { GET, POST, PUT } = serve({
   functions: [
     helloWorld, // <-- This is where you'll always add all your functions
     userSignUpComplete,
+    oauthSignUpComplete,
     userOnboardingComplete,
     userCreated,
     userDeleted,

@@ -1,5 +1,5 @@
-import AuthBackgroundShape from '@/features/auth/auth-background-shape';
-import { Metadata } from 'next';
+import AuthBackgroundShape from '@/features/auth/components/auth-background-shape';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Auth Layout',

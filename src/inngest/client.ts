@@ -22,7 +22,8 @@ type Events = {
   'test/hello.world': {
     data: { email: string };
   };
-  'user/new.signup': UserSignup;
+  'user/new.signup.complete': UserSignup;
+  'user/oauth.signup.complete': UserSignup;
   'user/onboarding.complete': UserOnboarding;
   'admin-user/created': UserCreated;
   'admin-user/deleted': UserDeleted;

@@ -10,6 +10,7 @@ import { polarClient } from '@/lib/polar';
 import {
   createSubscriber,
   deleteSubscriber,
+  // deleteSubscriber,
   sendWelcomeNotification,
 } from '@/novu/functions';
 import { eq } from 'drizzle-orm';
@@ -31,7 +32,7 @@ export const helloWorld = inngest.createFunction(
 
 export const userSignUpComplete = inngest.createFunction(
   { id: 'user-new-signup', retries: 5, optimizeParallelism: true },
-  { event: 'user/new.signup' },
+  { event: 'user/new.signup.complete' },
   async ({ event, step }) => {
     const serverClient = StreamChat.getInstance(
       env.NEXT_PUBLIC_STREAM_API_KEY,
@@ -95,7 +96,81 @@ export const userSignUpComplete = inngest.createFunction(
           chatTokenExpireAt: new Date(streamResult.expireTime * 1000),
           chatTokenIssuedAt: new Date(streamResult.issuedAt * 1000),
         })
-        .where(eq(user.id, foundUser.id));
+        .where(eq(user.id, foundUser.id))
+        .returning();
+    });
+  },
+);
+
+export const oauthSignUpComplete = inngest.createFunction(
+  { id: 'user-oauth-signup' },
+  { event: 'user/oauth.signup.complete' },
+  async ({ event, step }) => {
+    const serverClient = StreamChat.getInstance(
+      env.NEXT_PUBLIC_STREAM_API_KEY,
+      env.STREAM_API_SECRET,
+    );
+
+    const foundUser = await step.run('find-the-user', async () => {
+      return db.query.user.findFirst({
+        where: (user, { eq }) => eq(user.email, event.data.email),
+      });
+    });
+
+    if (!foundUser) {
+      throw new NonRetriableError('User no longer exists; stopping');
+    }
+
+    await step.run('chat-user-update', async () => {
+      const streamUser = {
+        id: foundUser.id,
+        anon: false,
+        banned: false,
+        name: foundUser.name,
+        image: foundUser.image,
+        language: 'en',
+        last_active: format(foundUser.createdAt, "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+        notifications_muted: false,
+        role: 'user',
+        username: event.data.name,
+      } as UserResponse;
+
+      await serverClient.upsertUsers([streamUser]);
+    });
+
+    await step.run('subscriber-creating', async () => {
+      const subscriber = await createSubscriber({
+        id: foundUser.id,
+        name: foundUser.name,
+        email: foundUser.email,
+      });
+      return subscriber.result;
+    });
+
+    const streamResult = await step.run('chat-token-creating', async () => {
+      const expireTime = Math.floor(Date.now() / 1000) + 60 * 60 * 24; // 24 hours from now
+      const issuedAt = Math.floor(new Date().getTime() / 1000);
+      const token = serverClient.createToken(
+        foundUser.id,
+        expireTime,
+        issuedAt,
+      );
+      await Promise.resolve();
+      return { token, expireTime, issuedAt };
+    });
+
+    // update the user in the database to set isSocialSignInComplete to true
+    await step.run('update-user-with-token', async () => {
+      return db
+        .update(user)
+        .set({
+          chatToken: streamResult.token,
+          chatTokenExpireAt: new Date(streamResult.expireTime * 1000),
+          chatTokenIssuedAt: new Date(streamResult.issuedAt * 1000),
+          isSocialSignInComplete: true,
+        })
+        .where(eq(user.id, foundUser.id))
+        .returning();
     });
   },
 );
@@ -127,6 +202,7 @@ export const userOnboardingComplete = inngest.createFunction(
   },
 );
 
+// ADMIN - functions
 export const userCreated = inngest.createFunction(
   { id: 'admin-user-created' },
   { event: 'admin-user/created' },

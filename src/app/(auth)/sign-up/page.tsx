@@ -1,3 +1,6 @@
+import Link from 'next/link';
+
+import Logo from '@/components/shared/logo';
 import {
   Card,
   CardContent,
@@ -5,10 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
-import Logo from '@/components/shared/logo';
-import SignupForm from '@/features/auth/signup-form';
-import Link from 'next/link';
+import SignupForm from '@/features/auth/components/signup-form';
 
 export default function SignupPage() {
   return (

@@ -1,3 +1,6 @@
+import Link from 'next/link';
+
+import Logo from '@/components/shared/logo';
 import {
   Card,
   CardContent,
@@ -5,10 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
-import Logo from '@/components/shared/logo';
-import LoginForm from '@/features/auth/login-form';
-import Link from 'next/link';
+import LoginForm from '@/features/auth/components/login-form';
 
 export default function LoginPage() {
   return (
