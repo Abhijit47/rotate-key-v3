@@ -1,4 +1,5 @@
 import { ChevronRightIcon } from 'lucide-react';
+import Link from 'next/link';
 
 import Logo from '@/components/shared/logo';
 import {
@@ -8,8 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import OnboardingForm from '@/features/auth/onboarding-form';
-import Link from 'next/link';
+import OnboardingForm from '@/features/auth/components/onboarding-form';
 
 export default function OnboardingPage() {
   return (

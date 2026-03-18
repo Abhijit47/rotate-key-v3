@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import TwoFactorAuthenticationForm from '@/features/auth/two-factor-authentication-form';
+import TwoFactorAuthenticationForm from '@/features/auth/components/two-factor-authentication-form';
 
 export default function TwoFactorAuthentication() {
   return (

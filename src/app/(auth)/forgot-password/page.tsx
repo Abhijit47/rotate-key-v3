@@ -1,4 +1,5 @@
 import { ChevronLeftIcon } from 'lucide-react';
+import Link from 'next/link';
 
 import Logo from '@/components/shared/logo';
 import {
@@ -8,8 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import ForgotPasswordForm from '@/features/auth/forgot-password-form';
-import Link from 'next/link';
+import ForgotPasswordForm from '@/features/auth/components/forgot-password-form';
 
 export default function ForgotPasswordPage() {
   return (

@@ -27,6 +27,7 @@ export const user = pgTable("user", {
   banExpires: timestamp("ban_expires"),
   whereAreYouFrom: text("where_are_you_from"),
   whereDoYouWantToGo: text("where_do_you_want_to_go"),
+  isSocialSignInComplete: boolean("is_social_sign_in_complete"),
   isOnboarded: boolean("is_onboarded"),
   chatToken: text("chat_token").default("n/a"),
   chatTokenExpireAt: timestamp("chat_token_expire_at"),

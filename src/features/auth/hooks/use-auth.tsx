@@ -9,9 +9,9 @@ export function useSignUpUser() {
   const queryClient = useQueryClient();
 
   return useMutation(
-    trpc.users.signUpUser.mutationOptions({
+    trpc.auth.signUpUser.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries(trpc.users.getCurrentUser.queryOptions());
+        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
       },
       onError: (err) => {
         console.error({ err });
@@ -28,9 +28,9 @@ export function useSignInUser() {
   const queryClient = useQueryClient();
 
   return useMutation(
-    trpc.users.signInUser.mutationOptions({
+    trpc.auth.signInUser.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries(trpc.users.getCurrentUser.queryOptions());
+        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
       },
       onError: (err) => {
         console.error({ err });
@@ -47,9 +47,47 @@ export function useOnboardUser() {
   const queryClient = useQueryClient();
 
   return useMutation(
-    trpc.users.onboardingUser.mutationOptions({
+    trpc.auth.onboardingUser.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries(trpc.users.getCurrentUser.queryOptions());
+        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
+      },
+      onError: (err) => {
+        console.error({ err });
+      },
+    }),
+  );
+}
+
+/**
+ * Hook to sign in a user with Google
+ */
+export function useSignInWithGoogle() {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    trpc.auth.signInWithGoogle.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
+      },
+      onError: (err) => {
+        console.error({ err });
+      },
+    }),
+  );
+}
+
+/**
+ * Hook to sign in a user with Facebook
+ */
+export function useSignInWithFacebook() {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    trpc.auth.signInWithFacebook.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
       },
       onError: (err) => {
         console.error({ err });

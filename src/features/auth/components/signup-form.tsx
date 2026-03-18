@@ -1,5 +1,18 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { IconBrandFacebook, IconBrandGoogle } from '@tabler/icons-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+// import { useState } from 'react';
+import {
+  Controller,
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -13,34 +26,36 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import { signIn } from '@/lib/auth-client';
+// import { signIn } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 import { signupSchema, SignupValues } from '@/lib/validators/auth-schemas';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { IconBrandFacebook, IconBrandGoogle } from '@tabler/icons-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { Route } from 'next';
 import {
-  Controller,
-  SubmitErrorHandler,
-  SubmitHandler,
-  useForm,
-} from 'react-hook-form';
-import { toast } from 'sonner';
-import { useSignUpUser } from './hooks/use-auth';
+  useSignInWithFacebook,
+  useSignInWithGoogle,
+  useSignUpUser,
+} from '../hooks/use-auth';
 
 export default function SignupForm({
   className,
   ...props
 }: React.ComponentProps<'form'>) {
-  const [isSignUpPending, setIsSignUpPending] = useState(false);
-  const [isPendingGoogleSignUp, setIsGoogleSignUp] = useState(false);
-  const [isPendingFacebookSignUp, setIsFacebookSignUp] = useState(false);
+  // const [isSignUpPending, setIsSignUpPending] = useState(false);
+  // const [isPendingGoogleSignUp, setIsGoogleSignUp] = useState(false);
+  // const [isPendingFacebookSignUp, setIsFacebookSignUp] = useState(false);
 
   const router = useRouter();
 
-  const { mutateAsync: signUpWithEmail } = useSignUpUser();
+  const { mutateAsync: signUpWithEmail, isPending: isSignUpWithEmail } =
+    useSignUpUser();
+  const {
+    mutateAsync: signInWithGoogle,
+    isPending: isSignInWithGooglePending,
+  } = useSignInWithGoogle();
+  const {
+    mutateAsync: signInWithFacebook,
+    isPending: isSignInWithFacebookPending,
+  } = useSignInWithFacebook();
 
   const form = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
@@ -62,18 +77,19 @@ export default function SignupForm({
           descriptionClassName: 'text-[10px] text-balance',
         });
       }
+      return;
     });
   };
 
   const onSubmit: SubmitHandler<SignupValues> = (values) => {
-    setIsSignUpPending(true);
-    let signUpSucceeded = false;
+    // setIsSignUpPending(true);
+    // let signUpSucceeded = false;
 
     toast.promise(signUpWithEmail(values), {
       loading: 'Creating Account...',
       success: ({ user }) => {
         const name = user?.name || 'User';
-        signUpSucceeded = true;
+        // signUpSucceeded = true;
         form.reset();
         return (
           <p className={'text-sm'}>
@@ -84,61 +100,32 @@ export default function SignupForm({
       },
       error: (err) => err.message || 'Failed to create account',
       finally: () => {
-        setIsSignUpPending(false);
-        if (signUpSucceeded) {
+        // setIsSignUpPending(false);
+        if (!isSignUpWithEmail) {
           setTimeout(() => {
             router.push('/onboarding');
           }, 1500);
         }
       },
     });
-
-    // toast.promise(
-    //   signUp.email({
-    //     email: values.email,
-    //     password: values.password,
-    //     name: values.fullName,
-    //     callbackURL: `${window.location.origin}/onboarding`,
-    //   }),
-    //   {
-    //     loading: 'Creating Account...',
-    //     success: ({ data }) => {
-    //       const name = data?.user?.name || 'User';
-    //       signUpSucceeded = true;
-    //       form.reset();
-    //       return (
-    //         <p className={'text-sm'}>
-    //           Account created successfully! Welcome, <strong>{name}</strong>!
-    //           Redirecting to onboarding...
-    //         </p>
-    //       );
-    //     },
-    //     error: (err) => err.message || 'Failed to create account',
-    //     finally: () => {
-    //       setIsSignUpPending(false);
-    //       if (signUpSucceeded) {
-    //         setTimeout(() => {
-    //           router.push('/onboarding');
-    //         }, 1500);
-    //       }
-    //     },
-    //   },
-    // );
   };
 
   function handleGoogleSignUp() {
-    setIsGoogleSignUp(true);
+    // setIsGoogleSignUp(true);
     toast.promise(
-      signIn.social({
-        provider: 'google',
-        callbackURL: `${window.location.origin}/`,
-        newUserCallbackURL: `${window.location.origin}/onboarding`,
-        errorCallbackURL: `${window.location.origin}/login?error=google_auth_failed`,
-        requestSignUp: true,
-      }),
+      // signIn.social({
+      //   provider: 'google',
+      //   callbackURL: `${window.location.origin}/`,
+      //   newUserCallbackURL: `${window.location.origin}/onboarding`,
+      //   errorCallbackURL: `${window.location.origin}/login?error=google_auth_failed`,
+      //   requestSignUp: true,
+      // }),
+      signInWithGoogle,
       {
         loading: 'Redirecting to Google...',
-        success: () => {
+        success: (data) => {
+          console.log('Google sign-in response client:', data);
+          router.push(data.url as Route);
           return 'Redirected to Google for authentication';
         },
         error: (error) => {
@@ -146,26 +133,28 @@ export default function SignupForm({
             error?.message || 'Failed to redirect to Google. Please try again.'
           );
         },
-        finally: () => {
-          setIsGoogleSignUp(false);
-        },
+        // finally: () => {
+        //   setIsGoogleSignUp(false);
+        // },
       },
     );
   }
 
   function handleFacebookSignUp() {
-    setIsFacebookSignUp(true);
+    // setIsFacebookSignUp(true);
     toast.promise(
-      signIn.social({
-        provider: 'facebook',
-        callbackURL: `${window.location.origin}/`,
-        newUserCallbackURL: `${window.location.origin}/onboarding`,
-        errorCallbackURL: `${window.location.origin}/login?error=facebook_auth_failed`,
-        requestSignUp: true,
-      }),
+      // signIn.social({
+      //   provider: 'facebook',
+      //   callbackURL: `${window.location.origin}/`,
+      //   newUserCallbackURL: `${window.location.origin}/onboarding`,
+      //   errorCallbackURL: `${window.location.origin}/login?error=facebook_auth_failed`,
+      //   requestSignUp: true,
+      // }),
+      signInWithFacebook,
       {
         loading: 'Redirecting to Facebook...',
-        success: () => {
+        success: (data) => {
+          router.push(data.url as Route);
           return 'Redirected to Facebook for authentication';
         },
         error: (error) => {
@@ -174,15 +163,20 @@ export default function SignupForm({
             'Failed to redirect to Facebook. Please try again.'
           );
         },
-        finally: () => {
-          setIsFacebookSignUp(false);
-        },
+        // finally: () => {
+        //   setIsFacebookSignUp(false);
+        // },
       },
     );
   }
 
+  // const disabledState =
+  //   isPendingGoogleSignUp || isPendingFacebookSignUp || isSignUpPending;
+
   const disabledState =
-    isPendingGoogleSignUp || isPendingFacebookSignUp || isSignUpPending;
+    isSignUpWithEmail ||
+    isSignInWithGooglePending ||
+    isSignInWithFacebookPending;
 
   return (
     <form
@@ -331,7 +325,7 @@ export default function SignupForm({
           />
           <Field>
             <Button type='submit' disabled={disabledState}>
-              {isSignUpPending ? (
+              {isSignUpWithEmail ? (
                 <span className={'inline-flex items-center gap-2'}>
                   Creating Account...
                   <Spinner />

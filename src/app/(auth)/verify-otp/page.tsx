@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import VerifyOtpForm from '@/features/auth/verify-otp-form';
+import VerifyOtpForm from '@/features/auth/components/verify-otp-form';
 
 export default function VerifyOTPPage() {
   return (

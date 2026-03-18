@@ -1,6 +1,7 @@
-import Logo from '@/components/shared/logo';
 import { ChevronLeftIcon } from 'lucide-react';
+import Link from 'next/link';
 
+import Logo from '@/components/shared/logo';
 import {
   Card,
   CardContent,
@@ -8,8 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import ResetPasswordForm from '@/features/auth/reset-password-form';
-import Link from 'next/link';
+import ResetPasswordForm from '@/features/auth/components/reset-password-form';
 
 export default function ResetPasswordPage() {
   return (
