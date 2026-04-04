@@ -118,15 +118,20 @@ export const authRouter = createTRPCRouter({
         asResponse: true,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (response.ok === false) {
+        const errorData = (await response.json()) as {
+          message: string;
+          code: string;
+        };
+        // console.log('errorData place', { errorData });
         logger.error('Failed to sign in user with email', {
           statusCode: response.status,
-          errorMessage: errorData.error || response.statusText,
+          errorMessage: errorData.message || errorData.code || 'Unknown error',
         });
         throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: errorData.error || 'Failed to sign in user.',
+          code: errorData instanceof TRPCError ? errorData.code : 'NOT_FOUND',
+          message: errorData.message,
+          cause: new Error(errorData.message),
         });
       }
 
@@ -141,10 +146,19 @@ export const authRouter = createTRPCRouter({
           errorMessage: error.message,
           statusCode: error.status,
         });
+        throw new TRPCError({
+          code: error instanceof TRPCError ? error.code : 'BAD_REQUEST',
+          message:
+            error instanceof Error ? error.message : 'Failed to sign in user.',
+          cause: error.cause ?? error,
+        });
       }
       throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: 'Failed to sign in user.',
+        code: error instanceof TRPCError ? error.code : 'INTERNAL_SERVER_ERROR',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Unexpected error during sign in.',
       });
     }
   }),

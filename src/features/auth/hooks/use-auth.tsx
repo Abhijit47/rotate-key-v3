@@ -1,5 +1,6 @@
 import { useTRPC } from '@/trpc/client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Route } from 'next';
 import { useRouter } from 'next/navigation';
 
 /**
@@ -32,14 +33,18 @@ export function useSignUpUser() {
 /**
  * Hook to sign in a user
  */
-export function useSignInUser() {
+export function useSignInEmail() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation(
     trpc.auth.signInUser.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.auth.getCurrentUser.queryOptions(),
+        );
+        router.push('/');
       },
       onError: (err) => {
         console.error({ err });
@@ -73,11 +78,19 @@ export function useOnboardUser() {
 export function useSignInWithGoogle() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation(
     trpc.auth.signInWithGoogle.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(
+          trpc.auth.getCurrentUser.queryOptions(),
+        );
+        if (data.url) {
+          router.push(data.url as Route);
+        } else {
+          router.push('/');
+        }
       },
       onError: (err) => {
         console.error({ err });
@@ -92,11 +105,19 @@ export function useSignInWithGoogle() {
 export function useSignInWithFacebook() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation(
     trpc.auth.signInWithFacebook.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(
+          trpc.auth.getCurrentUser.queryOptions(),
+        );
+        if (data.url) {
+          router.push(data.url as Route);
+        } else {
+          router.push('/');
+        }
       },
       onError: (err) => {
         console.error({ err });
