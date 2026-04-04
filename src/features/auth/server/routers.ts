@@ -21,6 +21,20 @@ import {
 
 export const authRouter = createTRPCRouter({
   signUpUser: baseProcedure.input(signupSchema).mutation(async ({ input }) => {
+    // Prevent creating a duplicate account when this email already exists.
+    // Existing users should sign in instead, or use the forgot-password flow if needed
+    const userFound = await db.query.user.findFirst({
+      where: eq(userTable.email, input.email),
+    });
+    if (userFound) {
+      logger.error('Attempt to sign up with an email that already exists', {
+        email: input.email,
+      });
+      throw new TRPCError({
+        code: 'CONFLICT',
+        message: 'account exists',
+      });
+    }
     try {
       const response = await auth.api.signUpEmail({
         body: {
@@ -33,13 +47,14 @@ export const authRouter = createTRPCRouter({
       });
 
       if (!response.ok) {
+        // console.log('response place', { response });
         logger.error('Failed to sign up user with email', {
           statusCode: response.status,
           errorMessage: response.statusText,
         });
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'Failed to sign up user.',
+          message: response.statusText || 'Failed to sign up user.',
         });
       }
 
@@ -60,20 +75,33 @@ export const authRouter = createTRPCRouter({
               ? dispatchError.message
               : 'Unknown error',
         });
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Failed to dispatch post-signup event.',
+          cause:
+            dispatchError instanceof Error ? dispatchError : 'Unknown error',
+        });
       }
 
       return responseData;
     } catch (error) {
+      // console.log('catch block->', error);
       if (isAPIError(error)) {
-        // console.log('signup with email->', error.message, error.status);
         logger.error('Failed to sign up user with email', {
           errorMessage: error.message,
           statusCode: error.status,
+          url: '/auth/email-signup',
+        });
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Failed to sign up user. 💣',
+          cause: error,
         });
       }
       throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: 'Failed to sign up user.',
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Unexpected error during sign up. 😬',
+        cause: error instanceof Error ? error : 'Unknown error',
       });
     }
   }),
