@@ -29,6 +29,7 @@ import { Spinner } from '@/components/ui/spinner';
 // import { signIn } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 import { signupSchema, SignupValues } from '@/lib/validators/auth-schemas';
+import { TRPCClientError } from '@trpc/client';
 import { Route } from 'next';
 import {
   useSignInWithFacebook,
@@ -40,18 +41,17 @@ export default function SignupForm({
   className,
   ...props
 }: React.ComponentProps<'form'>) {
-  // const [isSignUpPending, setIsSignUpPending] = useState(false);
-  // const [isPendingGoogleSignUp, setIsGoogleSignUp] = useState(false);
-  // const [isPendingFacebookSignUp, setIsFacebookSignUp] = useState(false);
-
   const router = useRouter();
 
+  // email/password
   const { mutateAsync: signUpWithEmail, isPending: isSignUpWithEmail } =
     useSignUpUser();
+  // social-google
   const {
     mutateAsync: signInWithGoogle,
     isPending: isSignInWithGooglePending,
   } = useSignInWithGoogle();
+  // social-facebook
   const {
     mutateAsync: signInWithFacebook,
     isPending: isSignInWithFacebookPending,
@@ -82,15 +82,17 @@ export default function SignupForm({
   };
 
   const onSubmit: SubmitHandler<SignupValues> = (values) => {
-    // setIsSignUpPending(true);
-    // let signUpSucceeded = false;
-
     toast.promise(signUpWithEmail(values), {
       loading: 'Creating Account...',
       success: ({ user }) => {
         const name = user?.name || 'User';
-        // signUpSucceeded = true;
         form.reset();
+        // shifted inside hook
+        // if (!isSignUpWithEmail) {
+        //   setTimeout(() => {
+        //     router.push('/onboarding');
+        //   }, 1500);
+        // }
         return (
           <p className={'text-sm'}>
             Account created successfully! Welcome, <strong>{name}</strong>!
@@ -98,14 +100,16 @@ export default function SignupForm({
           </p>
         );
       },
-      error: (err) => err.message || 'Failed to create account',
-      finally: () => {
-        // setIsSignUpPending(false);
-        if (!isSignUpWithEmail) {
-          setTimeout(() => {
-            router.push('/onboarding');
-          }, 1500);
+      error: (err) => {
+        const trpcSignUpError = new TRPCClientError(err);
+        if (trpcSignUpError.data?.code === 'BAD_REQUEST') {
+          // expected error, account already exists, so we can guide them to the login page from hook
+          form.reset();
+          return trpcSignUpError.message;
         }
+        form.reset();
+        // for unexpected errors, we can show a generic message but log the details for debugging
+        return err.message || 'Failed to create account';
       },
     });
   };

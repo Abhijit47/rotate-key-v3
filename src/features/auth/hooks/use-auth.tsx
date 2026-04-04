@@ -1,5 +1,6 @@
 import { useTRPC } from '@/trpc/client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 /**
  * Hook to sign up a user
@@ -7,15 +8,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 export function useSignUpUser() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation(
     trpc.auth.signUpUser.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
+        router.push('/onboarding');
       },
       onError: (err) => {
-        console.error({ err });
+        console.error({ err: err.message });
+        router.push('/login');
       },
+      throwOnError: true,
     }),
   );
 }

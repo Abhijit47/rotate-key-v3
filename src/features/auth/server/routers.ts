@@ -21,6 +21,20 @@ import {
 
 export const authRouter = createTRPCRouter({
   signUpUser: baseProcedure.input(signupSchema).mutation(async ({ input }) => {
+    // if user was created via social login. they won't have a password and can use "forgot password" flow to set a password. this is to prevent duplicate accounts with same email.
+    const userFound = await db.query.user.findFirst({
+      where: eq(userTable.email, input.email),
+    });
+    if (userFound) {
+      logger.error('Attempt to sign up with an email that already exists', {
+        email: input.email,
+      });
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message:
+          'An account with this email already exists. Please sign in or use a different email.',
+      });
+    }
     try {
       const response = await auth.api.signUpEmail({
         body: {
@@ -33,14 +47,16 @@ export const authRouter = createTRPCRouter({
       });
 
       if (!response.ok) {
+        console.log('response place', { response });
         logger.error('Failed to sign up user with email', {
           statusCode: response.status,
           errorMessage: response.statusText,
         });
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Failed to sign up user.',
-        });
+        // throw new TRPCError({
+        //   code: 'BAD_REQUEST',
+        //   message: `${response.statusText}:res`,
+        // });
+        throw new Error(`${response.statusText}:res`);
       }
 
       const responseClone = response.clone();
@@ -64,16 +80,23 @@ export const authRouter = createTRPCRouter({
 
       return responseData;
     } catch (error) {
+      // console.log('catch block->', error);
       if (isAPIError(error)) {
-        // console.log('signup with email->', error.message, error.status);
         logger.error('Failed to sign up user with email', {
           errorMessage: error.message,
           statusCode: error.status,
+          url: '/auth/email-signup',
+        });
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Failed to sign up user. cacth error. 💣',
+          cause: error,
         });
       }
       throw new TRPCError({
         code: 'BAD_REQUEST',
-        message: 'Failed to sign up user.',
+        message: 'Unexpected error during sign up. 😬',
+        cause: error instanceof Error ? error : 'Unknown error',
       });
     }
   }),
