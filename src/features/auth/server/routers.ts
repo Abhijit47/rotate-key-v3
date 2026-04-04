@@ -129,7 +129,7 @@ export const authRouter = createTRPCRouter({
           errorMessage: errorData.message || errorData.code || 'Unknown error',
         });
         throw new TRPCError({
-          code: errorData instanceof TRPCError ? errorData.code : 'NOT_FOUND',
+          code: 'UNAUTHORIZED',
           message: errorData.message,
           cause: new Error(errorData.message),
         });
@@ -147,9 +147,8 @@ export const authRouter = createTRPCRouter({
           statusCode: error.status,
         });
         throw new TRPCError({
-          code: error instanceof TRPCError ? error.code : 'BAD_REQUEST',
-          message:
-            error instanceof Error ? error.message : 'Failed to sign in user.',
+          code: 'BAD_REQUEST',
+          message: error.message,
           cause: error.cause ?? error,
         });
       }

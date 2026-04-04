@@ -1,6 +1,6 @@
 import { useTRPC } from '@/trpc/client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Route } from 'next';
+// import { Route } from 'next';
 import { useRouter } from 'next/navigation';
 
 /**
@@ -87,7 +87,8 @@ export function useSignInWithGoogle() {
           trpc.auth.getCurrentUser.queryOptions(),
         );
         if (data.url) {
-          router.push(data.url as Route);
+          // router.push(data.url as Route);
+          window.location.assign(data.url);
         } else {
           router.push('/');
         }
@@ -114,7 +115,8 @@ export function useSignInWithFacebook() {
           trpc.auth.getCurrentUser.queryOptions(),
         );
         if (data.url) {
-          router.push(data.url as Route);
+          // router.push(data.url as Route);
+          window.location.assign(data.url);
         } else {
           router.push('/');
         }

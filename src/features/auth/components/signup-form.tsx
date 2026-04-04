@@ -313,7 +313,7 @@ export default function SignupForm({
               disabled={disabledState}
               onClick={handleGoogleSignIn}>
               <IconBrandGoogle className='mr-2 size-4' />
-              Sign in with Google
+              Continue with Google
             </Button>
             <Button
               variant='outline'
@@ -321,7 +321,7 @@ export default function SignupForm({
               disabled={disabledState}
               onClick={handleFacebookSignIn}>
               <IconBrandFacebook className='mr-2 size-4' />
-              Sign in with Facebook
+              Continue with Facebook
             </Button>
           </Field>
         </FieldGroup>
