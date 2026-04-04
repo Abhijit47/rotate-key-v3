@@ -187,24 +187,46 @@ export const authRouter = createTRPCRouter({
       const { whereAreYouFrom, whereDoYouWantToGo } = input;
       const user = auth.user;
 
-      await db
+      const [updatingUser] = await db
         .update(userTable)
         .set({
           whereAreYouFrom,
           whereDoYouWantToGo,
           isOnboarded: true,
         })
-        .where(eq(userTable.id, user.id));
+        .where(eq(userTable.id, user.id))
+        .returning();
+      if (!updatingUser) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'User not found for onboarding.',
+        });
+      }
 
-      await inngest.send({
-        name: 'user/onboarding.complete',
-        data: {
-          ...user,
-          whereAreYouFrom,
-          whereDoYouWantToGo,
-          isOnboarded: true,
-        },
-      });
+      try {
+        await inngest.send({
+          name: 'user/onboarding.complete',
+          data: {
+            ...user,
+            whereAreYouFrom,
+            whereDoYouWantToGo,
+            isOnboarded: true,
+          },
+        });
+      } catch (dispatchError) {
+        logger.error('Failed to dispatch user/onboarding.complete', {
+          errorMessage:
+            dispatchError instanceof Error
+              ? dispatchError.message
+              : 'Unknown error',
+        });
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Failed to dispatch onboarding complete event.',
+          cause:
+            dispatchError instanceof Error ? dispatchError : 'Unknown error',
+        });
+      }
     }),
 
   signInWithGoogle: baseProcedure.mutation(async () => {

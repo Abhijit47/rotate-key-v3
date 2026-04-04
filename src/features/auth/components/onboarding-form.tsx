@@ -11,7 +11,7 @@ import {
 } from '@/lib/validators/auth-schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PartyPopper } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import {
   Controller,
   SubmitErrorHandler,
@@ -25,7 +25,7 @@ const inputLabelClassName =
   'origin-start text-muted-foreground group-focus-within:text-foreground has-[+input:not(:placeholder-shown)]:text-foreground absolute top-1/2 block -translate-y-1/2 cursor-text px-2 text-sm transition-all group-focus-within:pointer-events-none group-focus-within:top-0 group-focus-within:cursor-default group-focus-within:text-xs group-focus-within:font-medium has-[+input:not(:placeholder-shown)]:pointer-events-none has-[+input:not(:placeholder-shown)]:top-0 has-[+input:not(:placeholder-shown)]:cursor-default has-[+input:not(:placeholder-shown)]:text-xs has-[+input:not(:placeholder-shown)]:font-medium';
 
 export default function OnboardingForm() {
-  const router = useRouter();
+  // const router = useRouter();
 
   const form = useForm<OnboardingValues>({
     resolver: zodResolver(onboardingSchema),
@@ -55,9 +55,6 @@ export default function OnboardingForm() {
     toast.promise(mutateAsync(values), {
       loading: 'Onboarding in progress...',
       success: () => {
-        setTimeout(() => {
-          router.push('/');
-        }, 1000);
         return 'Onboarding successful! Redirecting...';
       },
       error: (error) => {

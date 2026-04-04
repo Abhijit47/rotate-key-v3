@@ -59,11 +59,15 @@ export function useSignInEmail() {
 export function useOnboardUser() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation(
     trpc.auth.onboardingUser.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.auth.getCurrentUser.queryOptions(),
+        );
+        router.push('/');
       },
       onError: (err) => {
         console.error({ err });
