@@ -1,7 +1,7 @@
 import { logger } from '@sentry/nextjs';
 import { TRPCError } from '@trpc/server';
 import { isAPIError } from 'better-auth/api';
-import { eq } from 'drizzle-orm';
+import { DrizzleError, eq } from 'drizzle-orm';
 
 import { db } from '@/drizzle/db';
 import { user as userTable } from '@/drizzle/schema';
@@ -187,23 +187,66 @@ export const authRouter = createTRPCRouter({
       const { whereAreYouFrom, whereDoYouWantToGo } = input;
       const user = auth.user;
 
-      await db
-        .update(userTable)
-        .set({
-          whereAreYouFrom,
-          whereDoYouWantToGo,
-          isOnboarded: true,
-        })
-        .where(eq(userTable.id, user.id));
+      await db.transaction(async (tx) => {
+        try {
+          const [updatingUser] = await tx
+            .update(userTable)
+            .set({
+              whereAreYouFrom,
+              whereDoYouWantToGo,
+              isOnboarded: true,
+            })
+            .where(eq(userTable.id, user.id))
+            .returning();
 
-      await inngest.send({
-        name: 'user/onboarding.complete',
-        data: {
-          ...user,
-          whereAreYouFrom,
-          whereDoYouWantToGo,
-          isOnboarded: true,
-        },
+          if (!updatingUser) {
+            tx.rollback();
+            return;
+          }
+        } catch (error) {
+          if (error instanceof DrizzleError) {
+            logger.error('Database error during user onboarding', {
+              errorMessage: error.message,
+              cause: error.cause,
+            });
+          }
+
+          logger.error('Failed to update user during onboarding', {
+            errorMessage:
+              error instanceof Error ? error.message : 'Unknown error',
+          });
+          tx.rollback();
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to update user during onboarding.',
+            cause: error instanceof Error ? error : 'Unknown error',
+          });
+        }
+
+        try {
+          await inngest.send({
+            name: 'user/onboarding.complete',
+            data: {
+              ...user,
+              whereAreYouFrom,
+              whereDoYouWantToGo,
+              isOnboarded: true,
+            },
+          });
+        } catch (dispatchError) {
+          logger.error('Failed to dispatch user/onboarding.complete', {
+            errorMessage:
+              dispatchError instanceof Error
+                ? dispatchError.message
+                : 'Unknown error',
+          });
+          throw new TRPCError({
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Failed to dispatch onboarding complete event.',
+            cause:
+              dispatchError instanceof Error ? dispatchError : 'Unknown error',
+          });
+        }
       });
     }),
 
