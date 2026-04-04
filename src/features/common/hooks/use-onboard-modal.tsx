@@ -1,3 +1,4 @@
+/*
 import { useSession } from '@/lib/auth-client';
 import { useState } from 'react';
 import OnboardModal from '../components/onboard-modal';
@@ -24,16 +25,19 @@ export const useOnboardModal = () => {
 
   return { modal };
 };
+*/
 
 /**
  * future upgrade
  */
-/**
- import { useEffect, useMemo, useState } from 'react';
+
 import { useSession } from '@/lib/auth-client';
+import { useCallback, useEffect, useState } from 'react';
 import OnboardModal from '../components/onboard-modal';
 
-const SNOOZE_MS = 3 * 60 * 60 * 1000;
+// const SNOOZE_MS = 3 * 60 * 60 * 1000; // 3 hours
+// example testing with 10 seconds
+const SNOOZE_MS = 10 * 1000;
 
 export const useOnboardModal = () => {
   const { data, isPending, isRefetching } = useSession();
@@ -45,12 +49,9 @@ export const useOnboardModal = () => {
   const storageKey = userId ? `onboard-modal:snoozed-until:${userId}` : null;
 
   const shouldPrompt =
-    !!data &&
-    !isPending &&
-    !isRefetching &&
-    !data.user?.isOnboarded;
+    !!data && !isPending && !isRefetching && !data.user?.isOnboarded;
 
-  useEffect(() => {
+  useCallback(() => {
     if (!storageKey) {
       setSnoozedUntil(0);
       return;
@@ -63,6 +64,7 @@ export const useOnboardModal = () => {
 
   useEffect(() => {
     if (!snoozedUntil || snoozedUntil <= now) return;
+    if (typeof window === 'undefined') return;
 
     const timeout = window.setTimeout(() => {
       setNow(Date.now());
@@ -75,6 +77,7 @@ export const useOnboardModal = () => {
 
   const handleOpenChange = (open: boolean) => {
     if (open || !storageKey) return;
+    if (typeof window === 'undefined') return;
 
     const nextSnooze = Date.now() + SNOOZE_MS;
     window.localStorage.setItem(storageKey, String(nextSnooze));
@@ -86,4 +89,3 @@ export const useOnboardModal = () => {
     modal: <OnboardModal open={isOpen} onOpenChange={handleOpenChange} />,
   };
 };
- */
