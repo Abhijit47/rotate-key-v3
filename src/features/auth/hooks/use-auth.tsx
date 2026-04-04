@@ -12,15 +12,19 @@ export function useSignUpUser() {
 
   return useMutation(
     trpc.auth.signUpUser.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.auth.getCurrentUser.queryOptions(),
+        );
         router.push('/onboarding');
       },
       onError: (err) => {
         console.error({ err: err.message });
-        router.push('/login');
+        if (err.data?.code === 'CONFLICT') {
+          router.push('/login');
+          return;
+        }
       },
-      throwOnError: true,
     }),
   );
 }

@@ -21,7 +21,8 @@ import {
 
 export const authRouter = createTRPCRouter({
   signUpUser: baseProcedure.input(signupSchema).mutation(async ({ input }) => {
-    // if user was created via social login. they won't have a password and can use "forgot password" flow to set a password. this is to prevent duplicate accounts with same email.
+    // Prevent creating a duplicate account when this email already exists.
+    // Existing users should sign in instead, or use the forgot-password flow if needed
     const userFound = await db.query.user.findFirst({
       where: eq(userTable.email, input.email),
     });
@@ -30,9 +31,8 @@ export const authRouter = createTRPCRouter({
         email: input.email,
       });
       throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message:
-          'An account with this email already exists. Please sign in or use a different email.',
+        code: 'CONFLICT',
+        message: 'account exists',
       });
     }
     try {
@@ -47,16 +47,15 @@ export const authRouter = createTRPCRouter({
       });
 
       if (!response.ok) {
-        console.log('response place', { response });
+        // console.log('response place', { response });
         logger.error('Failed to sign up user with email', {
           statusCode: response.status,
           errorMessage: response.statusText,
         });
-        // throw new TRPCError({
-        //   code: 'BAD_REQUEST',
-        //   message: `${response.statusText}:res`,
-        // });
-        throw new Error(`${response.statusText}:res`);
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: response.statusText || 'Failed to sign up user.',
+        });
       }
 
       const responseClone = response.clone();
@@ -76,6 +75,12 @@ export const authRouter = createTRPCRouter({
               ? dispatchError.message
               : 'Unknown error',
         });
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Failed to dispatch post-signup event.',
+          cause:
+            dispatchError instanceof Error ? dispatchError : 'Unknown error',
+        });
       }
 
       return responseData;
@@ -89,12 +94,12 @@ export const authRouter = createTRPCRouter({
         });
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'Failed to sign up user. cacth error. 💣',
+          message: 'Failed to sign up user. 💣',
           cause: error,
         });
       }
       throw new TRPCError({
-        code: 'BAD_REQUEST',
+        code: 'INTERNAL_SERVER_ERROR',
         message: 'Unexpected error during sign up. 😬',
         cause: error instanceof Error ? error : 'Unknown error',
       });

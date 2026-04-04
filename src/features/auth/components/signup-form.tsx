@@ -29,7 +29,7 @@ import { Spinner } from '@/components/ui/spinner';
 // import { signIn } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 import { signupSchema, SignupValues } from '@/lib/validators/auth-schemas';
-import { TRPCClientError } from '@trpc/client';
+// import { TRPCClientError } from '@trpc/client';
 import { Route } from 'next';
 import {
   useSignInWithFacebook,
@@ -101,15 +101,19 @@ export default function SignupForm({
         );
       },
       error: (err) => {
-        const trpcSignUpError = new TRPCClientError(err);
-        if (trpcSignUpError.data?.code === 'BAD_REQUEST') {
-          // expected error, account already exists, so we can guide them to the login page from hook
-          form.reset();
-          return trpcSignUpError.message;
-        }
+        // const trpcSignUpError = new TRPCClientError(err);
+        // if (trpcSignUpError.data?.code === 'BAD_REQUEST') {
+        //   // expected error, account already exists, so we can guide them to the login page from hook
+        //   form.reset();
+        //   return trpcSignUpError.message;
+        // }
         form.reset();
+        const errorMessage =
+          err.message === 'account exists'
+            ? 'An account with this email already exists. Please sign in or use a different email.'
+            : 'Failed to create account. Please try again.';
         // for unexpected errors, we can show a generic message but log the details for debugging
-        return err.message || 'Failed to create account';
+        return errorMessage;
       },
     });
   };
