@@ -23,6 +23,7 @@ const handler = c15tInstance({
     disableGeoLocation: isDev,
     openapi: {
       enabled: true,
+      // docsPath: '/api/c15t/openapi.json',
     },
   },
   logger: {

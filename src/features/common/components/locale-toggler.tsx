@@ -5,7 +5,7 @@ import { changeLocaleAction } from '@/lib/actions';
 import { Globe2Icon } from 'lucide-react';
 import { Locale, useLocale } from 'next-intl';
 import { useTransition } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '../../../components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from '../../../components/ui/dropdown-menu';
 
 export default function LocaleToggler() {
   const [isPending, startTransition] = useTransition();

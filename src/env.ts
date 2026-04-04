@@ -29,6 +29,7 @@ export const env = createEnv({
     NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER: z.string().min(1),
     NEXT_PUBLIC_NOVU_SUBSCRIBER_ID: z.string().min(1),
     NEXT_PUBLIC_STREAM_API_KEY: z.string().min(1),
+    NEXT_PUBLIC_ONBOARDING_SNOOZE_DURATION: z.string().min(1),
   },
   // For Next.js >= 13.4.4, you only need to destructure client variables:
   experimental__runtimeEnv: {
@@ -39,5 +40,7 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER,
     NEXT_PUBLIC_NOVU_SUBSCRIBER_ID: process.env.NEXT_PUBLIC_NOVU_SUBSCRIBER_ID,
     NEXT_PUBLIC_STREAM_API_KEY: process.env.NEXT_PUBLIC_STREAM_API_KEY,
+    NEXT_PUBLIC_ONBOARDING_SNOOZE_DURATION:
+      process.env.NEXT_PUBLIC_ONBOARDING_SNOOZE_DURATION,
   },
 });
