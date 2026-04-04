@@ -28,9 +28,13 @@ export default function UserButton() {
   return (
     <>
       {isPending ? (
-        <Skeleton className='size-8 rounded-md' />
+        <li>
+          <Skeleton className='size-8 rounded-md' />
+        </li>
       ) : isRefetching ? (
-        <Skeleton className='size-8 rounded-md' />
+        <li>
+          <Skeleton className='size-8 rounded-md' />
+        </li>
       ) : !data ? (
         <>
           <li>

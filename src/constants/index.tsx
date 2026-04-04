@@ -2,7 +2,7 @@ import { Route } from 'next';
 
 type Navlink = {
   name: string;
-  href: Route;
+  href: Route | `#${string}`;
 };
 
 export const navlinks: Navlink[] = [

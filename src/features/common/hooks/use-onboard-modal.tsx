@@ -31,11 +31,13 @@ export const useOnboardModal = () => {
  * future upgrade
  */
 
+import { env } from '@/env';
 import { useSession } from '@/lib/auth-client';
 import { useCallback, useEffect, useState } from 'react';
 import OnboardModal from '../components/onboard-modal';
 
-// const SNOOZE_MS = 3 * 60 * 60 * 1000; // 3 hours
+const SNOOZE_MS_3HRS = 3 * 60 * 60 * 1000; // 3 hours
+const SNOOZE_MS_15MIN = 15 * 60 * 1000; // 15 minutes
 // example testing with 10 seconds
 const SNOOZE_MS = 10 * 1000;
 
@@ -45,6 +47,13 @@ export const useOnboardModal = () => {
 
   const [snoozedUntil, setSnoozedUntil] = useState<number>(0);
   const [now, setNow] = useState(() => Date.now());
+
+  const SNOOZE_DURATION =
+    env.NEXT_PUBLIC_ONBOARDING_SNOOZE_DURATION === '3h'
+      ? SNOOZE_MS_3HRS
+      : env.NEXT_PUBLIC_ONBOARDING_SNOOZE_DURATION === '15m'
+        ? SNOOZE_MS_15MIN
+        : SNOOZE_MS;
 
   const storageKey = userId ? `onboard-modal:snoozed-until:${userId}` : null;
 
@@ -79,7 +88,7 @@ export const useOnboardModal = () => {
     if (open || !storageKey) return;
     if (typeof window === 'undefined') return;
 
-    const nextSnooze = Date.now() + SNOOZE_MS;
+    const nextSnooze = Date.now() + SNOOZE_DURATION;
     window.localStorage.setItem(storageKey, String(nextSnooze));
     setSnoozedUntil(nextSnooze);
     setNow(Date.now());
