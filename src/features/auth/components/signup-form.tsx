@@ -3,8 +3,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IconBrandFacebook, IconBrandGoogle } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-// import { useState } from 'react';
 import {
   Controller,
   SubmitErrorHandler,
@@ -30,7 +28,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import { signupSchema, SignupValues } from '@/lib/validators/auth-schemas';
 // import { TRPCClientError } from '@trpc/client';
-import { Route } from 'next';
 import {
   useSignInWithFacebook,
   useSignInWithGoogle,
@@ -41,8 +38,6 @@ export default function SignupForm({
   className,
   ...props
 }: React.ComponentProps<'form'>) {
-  const router = useRouter();
-
   // email/password
   const { mutateAsync: signUpWithEmail, isPending: isSignUpWithEmail } =
     useSignUpUser();
@@ -118,69 +113,36 @@ export default function SignupForm({
     });
   };
 
-  function handleGoogleSignUp() {
-    // setIsGoogleSignUp(true);
-    toast.promise(
-      // signIn.social({
-      //   provider: 'google',
-      //   callbackURL: `${window.location.origin}/`,
-      //   newUserCallbackURL: `${window.location.origin}/onboarding`,
-      //   errorCallbackURL: `${window.location.origin}/login?error=google_auth_failed`,
-      //   requestSignUp: true,
-      // }),
-      signInWithGoogle,
-      {
-        loading: 'Redirecting to Google...',
-        success: (data) => {
-          console.log('Google sign-in response client:', data);
-          router.push(data.url as Route);
-          return 'Redirected to Google for authentication';
-        },
-        error: (error) => {
-          return (
-            error?.message || 'Failed to redirect to Google. Please try again.'
-          );
-        },
-        // finally: () => {
-        //   setIsGoogleSignUp(false);
-        // },
+  function handleGoogleSignIn() {
+    toast.promise(signInWithGoogle, {
+      loading: 'Redirecting to Google...',
+      success: () => {
+        // console.log('Google sign-in response client:', data);
+        // router.push(data.url as Route);
+        return 'Redirected to Google for authentication';
       },
-    );
+      error: (error) => {
+        return (
+          error?.message || 'Failed to redirect to Google. Please try again.'
+        );
+      },
+    });
   }
 
-  function handleFacebookSignUp() {
-    // setIsFacebookSignUp(true);
-    toast.promise(
-      // signIn.social({
-      //   provider: 'facebook',
-      //   callbackURL: `${window.location.origin}/`,
-      //   newUserCallbackURL: `${window.location.origin}/onboarding`,
-      //   errorCallbackURL: `${window.location.origin}/login?error=facebook_auth_failed`,
-      //   requestSignUp: true,
-      // }),
-      signInWithFacebook,
-      {
-        loading: 'Redirecting to Facebook...',
-        success: (data) => {
-          router.push(data.url as Route);
-          return 'Redirected to Facebook for authentication';
-        },
-        error: (error) => {
-          return (
-            error?.message ||
-            'Failed to redirect to Facebook. Please try again.'
-          );
-        },
-        // finally: () => {
-        //   setIsFacebookSignUp(false);
-        // },
+  function handleFacebookSignIn() {
+    toast.promise(signInWithFacebook, {
+      loading: 'Redirecting to Facebook...',
+      success: () => {
+        // router.push(data.url as Route);
+        return 'Redirected to Facebook for authentication';
       },
-    );
+      error: (error) => {
+        return (
+          error?.message || 'Failed to redirect to Facebook. Please try again.'
+        );
+      },
+    });
   }
-
-  // const disabledState =
-  //   isPendingGoogleSignUp || isPendingFacebookSignUp || isSignUpPending;
-
   const disabledState =
     isSignUpWithEmail ||
     isSignInWithGooglePending ||
@@ -349,17 +311,17 @@ export default function SignupForm({
               variant='outline'
               type='button'
               disabled={disabledState}
-              onClick={handleGoogleSignUp}>
+              onClick={handleGoogleSignIn}>
               <IconBrandGoogle className='mr-2 size-4' />
-              Sign up with Google
+              Continue with Google
             </Button>
             <Button
               variant='outline'
               type='button'
               disabled={disabledState}
-              onClick={handleFacebookSignUp}>
+              onClick={handleFacebookSignIn}>
               <IconBrandFacebook className='mr-2 size-4' />
-              Sign up with Facebook
+              Continue with Facebook
             </Button>
           </Field>
         </FieldGroup>

@@ -11,13 +11,11 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import { signIn } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 import { loginSchema, LoginValues } from '@/lib/validators/auth-schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IconBrandFacebook, IconBrandGoogle } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useState, useTransition } from 'react';
 import {
   Controller,
   SubmitErrorHandler,
@@ -25,14 +23,29 @@ import {
   useForm,
 } from 'react-hook-form';
 import { toast } from 'sonner';
+import {
+  useSignInEmail,
+  useSignInWithFacebook,
+  useSignInWithGoogle,
+} from '../hooks/use-auth';
 
 export default function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'form'>) {
-  const [isSignInPending, startSignInTransition] = useTransition();
-  const [isPendingGoogleSignIn, setIsGoogleSignIn] = useState(false);
-  const [isPendingFacebookSignIn, setIsFacebookSignIn] = useState(false);
+  // email-password
+  const { mutateAsync: signInWithEmail, isPending: isSignInWithEmail } =
+    useSignInEmail();
+  // social-google
+  const {
+    mutateAsync: signInWithGoogle,
+    isPending: isSignInWithGooglePending,
+  } = useSignInWithGoogle();
+  // social-facebook
+  const {
+    mutateAsync: signInWithFacebook,
+    isPending: isSignInWithFacebookPending,
+  } = useSignInWithFacebook();
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -58,90 +71,69 @@ export default function LoginForm({
 
   const onSubmit: SubmitHandler<LoginValues> = (values) => {
     // console.log('Form submitted successfully with data:', data);
-    startSignInTransition(async () => {
-      try {
-        const result = await signIn.email({
-          email: values.email,
-          password: values.password,
-          rememberMe: values.rememberMe,
-          callbackURL: `${window.location.origin}/`,
-        });
-        if (result.error) {
-          toast.error(result.error.message, {
-            duration: 3000,
-          });
-          return;
-        }
-        toast.success('Login successful! Redirecting...', {
-          duration: 3000,
-        });
+    toast.promise(signInWithEmail(values), {
+      loading: 'Logging in...',
+      success: ({ user }) => {
+        const name = user?.name || 'User';
         form.reset();
-      } catch (error) {
-        console.error('Login error:', error);
-        toast.error('An unexpected error occurred. Please try again.', {
-          duration: 3000,
-        });
-      }
+        return (
+          <p className={'text-sm'}>
+            Login successful! Welcome back, <strong>{name}</strong>!
+            Redirecting...
+          </p>
+        );
+      },
+      error: (err) => {
+        console.warn('Login error:', err);
+        form.reset();
+        // const errorMessage =
+        //   err.message === 'account exists'
+        //     ? 'An account with this email already exists. Please sign in or use a different email.'
+        //     : 'Failed to create account. Please try again.';
+        // for unexpected errors, we can show a generic message but log the details for debugging
+        return err.message || 'An unexpected error occurred. Please try again.';
+      },
     });
   };
 
   function handleGoogleSignIn() {
-    setIsGoogleSignIn(true);
-    toast.promise(
-      signIn.social({
-        provider: 'google',
-        callbackURL: `${window.location.origin}/`,
-        newUserCallbackURL: `${window.location.origin}/onboarding`,
-        errorCallbackURL: `${window.location.origin}/login?error=google_auth_failed`,
-        requestSignUp: true,
-      }),
-      {
-        loading: 'Redirecting to Google...',
-        success: () => {
-          return 'Redirected to Google for authentication';
-        },
-        error: (error) => {
-          return (
-            error?.message || 'Failed to redirect to Google. Please try again.'
-          );
-        },
-        finally: () => {
-          setIsGoogleSignIn(false);
-        },
+    toast.promise(signInWithGoogle, {
+      loading: 'Redirecting to Google...',
+      success: () => {
+        // console.log('Google sign-in response client:', data);
+        // router.push(data.url as Route);
+        return 'Redirected to Google for authentication';
       },
-    );
+      error: (error) => {
+        return (
+          error?.message || 'Failed to redirect to Google. Please try again.'
+        );
+      },
+    });
   }
 
   function handleFacebookSignIn() {
-    setIsFacebookSignIn(true);
-    toast.promise(
-      signIn.social({
-        provider: 'facebook',
-        callbackURL: `${window.location.origin}/`,
-        newUserCallbackURL: `${window.location.origin}/onboarding`,
-        errorCallbackURL: `${window.location.origin}/login?error=facebook_auth_failed`,
-        requestSignUp: true,
-      }),
-      {
-        loading: 'Redirecting to Facebook...',
-        success: () => {
-          return 'Redirected to Facebook for authentication';
-        },
-        error: (error) => {
-          return (
-            error?.message ||
-            'Failed to redirect to Facebook. Please try again.'
-          );
-        },
-        finally: () => {
-          setIsFacebookSignIn(false);
-        },
+    toast.promise(signInWithFacebook, {
+      loading: 'Redirecting to Facebook...',
+      success: () => {
+        // router.push(data.url as Route);
+        return 'Redirected to Facebook for authentication';
       },
-    );
+      error: (error) => {
+        return (
+          error?.message || 'Failed to redirect to Facebook. Please try again.'
+        );
+      },
+    });
   }
 
+  // const disabledState =
+  //   isPendingGoogleSignIn || isPendingFacebookSignIn || isSignInPending;
+
   const disabledState =
-    isPendingGoogleSignIn || isPendingFacebookSignIn || isSignInPending;
+    isSignInWithEmail ||
+    isSignInWithGooglePending ||
+    isSignInWithFacebookPending;
 
   return (
     <form
@@ -225,8 +217,8 @@ export default function LoginForm({
           />
 
           <Field>
-            <Button type='submit' disabled={isSignInPending}>
-              {isSignInPending ? (
+            <Button type='submit' disabled={disabledState}>
+              {disabledState ? (
                 <span className={'inline-flex items-center gap-2'}>
                   Logging in...
                   <Spinner />
@@ -246,16 +238,34 @@ export default function LoginForm({
                 type='button'
                 disabled={disabledState}
                 onClick={handleGoogleSignIn}>
-                <IconBrandGoogle className='mr-2 size-4' />
-                Log in with Google
+                {disabledState ? (
+                  <span className={'inline-flex items-center gap-2'}>
+                    Logging in...
+                    <Spinner />
+                  </span>
+                ) : (
+                  <span className={'inline-flex items-center gap-2'}>
+                    <IconBrandGoogle className='mr-2 size-4' />
+                    Log in with Google
+                  </span>
+                )}
               </Button>
               <Button
                 variant='outline'
                 type='button'
                 disabled={disabledState}
                 onClick={handleFacebookSignIn}>
-                <IconBrandFacebook className='mr-2 size-4' />
-                Log in with Facebook
+                {disabledState ? (
+                  <span className={'inline-flex items-center gap-2'}>
+                    Logging in...
+                    <Spinner />
+                  </span>
+                ) : (
+                  <span className={'inline-flex items-center gap-2'}>
+                    <IconBrandFacebook className='mr-2 size-4' />
+                    Log in with Facebook
+                  </span>
+                )}
               </Button>
             </Field>
           </FieldGroup>
