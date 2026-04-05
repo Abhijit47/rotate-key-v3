@@ -35,13 +35,6 @@ import {
   useUserProperty,
 } from '../hooks/use-property';
 
-function prettifyText(text: string) {
-  return text
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
 import {
   Empty,
   EmptyContent,
@@ -50,6 +43,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
+import { useSession } from '@/lib/auth-client';
+
+function prettifyText(text: string) {
+  return text
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
 export function EmptyPropertiesState() {
   return (
@@ -88,6 +89,11 @@ export function EmptyPropertiesState() {
 export function PropertyListings() {
   const { data: properties } = usePublicProperties();
   const { mutateAsync, isPending } = useDeleteProperty();
+  const { data } = useSession();
+
+  // const hasUserProperty = data?.user
+  //   ? properties?.some((property) => property.authorId === data.user.id)
+  //   : false;
 
   function handleDeleteProperty(propertyId: string) {
     if (confirm('Are you sure you want to delete this property?')) {
@@ -148,24 +154,29 @@ export function PropertyListings() {
                 ))}
               </CardContent>
               <CardFooter className={'px-4 justify-end mt-auto'}>
-                <Link
-                  prefetch={'auto'}
-                  href={`/property/${property.id}/update`}
-                  className={buttonVariants({
-                    variant: 'outline',
-                    size: 'sm',
-                    className: 'mr-4',
-                  })}>
-                  Edit Details <PenLineIcon className={'size-4'} />
-                </Link>
-                <Button
-                  variant={'destructive'}
-                  size={'sm'}
-                  className={'mr-4'}
-                  onClick={() => handleDeleteProperty(property.id)}
-                  disabled={isPending}>
-                  {isPending ? 'Deleting...' : 'Delete'}
-                </Button>
+                {property.authorId === data?.user?.id ? (
+                  <>
+                    <Link
+                      prefetch={'auto'}
+                      href={`/property/${property.id}/update`}
+                      className={buttonVariants({
+                        variant: 'outline',
+                        size: 'sm',
+                        className: 'mr-4',
+                      })}>
+                      Edit Details <PenLineIcon className={'size-4'} />
+                    </Link>
+
+                    <Button
+                      variant={'destructive'}
+                      size={'sm'}
+                      className={'mr-4'}
+                      onClick={() => handleDeleteProperty(property.id)}
+                      disabled={isPending}>
+                      {isPending ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </>
+                ) : null}
                 <Link
                   prefetch={'auto'}
                   href={`/property/${property.id}`}

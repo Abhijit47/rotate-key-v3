@@ -70,7 +70,7 @@ const images = [
 ];
 
 function getRandomImages(count: number) {
-  const shuffled = images.sort(() => 0.5 - Math.random());
+  const shuffled = [...images].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }
 
@@ -278,9 +278,21 @@ export default function UpdatePropertyForm({
                       <InputGroup>
                         <InputGroupTextarea
                           id='textarea-code-32'
-                          placeholder="console.log('Hello, world!');"
+                          placeholder='Enter image URLs, one per line'
                           className='min-h-50'
-                          {...field}
+                          // {...field}
+
+                          value={field.value?.join('\n') ?? ''}
+                          onChange={(e) => {
+                            const urls = e.target.value
+                              .split('\n')
+                              .map((url) => url.trim())
+                              .filter(Boolean);
+                            field.onChange(urls);
+                          }}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
                         />
                         <InputGroupAddon align='block-end' className='border-t'>
                           <InputGroupText>
@@ -297,6 +309,7 @@ export default function UpdatePropertyForm({
                           <InputGroupButton
                             className='ml-auto'
                             size='icon-xs'
+                            type='button'
                             onClick={() => {
                               const randomImages = getRandomImages(3);
                               field.onChange(randomImages);

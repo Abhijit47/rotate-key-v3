@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+// import { relations } from 'drizzle-orm';
 import { jsonb, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { user } from './auth';
 
@@ -22,12 +22,12 @@ export const property = pgTable('property', {
     .notNull(),
 });
 
-export const propertyRelations = relations(property, ({ one }) => ({
-  author: one(user, {
-    fields: [property.authorId],
-    references: [user.id],
-  }),
-}));
+// export const propertyRelations = relations(property, ({ one }) => ({
+//   author: one(user, {
+//     fields: [property.authorId],
+//     references: [user.id],
+//   }),
+// }));
 
-export type InsertProperty = typeof property.$inferSelect;
+export type InsertProperty = typeof property.$inferInsert;
 export type SelectProperty = typeof property.$inferSelect;

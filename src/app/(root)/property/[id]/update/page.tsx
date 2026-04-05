@@ -1,5 +1,6 @@
 import UpdatePropertyForm from '@/features/property/components/update-property-form';
 import { prefetchUserProperty } from '@/features/property/server/prefetch';
+import { requireAuth } from '@/lib/requireAuth';
 import { HydrateClient } from '@/trpc/server';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
@@ -8,6 +9,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 export default async function UpdateProperty(
   props: PageProps<'/property/[id]/update'>,
 ) {
+  await requireAuth();
   const propertyId = (await props.params).id;
   if (!propertyId) {
     notFound();

@@ -4,6 +4,7 @@ import { db } from '@/drizzle/db';
 import { property } from '@/drizzle/schema';
 import {
   deletePropertySchema,
+  propertyIdSchema,
   propertySchema,
   updatePropertySchema,
 } from '@/lib/validators/property-schema';
@@ -75,6 +76,9 @@ export const propertyRouter = createTRPCRouter({
           .returning();
         return updatedProperty;
       } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         console.error('Error updating property:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -109,55 +113,44 @@ export const propertyRouter = createTRPCRouter({
       return deleted;
     }),
 
-  getPrivateProperties: protectedProcedure
-    .input(propertySchema)
-    .query(async ({ ctx }) => {
-      const { user } = ctx.auth;
+  getPrivateProperties: protectedProcedure.query(async ({ ctx }) => {
+    const { user } = ctx.auth;
 
-      // get properties that associated with the user
-      const [properties] = await db.query.property.findMany({
-        where: eq(property.authorId, user.id),
-        orderBy: (property, { desc }) => desc(property.createdAt),
-      });
+    // get properties that associated with the user
+    const properties = await db.query.property.findMany({
+      where: eq(property.authorId, user.id),
+      orderBy: (property, { desc }) => desc(property.createdAt),
+    });
 
-      if (!properties) {
-        return [];
-      }
+    if (properties.length === 0) {
+      return [];
+    }
 
-      return properties;
-    }),
+    return properties;
+  }),
+
+  // Every card in the public listings page links here, but this route prefetches and renders getUserProperty semantics. Even after the server starts honoring id, non-owners still will not be able to open someone else’s listing from the feed. This page needs a listing-by-id query; keep getUserProperty for owner-only edit flows.
 
   getUserProperty: protectedProcedure
-    .input(deletePropertySchema)
-    .query(async ({ ctx }) => {
+    .input(propertyIdSchema)
+    .query(async ({ input, ctx }) => {
       const { user } = ctx.auth;
 
+      const { id } = input;
+
       // get properties that associated with the user or not within the user
-      const myProperty = await db.query.property.findFirst({
-        // where: o(eq(property.authorId, user.id)),
-        where(fields, operators) {
-          const { eq } = operators;
-
-          if (!user.id) {
-            // return eq(fields.authorId, undefined);
-            throw new TRPCError({
-              code: 'UNAUTHORIZED',
-              message: 'User not authenticated',
-            });
-          }
-
-          return eq(fields.authorId, user.id);
-        },
+      const removeProperty = await db.query.property.findFirst({
+        where: and(eq(property.id, id), eq(property.authorId, user.id)),
       });
 
-      if (!myProperty) {
+      if (!removeProperty) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Property not found',
         });
       }
 
-      return myProperty;
+      return removeProperty;
     }),
 
   getPublicProperties: baseProcedure.query(async () => {

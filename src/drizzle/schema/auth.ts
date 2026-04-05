@@ -1,5 +1,5 @@
 import { plans, roles } from '@/constants/db-constants';
-import { relations, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   index,
@@ -10,7 +10,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { property } from './property';
+// import { property } from './property';
 
 export const rolesEnum = pgEnum('role', roles);
 export const plansEnum = pgEnum('plan', plans);
@@ -111,25 +111,25 @@ export const verification = pgTable(
   (table) => [index('verification_identifier_idx').on(table.identifier)],
 );
 
-export const userRelations = relations(user, ({ many }) => ({
-  sessions: many(session),
-  accounts: many(account),
-  properties: many(property),
-}));
+// export const userRelations = relations(user, ({ many }) => ({
+//   sessions: many(session),
+//   accounts: many(account),
+//   properties: many(property),
+// }));
 
-export const sessionRelations = relations(session, ({ one }) => ({
-  user: one(user, {
-    fields: [session.userId],
-    references: [user.id],
-  }),
-}));
+// export const sessionRelations = relations(session, ({ one }) => ({
+//   user: one(user, {
+//     fields: [session.userId],
+//     references: [user.id],
+//   }),
+// }));
 
-export const accountRelations = relations(account, ({ one }) => ({
-  user: one(user, {
-    fields: [account.userId],
-    references: [user.id],
-  }),
-}));
+// export const accountRelations = relations(account, ({ one }) => ({
+//   user: one(user, {
+//     fields: [account.userId],
+//     references: [user.id],
+//   }),
+// }));
 
 export type InsertUser = typeof user.$inferInsert;
 export type SelectUser = typeof user.$inferSelect;
