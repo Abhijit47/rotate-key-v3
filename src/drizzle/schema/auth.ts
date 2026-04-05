@@ -10,6 +10,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
+import { property } from './property';
 
 export const rolesEnum = pgEnum('role', roles);
 export const plansEnum = pgEnum('plan', plans);
@@ -113,6 +114,7 @@ export const verification = pgTable(
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  properties: many(property),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({

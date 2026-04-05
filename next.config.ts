@@ -32,6 +32,14 @@ const nextConfig: NextConfig = {
         // search is omitted, so ?v=123, ?t=456, or no query string are all allowed
       },
     ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
 
   async headers() {

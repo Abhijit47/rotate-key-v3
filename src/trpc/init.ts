@@ -39,3 +39,29 @@ export const protectedProcedure = baseProcedure.use(
     return next({ ctx: { ...ctx, auth: session } });
   }),
 );
+// future add on: check permissions middleware
+// export const permissionsProcedure = protectedProcedure.use(
+//   t.middleware(async ({ ctx, next }) => {
+//     const session = await ctx;
+
+//     if (!session?.user) {
+//       throw new TRPCError({
+//         code: 'UNAUTHORIZED',
+//         message: 'You must be logged in to access this resource.',
+//       });
+//     }
+
+//     // check permissions here if needed
+//     const data = await checkUserPermissions(session.user.id);
+//     console.log({ data });
+
+//     if (!data.success) {
+//       throw new TRPCError({
+//         code: 'FORBIDDEN',
+//         message: 'You do not have permission to access this resource.',
+//       });
+//     }
+
+//     return next({ ctx: { ...ctx, auth: session } });
+//   }),
+// );
