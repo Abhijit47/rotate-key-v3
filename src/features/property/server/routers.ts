@@ -92,25 +92,36 @@ export const propertyRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { user } = ctx.auth;
 
-      // delete property that associated with the user
-      const { id } = input;
+      try {
+        // delete property that associated with the user
+        const { id } = input;
 
-      const existingProperty = await db.query.property.findFirst({
-        where: and(eq(property.id, id), eq(property.authorId, user.id)),
-      });
+        const existingProperty = await db.query.property.findFirst({
+          where: and(eq(property.id, id), eq(property.authorId, user.id)),
+        });
 
-      if (!existingProperty) {
+        if (!existingProperty) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Property not found',
+          });
+        }
+
+        const deleted = await db
+          .delete(property)
+          .where(and(eq(property.id, id), eq(property.authorId, user.id)))
+          .returning();
+        return deleted;
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        console.error('Error deleting property:', error);
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Property not found',
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'An error occurred while deleting the property.',
         });
       }
-
-      const deleted = await db
-        .delete(property)
-        .where(and(eq(property.id, id), eq(property.authorId, user.id)))
-        .returning();
-      return deleted;
     }),
 
   getPrivateProperties: protectedProcedure.query(async ({ ctx }) => {
