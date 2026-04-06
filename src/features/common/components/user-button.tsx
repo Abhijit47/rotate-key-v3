@@ -118,25 +118,25 @@ export default function UserButton() {
                   <DropdownMenuItem asChild>
                     <Link href={'/property/new'} className='w-full'>
                       Create Property
-                      <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                      <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href={'/swapings'} className='w-full' prefetch>
                       Swapings
-                      <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                      <DropdownMenuShortcut>⌘W</DropdownMenuShortcut>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href={'#'} className='w-full'>
                       Favourite Properties
-                      <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                      <DropdownMenuShortcut>⌘F</DropdownMenuShortcut>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href={'#'} className='w-full'>
                       My Properties
-                      <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                      <DropdownMenuShortcut>⌘M</DropdownMenuShortcut>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>Team</DropdownMenuItem>

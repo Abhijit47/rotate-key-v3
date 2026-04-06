@@ -99,7 +99,7 @@ export const adminRouter = createTRPCRouter({
         });
       }
 
-      return user;
+      return existingUser;
     }),
 
   deleteUsers: protectedProcedure.mutation(async ({ ctx }) => {
@@ -123,13 +123,14 @@ export const adminRouter = createTRPCRouter({
 
     const oldUsers = await db.query.user.findMany({});
 
-    const res = await Promise.all(
+    await Promise.all(
       oldUsers.map(async (oldUser) => {
         await db.delete(user).where(eq(user.id, oldUser.id));
+        return oldUser.id;
       }),
     );
 
-    return res;
+    return { deletedCount: oldUsers.length };
   }),
 
   deleteUser: protectedProcedure

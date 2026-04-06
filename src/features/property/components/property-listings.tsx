@@ -138,10 +138,23 @@ export function PropertyListings() {
                   {property.streetAddress}
                 </CardDescription>
                 <CardAction className={'self-center space-x-2'}>
-                  <Button variant={'destructive'} size={'icon-xs'}>
+                  {/* TODO: Added in future */}
+                  <Button
+                    variant={'destructive'}
+                    size={'icon-xs'}
+                    disabled
+                    aria-label={'Save property (currently unavailable)'}
+                    title={'Save property (currently unavailable)'}>
                     <HeartIcon className={'size-4'} />
                   </Button>
-                  <Button variant={'default'} size={'icon-xs'}>
+
+                  {/* TODO: Added in future */}
+                  <Button
+                    variant={'default'}
+                    size={'icon-xs'}
+                    disabled
+                    aria-label={'Like property (currently unavailable)'}
+                    title={'Like property (currently unavailable)'}>
                     <ThumbsUpIcon className={'size-4 text-white'} />
                   </Button>
                 </CardAction>

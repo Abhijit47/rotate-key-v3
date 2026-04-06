@@ -30,7 +30,7 @@ export const moderator = ac.newRole({
 
 export const user = ac.newRole({
   property: ['create', 'share', 'update', 'get', 'list', 'like', 'save'],
-  user: ['create', 'get', 'update', 'set-password'],
+  user: ['get', 'update', 'set-password'],
 });
 
 // export const check1 = await auth.api.userHasPermission({
