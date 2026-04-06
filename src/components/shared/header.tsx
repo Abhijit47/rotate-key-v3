@@ -28,6 +28,7 @@ export default function Header() {
             <li key={link.name}>
               <Link
                 href={link.href}
+                prefetch={link.href.startsWith('/swapings') ? true : undefined}
                 className={buttonVariants({ variant: 'ghost' })}>
                 {link.name}
               </Link>

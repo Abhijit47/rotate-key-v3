@@ -2,11 +2,12 @@
 
 import { IconHomePlus } from '@tabler/icons-react';
 import {
+  ArrowUpRightFromSquareIcon,
   ArrowUpRightIcon,
-  LucideArrowUpRightFromSquare,
-  LucideCheckCheck,
-  LucideThumbsUp,
+  CheckCheckIcon,
+  HeartIcon,
   PenLineIcon,
+  ThumbsUpIcon,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -100,7 +101,7 @@ export function PropertyListings() {
       toast.promise(mutateAsync({ id: propertyId }), {
         loading: 'Deleting property...',
         success: 'Property deleted successfully!',
-        error: 'Failed to delete property.',
+        error: (err) => err.message,
       });
     }
   }
@@ -136,9 +137,25 @@ export function PropertyListings() {
                 <CardDescription className={'capitalize'}>
                   {property.streetAddress}
                 </CardDescription>
-                <CardAction>
-                  <Button variant={'outline'} size={'icon-xs'}>
-                    <LucideThumbsUp className={'size-4'} />
+                <CardAction className={'self-center space-x-2'}>
+                  {/* TODO: Added in future */}
+                  <Button
+                    variant={'destructive'}
+                    size={'icon-xs'}
+                    disabled
+                    aria-label={'Save property (currently unavailable)'}
+                    title={'Save property (currently unavailable)'}>
+                    <HeartIcon className={'size-4'} />
+                  </Button>
+
+                  {/* TODO: Added in future */}
+                  <Button
+                    variant={'default'}
+                    size={'icon-xs'}
+                    disabled
+                    aria-label={'Like property (currently unavailable)'}
+                    title={'Like property (currently unavailable)'}>
+                    <ThumbsUpIcon className={'size-4 text-white'} />
                   </Button>
                 </CardAction>
               </CardHeader>
@@ -147,7 +164,7 @@ export function PropertyListings() {
                 {property.amenities.map((amenity, index) => (
                   <p key={index} className={'text-sm text-muted-foreground'}>
                     <span className={'inline-flex items-center gap-1'}>
-                      <LucideCheckCheck className={'size-4'} />
+                      <CheckCheckIcon className={'size-4'} />
                       {prettifyText(amenity)}
                     </span>
                   </p>
@@ -185,7 +202,7 @@ export function PropertyListings() {
                     size: 'sm',
                   })}>
                   View Details{' '}
-                  <LucideArrowUpRightFromSquare className={'size-4'} />
+                  <ArrowUpRightFromSquareIcon className={'size-4'} />
                 </Link>
               </CardFooter>
             </Card>

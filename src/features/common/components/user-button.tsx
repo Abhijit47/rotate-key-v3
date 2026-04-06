@@ -6,16 +6,17 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
+  // DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
+  // DropdownMenuSub,
+  // DropdownMenuSubContent,
+  // DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { signOut, useSession } from '@/lib/auth-client';
@@ -89,25 +90,57 @@ export default function UserButton() {
               <DropdownMenuContent className='min-w-60 w-full' align='end'>
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>
-                    {data.user.name} Account
+                    <Badge variant='outline' className='capitalize'>
+                      {data.user.role}
+                    </Badge>
                   </DropdownMenuLabel>
-                  <DropdownMenuItem>
-                    Profile
-                    <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                  <DropdownMenuItem asChild>
+                    <Link href={'#'} className='w-full'>
+                      Profile
+                      <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    Billing
-                    <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+                  <DropdownMenuItem asChild>
+                    <Link href={'#'} className='w-full'>
+                      Billing
+                      <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    Settings
-                    <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                  <DropdownMenuItem asChild>
+                    <Link href={'#'} className='w-full'>
+                      Settings
+                      <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href={'/property/new'} className='w-full'>
+                      Create Property
+                      <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href={'/swapings'} className='w-full' prefetch>
+                      Swapings
+                      <DropdownMenuShortcut>⌘W</DropdownMenuShortcut>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href={'#'} className='w-full'>
+                      Favourite Properties
+                      <DropdownMenuShortcut>⌘F</DropdownMenuShortcut>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href={'#'} className='w-full'>
+                      My Properties
+                      <DropdownMenuShortcut>⌘M</DropdownMenuShortcut>
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem>Team</DropdownMenuItem>
-                  <DropdownMenuSub>
+                  {/* <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
                       Invite users
                     </DropdownMenuSubTrigger>
@@ -119,18 +152,18 @@ export default function UserButton() {
                         <DropdownMenuItem>More...</DropdownMenuItem>
                       </DropdownMenuSubContent>
                     </DropdownMenuPortal>
-                  </DropdownMenuSub>
-                  <DropdownMenuItem>
+                  </DropdownMenuSub> */}
+                  {/* <DropdownMenuItem>
                     New Team
                     <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
+                {/* <DropdownMenuSeparator /> */}
+                {/* <DropdownMenuGroup>
                   <DropdownMenuItem>GitHub</DropdownMenuItem>
                   <DropdownMenuItem>Support</DropdownMenuItem>
                   <DropdownMenuItem disabled>API</DropdownMenuItem>
-                </DropdownMenuGroup>
+                </DropdownMenuGroup> */}
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem
