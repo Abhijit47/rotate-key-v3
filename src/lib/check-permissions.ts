@@ -7,6 +7,7 @@ export const checkAdminPermissions = cache(async (userId: string) => {
   const result = await auth.api.userHasPermission({
     body: {
       userId: userId,
+      // role: 'admin',
       permissions: {
         user: [
           'create',
@@ -28,14 +29,28 @@ export const checkAdminPermissions = cache(async (userId: string) => {
   return result;
 });
 
+export const checkModeratorPermissions = cache(async (userId: string) => {
+  const result = await auth.api.userHasPermission({
+    body: {
+      userId: userId,
+      // role: 'moderator',
+      permissions: {
+        user: ['ban'],
+        property: ['get', 'list', 'update'],
+      },
+    },
+  });
+  return result;
+});
+
 export const checkUserPermissions = cache(async (userId: string) => {
   const result = await auth.api.userHasPermission({
     body: {
       userId: userId,
-      role: 'user',
+      // role: 'user',
       permissions: {
-        user: ['get', 'update'],
-        property: ['create', 'share', 'update', 'delete', 'get', 'list'],
+        // user: ['create', 'get', 'update'],
+        property: ['create', 'share', 'update', 'get', 'list'],
       },
     },
   });

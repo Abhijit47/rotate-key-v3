@@ -3,7 +3,16 @@ import { adminAc, defaultStatements } from 'better-auth/plugins/admin/access';
 
 export const statement = {
   ...defaultStatements,
-  property: ['create', 'share', 'update', 'delete', 'get', 'list'],
+  property: [
+    'create',
+    'share',
+    'update',
+    'delete',
+    'get',
+    'list',
+    'like',
+    'save',
+  ],
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -20,7 +29,8 @@ export const moderator = ac.newRole({
 });
 
 export const user = ac.newRole({
-  property: ['create', 'share', 'update', 'get', 'list'],
+  property: ['create', 'share', 'update', 'get', 'list', 'like', 'save'],
+  user: ['create', 'get', 'update', 'set-password'],
 });
 
 // export const check1 = await auth.api.userHasPermission({

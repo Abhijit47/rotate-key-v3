@@ -2,6 +2,7 @@ import { and, eq } from 'drizzle-orm';
 
 import { db } from '@/drizzle/db';
 import { property } from '@/drizzle/schema';
+import { auth } from '@/lib/auth';
 import {
   deletePropertySchema,
   propertyIdSchema,
@@ -21,6 +22,21 @@ export const propertyRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { user } = ctx.auth;
       try {
+        const result = await auth.api.userHasPermission({
+          body: {
+            userId: user.id,
+            permissions: {
+              property: ['create'], // This must match the structure in your access control
+            },
+          },
+        });
+
+        if (!result.success) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: `You do not have permission to perform this action!`,
+          });
+        }
         const [newProperty] = await db
           .insert(property)
           .values({
@@ -47,6 +63,21 @@ export const propertyRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { user } = ctx.auth;
       try {
+        const result = await auth.api.userHasPermission({
+          body: {
+            userId: user.id,
+            permissions: {
+              property: ['update'], // This must match the structure in your access control
+            },
+          },
+        });
+
+        if (!result.success) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: `You do not have permission to perform this action!`,
+          });
+        }
         // update property that associated with the user
         const { id, ...updateData } = input;
 
@@ -93,6 +124,22 @@ export const propertyRouter = createTRPCRouter({
       const { user } = ctx.auth;
 
       try {
+        const result = await auth.api.userHasPermission({
+          body: {
+            userId: user.id,
+            permissions: {
+              property: ['delete'], // This must match the structure in your access control
+            },
+          },
+        });
+
+        if (!result.success) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: `You do not have permission to perform this action!`,
+          });
+        }
+
         // delete property that associated with the user
         const { id } = input;
 
