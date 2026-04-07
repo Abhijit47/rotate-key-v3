@@ -1,4 +1,4 @@
-import { logger } from '@sentry/nextjs';
+import * as Sentry from '@sentry/nextjs';
 import { headers } from 'next/headers';
 import { cache } from 'react';
 import superjson from 'superjson';
@@ -53,9 +53,11 @@ export const premiumProcedure = protectedProcedure.use(
         externalId: ctx.auth.user.id,
       });
     } catch (error) {
-      logger.error('Error fetching customer subscription status', {
-        error,
-        userId: ctx.auth.user.id,
+      Sentry.captureException(error, {
+        extra: {
+          context: 'Error fetching customer subscription status',
+          userId: ctx.auth.user.id,
+        },
       });
       throw new TRPCError({
         code: 'SERVICE_UNAVAILABLE',
