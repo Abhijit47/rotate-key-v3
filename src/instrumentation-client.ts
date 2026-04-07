@@ -7,6 +7,16 @@ import { env } from './env';
 
 const isDev = process.env.NODE_ENV === 'development';
 
+function feedbackPlugin() {
+  return Sentry.feedbackIntegration({
+    useSentryUser: {
+      name: 'fullName',
+      email: 'email',
+    },
+    colorScheme: 'system',
+  });
+}
+
 Sentry.init({
   dsn: env.NEXT_PUBLIC_SENTRY_DSN,
 
@@ -15,13 +25,7 @@ Sentry.init({
     Sentry.replayIntegration(),
     Sentry.browserTracingIntegration(),
     Sentry.browserProfilingIntegration(),
-    Sentry.feedbackIntegration({
-      useSentryUser: {
-        name: 'fullName',
-        email: 'email',
-      },
-      colorScheme: 'system',
-    }),
+    ...(!isDev ? [feedbackPlugin()] : []),
   ],
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.

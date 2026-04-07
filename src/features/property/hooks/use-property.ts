@@ -34,6 +34,9 @@ export function useCreateProperty() {
       },
       onError: (err) => {
         console.error({ err });
+        // if (err.data?.code === 'FORBIDDEN') {
+        //   toast.error(err.message);
+        // }
       },
     }),
   );

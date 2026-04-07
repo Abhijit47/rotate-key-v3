@@ -46,6 +46,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useUpgradeModal } from '@/features/common/hooks/use-upgrade-modal';
 import { useCreateProperty } from '../hooks/use-property';
 
 const propertyTypes = [
@@ -108,6 +109,7 @@ export default function NewPropertyForm() {
     },
     mode: 'onChange',
   });
+  const { handleError, modal } = useUpgradeModal();
   const watchAll = useWatch({ control: form.control });
 
   const { mutateAsync, isPending } = useCreateProperty();
@@ -131,6 +133,7 @@ export default function NewPropertyForm() {
         return 'Property created successfully';
       },
       error: (err) => {
+        handleError(err);
         return err.message || 'Failed to create property';
       },
     });
@@ -138,6 +141,7 @@ export default function NewPropertyForm() {
 
   return (
     <div className={'relative'}>
+      {modal}
       <div className='w-full max-w-lg mx-auto py-6'>
         <form onSubmit={form.handleSubmit(onSubmit, onError)}>
           <FieldGroup className={'gap-4'}>
