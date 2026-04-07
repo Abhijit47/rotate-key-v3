@@ -1,8 +1,10 @@
+import * as Sentry from '@sentry/nextjs';
 import { headers } from 'next/headers';
 import { cache } from 'react';
 import superjson from 'superjson';
 
 import { auth } from '@/lib/auth';
+import { polarClient } from '@/lib/polar';
 import { initTRPC, TRPCError } from '@trpc/server';
 
 export const createTRPCContext = cache(async () => {
@@ -38,4 +40,43 @@ export const protectedProcedure = baseProcedure.use(
 
     return next({ ctx: { ...ctx, auth: session } });
   }),
+);
+export const premiumProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    // const customer = await polarClient.customers.getStateExternal({
+    //   externalId: ctx.auth.user.id,
+    // });
+
+    let customer;
+    try {
+      customer = await polarClient.customers.getStateExternal({
+        externalId: ctx.auth.user.id,
+      });
+    } catch (error) {
+      Sentry.captureException(error, {
+        extra: {
+          context: 'Error fetching customer subscription status',
+          userId: ctx.auth.user.id,
+        },
+      });
+      throw new TRPCError({
+        code: 'SERVICE_UNAVAILABLE',
+        message:
+          'Unable to verify subscription right now. Please try again shortly.',
+      });
+    }
+
+    if (
+      !customer.activeSubscriptions ||
+      customer.activeSubscriptions.length === 0
+    ) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message:
+          'Active subscription required to access this resource. Please upgrade your plan.',
+      });
+    }
+
+    return next({ ctx: { ...ctx, customer } });
+  },
 );

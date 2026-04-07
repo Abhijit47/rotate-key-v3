@@ -12,12 +12,13 @@ import {
 import {
   baseProcedure,
   createTRPCRouter,
+  premiumProcedure,
   protectedProcedure,
 } from '@/trpc/init';
 import { TRPCError } from '@trpc/server';
 
 export const propertyRouter = createTRPCRouter({
-  createProperty: protectedProcedure
+  createProperty: premiumProcedure
     .input(propertySchema)
     .mutation(async ({ input, ctx }) => {
       const { user } = ctx.auth;
