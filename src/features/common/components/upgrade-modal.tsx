@@ -39,6 +39,7 @@ export default function UpgradeModal({
             asChild
             // onClick={() => authClient.checkout({ slug: 'basic' })}
           >
+            {/* TODO: Later create pricing page */}
             <Link href='#pricing'>Upgrade your plan</Link>
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -133,7 +133,11 @@ export default function NewPropertyForm() {
         return 'Property created successfully';
       },
       error: (err) => {
-        handleError(err);
+        // handleError(err);
+        // return err.message || 'Failed to create property';
+        if (handleError(err)) {
+          return 'Upgrade required to create more properties.';
+        }
         return err.message || 'Failed to create property';
       },
     });

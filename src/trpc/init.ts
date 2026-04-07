@@ -1,3 +1,4 @@
+import { logger } from '@sentry/nextjs';
 import { headers } from 'next/headers';
 import { cache } from 'react';
 import superjson from 'superjson';
@@ -42,9 +43,26 @@ export const protectedProcedure = baseProcedure.use(
 );
 export const premiumProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
-    const customer = await polarClient.customers.getStateExternal({
-      externalId: ctx.auth.user.id,
-    });
+    // const customer = await polarClient.customers.getStateExternal({
+    //   externalId: ctx.auth.user.id,
+    // });
+
+    let customer;
+    try {
+      customer = await polarClient.customers.getStateExternal({
+        externalId: ctx.auth.user.id,
+      });
+    } catch (error) {
+      logger.error('Error fetching customer subscription status', {
+        error,
+        userId: ctx.auth.user.id,
+      });
+      throw new TRPCError({
+        code: 'SERVICE_UNAVAILABLE',
+        message:
+          'Unable to verify subscription right now. Please try again shortly.',
+      });
+    }
 
     if (
       !customer.activeSubscriptions ||
