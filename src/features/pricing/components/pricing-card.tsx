@@ -43,7 +43,7 @@ const localeToCurrency = {
 
 function PricingCard() {
   const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month');
-  const [selectedPlan, setSelectedPlan] = useState('basic');
+  const [selectedPlan, setSelectedPlan] = useState('');
 
   const { isCheckoutLoading, checkout } = useCheckout();
 
@@ -114,7 +114,16 @@ function PricingCard() {
           return (
             <div
               key={plan.id}
+              role='button'
+              tabIndex={0}
+              aria-expanded={isSelected}
               onClick={() => setSelectedPlan(plan.id)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  setSelectedPlan(plan.id);
+                }
+              }}
               className='relative cursor-pointer'>
               <div
                 className={`relative rounded-xl bg-card border border-foreground/10 transition-colors duration-300 ${
