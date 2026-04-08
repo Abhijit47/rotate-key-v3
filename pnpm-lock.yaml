@@ -59,6 +59,9 @@ importers:
       '@novu/react':
         specifier: ^3.14.1
         version: 3.14.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@number-flow/react':
+        specifier: ^0.6.0
+        version: 0.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@polar-sh/better-auth':
         specifier: ^1.8.2
         version: 1.8.3(@polar-sh/sdk@0.46.7)(@stripe/react-stripe-js@4.0.2(@stripe/stripe-js@7.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@stripe/stripe-js@7.9.0)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(better-auth@1.6.0(@opentelemetry/api@1.9.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(kysely@0.28.15))(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(solid-js@1.9.12))(react-dom@19.2.3(react@19.2.3))(react-is@18.3.1)(react@19.2.3)(redux@5.0.1)(zod@4.3.6)
@@ -140,6 +143,9 @@ importers:
       lucide-react:
         specifier: ^0.563.0
         version: 0.563.0(react@19.2.3)
+      motion:
+        specifier: ^12.38.0
+        version: 12.38.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       next:
         specifier: 16.1.6
         version: 16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -1742,6 +1748,12 @@ packages:
     peerDependenciesMeta:
       react-dom:
         optional: true
+
+  '@number-flow/react@0.6.0':
+    resolution: {integrity: sha512-77Yfc9+zkV2UDSP8phhZzxJGuwxi/Tt1TikmipL+1r3e9GFKEYDZ1XwInj67NoSt3OnOB0KLvvcl3lfPZgBHVQ==}
+    peerDependencies:
+      react: ^18 || ^19
+      react-dom: ^18 || ^19
 
   '@open-draft/deferred-promise@2.2.0':
     resolution: {integrity: sha512-CecwLWx3rhxVQF6V4bAgPS5t+So2sTbPgAzafKkVizyi7tlwpcFpdFqq+wqF2OwNBmqFuu6tOyouTuxgpMfzmA==}
@@ -5901,6 +5913,9 @@ packages:
       jiti:
         optional: true
 
+  esm-env@1.2.2:
+    resolution: {integrity: sha512-Epxrv+Nr/CaL4ZcFGPJIYLWFom+YeV1DqMLHJoEd9SYRxNbaFruBwfEX/kkHUJf55j2+TUbmDcmuilbP1TmXHA==}
+
   espree@10.4.0:
     resolution: {integrity: sha512-j6PAQ2uUr79PZhBjP5C5fhl8e39FmRnOjsD5lGnWrFU8i2G776tBK7+nP8KuQUTTyAZUwfQqXAgrVH5MbH9CYQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -7400,6 +7415,9 @@ packages:
   npm-run-path@6.0.0:
     resolution: {integrity: sha512-9qny7Z9DsQU8Ou39ERsPU4OZQlSTP47ShQzuKZ6PRXpYLtIFgl/DEBYEXKlvcEa+9tHVcK8CF81Y2V72qaZhWA==}
     engines: {node: '>=18'}
+
+  number-flow@0.6.0:
+    resolution: {integrity: sha512-K8flNq2Wqus53vjp/btVo3qXFkagF8dIdYavreBfE7hlvFFG/b1HMGEH6nZL+mlrJ+4lbLP9OmPv3t2rmRkpSQ==}
 
   nypm@0.6.2:
     resolution: {integrity: sha512-7eM+hpOtrKrBDCh7Ypu2lJ9Z7PNZBdi/8AT3AX8xoCj43BBVHD0hPSTEvMtkMpfs8FCqBGhxB+uToIQimA111g==}
@@ -9299,7 +9317,7 @@ snapshots:
       '@opentelemetry/resources': 2.6.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-node': 0.203.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.6.1(@opentelemetry/api@1.9.0)
-      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.1)
       '@orpc/openapi': 1.13.13(@opentelemetry/api@1.9.0)(ws@8.20.0)
       '@orpc/otel': 1.13.13(@opentelemetry/api@1.9.0)(@opentelemetry/instrumentation@0.214.0(@opentelemetry/api@1.9.1))
       '@orpc/server': 1.13.13(@opentelemetry/api@1.9.1)(ws@8.20.0)
@@ -10461,6 +10479,13 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  '@number-flow/react@0.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      esm-env: 1.2.2
+      number-flow: 0.6.0
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+
   '@open-draft/deferred-promise@2.2.0': {}
 
   '@open-draft/logger@0.3.0':
@@ -11432,7 +11457,7 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/contract@1.13.13(@opentelemetry/api@1.9.0)':
+  '@orpc/contract@1.13.13(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/client': 1.13.13(@opentelemetry/api@1.9.0)
       '@orpc/shared': 1.13.13(@opentelemetry/api@1.9.0)
@@ -11445,7 +11470,7 @@ snapshots:
 
   '@orpc/json-schema@1.13.13(@opentelemetry/api@1.9.0)(ws@8.20.0)':
     dependencies:
-      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.1)
       '@orpc/interop': 1.13.13
       '@orpc/openapi': 1.13.13(@opentelemetry/api@1.9.0)(ws@8.20.0)
       '@orpc/server': 1.13.13(@opentelemetry/api@1.9.1)(ws@8.20.0)
@@ -11460,7 +11485,7 @@ snapshots:
   '@orpc/openapi-client@1.13.13(@opentelemetry/api@1.9.0)':
     dependencies:
       '@orpc/client': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.1)
       '@orpc/shared': 1.13.13(@opentelemetry/api@1.9.0)
       '@orpc/standard-server': 1.13.13(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
@@ -11469,7 +11494,7 @@ snapshots:
   '@orpc/openapi@1.13.13(@opentelemetry/api@1.9.0)(ws@8.20.0)':
     dependencies:
       '@orpc/client': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.1)
       '@orpc/interop': 1.13.13
       '@orpc/openapi-client': 1.13.13(@opentelemetry/api@1.9.0)
       '@orpc/server': 1.13.13(@opentelemetry/api@1.9.1)(ws@8.20.0)
@@ -11492,7 +11517,7 @@ snapshots:
   '@orpc/server@1.13.13(@opentelemetry/api@1.9.1)(ws@8.20.0)':
     dependencies:
       '@orpc/client': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.1)
       '@orpc/interop': 1.13.13
       '@orpc/shared': 1.13.13(@opentelemetry/api@1.9.0)
       '@orpc/standard-server': 1.13.13(@opentelemetry/api@1.9.0)
@@ -11562,7 +11587,7 @@ snapshots:
 
   '@orpc/zod@1.13.13(@opentelemetry/api@1.9.0)(@orpc/contract@1.13.13(@opentelemetry/api@1.9.0))(@orpc/server@1.13.13(@opentelemetry/api@1.9.0)(ws@8.20.0))(ws@8.20.0)(zod@4.3.6)':
     dependencies:
-      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.1)
       '@orpc/json-schema': 1.13.13(@opentelemetry/api@1.9.0)(ws@8.20.0)
       '@orpc/openapi': 1.13.13(@opentelemetry/api@1.9.0)(ws@8.20.0)
       '@orpc/server': 1.13.13(@opentelemetry/api@1.9.1)(ws@8.20.0)
@@ -15113,6 +15138,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  esm-env@1.2.2: {}
+
   espree@10.4.0:
     dependencies:
       acorn: 8.16.0
@@ -16765,6 +16792,10 @@ snapshots:
     dependencies:
       path-key: 4.0.0
       unicorn-magic: 0.3.0
+
+  number-flow@0.6.0:
+    dependencies:
+      esm-env: 1.2.2
 
   nypm@0.6.2:
     dependencies:

@@ -2,7 +2,6 @@
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -10,8 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-// import { authClient } from '@/lib/auth-client';
-import Link from 'next/link';
+import PricingCard from '@/features/pricing/components/pricing-card';
 
 interface UpgradeModalProps {
   open: boolean;
@@ -28,20 +26,23 @@ export default function UpgradeModal({
         <AlertDialogHeader>
           <AlertDialogTitle>Upgrade to Pro</AlertDialogTitle>
           <AlertDialogDescription>
-            You need to upgrade your plan to Pro to create more properties.
-            Upgrade now to unlock unlimited properties and access premium
-            features!
+            <p className={'text-xs'}>
+              You need to upgrade your plan to Pro to create more properties.
+              Upgrade now to unlock unlimited properties and access premium
+              features!
+            </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
+        <div>
+          <PricingCard />
+        </div>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            asChild
-            // onClick={() => authClient.checkout({ slug: 'basic' })}
-          >
-            {/* TODO: Later create pricing page */}
-            <Link href='#pricing'>Upgrade your plan</Link>
-          </AlertDialogAction>
+          {/* <AlertDialogAction asChild>
+            <Link href='/pricing' prefetch>
+              Upgrade your plan
+            </Link>
+          </AlertDialogAction> */}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
