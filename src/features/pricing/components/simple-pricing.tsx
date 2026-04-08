@@ -61,6 +61,8 @@ export default function SimplePricing() {
 
   const { isCheckoutLoading, checkout } = useCheckout();
 
+  // during render, we can determine the user's locale and map it to the corresponding currency code
+  // if problem then useEffect to set it after mount
   const browserLanguage =
     typeof window !== 'undefined' ? navigator.language : 'en-US';
 
@@ -263,9 +265,11 @@ export default function SimplePricing() {
                           <Spinner />
                         </span>
                       ) : (
-                        planName
+                        <span className={'inline-flex items-center gap-2'}>
+                          {planName}
+                          <ArrowRight className='ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1' />
+                        </span>
                       )}
-                      <ArrowRight className='ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1' />
                     </Button>
                   </CardFooter>
 

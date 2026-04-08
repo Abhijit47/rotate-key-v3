@@ -26,11 +26,11 @@ export default function UpgradeModal({
         <AlertDialogHeader>
           <AlertDialogTitle>Upgrade to Pro</AlertDialogTitle>
           <AlertDialogDescription>
-            <p className={'text-xs'}>
+            <span className={'text-xs block'}>
               You need to upgrade your plan to Pro to create more properties.
               Upgrade now to unlock unlimited properties and access premium
               features!
-            </p>
+            </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div>

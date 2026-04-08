@@ -7,7 +7,7 @@ import {
   usage,
   webhooks,
 } from '@polar-sh/better-auth';
-import { betterAuth } from 'better-auth';
+import { APIError, betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
 import { admin as adminPlugin } from 'better-auth/plugins';
@@ -195,9 +195,21 @@ export const auth = betterAuth({
     deleteUser: {
       enabled: true,
       afterDelete: async (user) => {
-        await polarClient.customers.deleteExternal({
-          externalId: user.id,
-        });
+        try {
+          await polarClient.customers.deleteExternal({
+            externalId: user.id,
+          });
+        } catch (error) {
+          // Log but don't throw - user deletion should complete even if Polar cleanup fails
+          console.error(
+            `Failed to delete Polar customer for user ${user.id}:`,
+            error,
+          );
+          throw new APIError(500, {
+            message: 'Failed to delete associated customer in billing system',
+            code: 'INTERNAL_SERVER_ERROR',
+          });
+        }
 
         // TODO:
         // stream user delete

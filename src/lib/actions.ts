@@ -7,10 +7,20 @@ import { cookies } from 'next/headers';
 import { polarClient } from './polar';
 import { sleep } from './utils';
 
+// export function getRequiredEnv(
+//   name: 'POLAR_SANDBOX_ORGANIZATION_ID' | 'POLAR_PRODUCTION_ORGANIZATION_ID',
+// ) {
+//   const value = process.env[name];
+//   if (!value || value.trim() === '') {
+//     throw new Error(`Missing required environment variable: ${name}`);
+//   }
+//   return value;
+// }
+
 const sandBoxOrganizationId = '687f74cd-fba2-483d-8f1f-fd2856236ef9';
-const prodcutionOrganizationId = '295cccff-c03f-453f-92d7-5e8dd1588acd';
+const productionOrganizationId = '295cccff-c03f-453f-92d7-5e8dd1588acd';
 const isDev = process.env.NODE_ENV === 'development';
-const orgId = isDev ? sandBoxOrganizationId : prodcutionOrganizationId;
+const orgId = isDev ? sandBoxOrganizationId : productionOrganizationId;
 
 export async function changeLocaleAction(locale: Locale) {
   if (!locales.includes(locale)) {

@@ -17,7 +17,10 @@ export function useCheckout() {
           setIsLoading(false);
           return 'Redirected to checkout successfully!';
         },
-        error: 'Failed to redirect to checkout.',
+        error: () => {
+          setIsLoading(false);
+          return 'Failed to redirect to checkout.';
+        },
       },
     );
   }

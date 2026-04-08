@@ -47,6 +47,7 @@ function PricingCard() {
 
   const { isCheckoutLoading, checkout } = useCheckout();
 
+  // calculate during render
   const browserLanguage =
     typeof window !== 'undefined' ? navigator.language : 'en-US';
 
@@ -149,8 +150,7 @@ function PricingCard() {
                       </div>
                       <div>
                         <h3 className='text-sm font-medium text-foreground leading-tight'>
-                          {/* remove - */}
-                          {plan.name.split('-')[0]}
+                          {planName}
                         </h3>
                         <p className='text-xs text-muted-foreground lowercase'>
                           {plan.description}
