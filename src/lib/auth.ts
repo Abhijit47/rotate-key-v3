@@ -7,7 +7,7 @@ import {
   usage,
   webhooks,
 } from '@polar-sh/better-auth';
-import { betterAuth } from 'better-auth';
+import { APIError, betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
 import { admin as adminPlugin } from 'better-auth/plugins';
@@ -23,18 +23,45 @@ const facebookClientSecret = env.FACEBOOK_CLIENT_SECRET;
 const googleClientId = env.GOOGLE_CLIENT_ID;
 const googleClientSecret = env.GOOGLE_CLIENT_SECRET;
 
+// const products = [
+//   {
+//     productId: env.POLAR_PRODUCT_FREE_ID,
+//     slug: 'free',
+//   },
+//   {
+//     productId: env.POLAR_PRODUCT_BASIC_ID,
+//     slug: 'basic-monthly',
+//   },
+//   {
+//     productId: 'ac96bf48-4e16-4943-9f65-5fe37afa6819',
+//     slug: 'basic-yearly',
+//   },
+//   {
+//     productId: env.POLAR_PRODUCT_PRO_ID,
+//     slug: 'pro',
+//   },
+// ];
+// TODO: Later will add through env
 const products = [
   {
-    productId: env.POLAR_PRODUCT_FREE_ID,
+    productId: 'e5cb95ff-a6be-4549-81d0-5c10170a52ca',
+    slug: 'pro-yearly',
+  },
+  {
+    productId: 'ac96bf48-4e16-4943-9f65-5fe37afa6819',
+    slug: 'basic-yearly',
+  },
+  {
+    productId: '44057f38-5c6b-431d-9633-be7ef9433c0e',
+    slug: 'pro-monthly',
+  },
+  {
+    productId: 'd8839644-f591-4ae4-b4cf-5df7eebe1005',
+    slug: 'basic-monthly',
+  },
+  {
+    productId: 'a345249d-b5df-4f97-ad62-e23ee88e53fa',
     slug: 'free',
-  },
-  {
-    productId: env.POLAR_PRODUCT_BASIC_ID,
-    slug: 'basic',
-  },
-  {
-    productId: env.POLAR_PRODUCT_PRO_ID,
-    slug: 'pro',
   },
 ];
 
@@ -163,6 +190,30 @@ export const auth = betterAuth({
         required: false,
         defaultValue: 'free',
         input: false,
+      },
+    },
+    deleteUser: {
+      enabled: true,
+      afterDelete: async (user) => {
+        try {
+          await polarClient.customers.deleteExternal({
+            externalId: user.id,
+          });
+        } catch (error) {
+          // Log but don't throw - user deletion should complete even if Polar cleanup fails
+          console.error(
+            `Failed to delete Polar customer for user ${user.id}:`,
+            error,
+          );
+          throw new APIError(500, {
+            message: 'Failed to delete associated customer in billing system',
+            code: 'INTERNAL_SERVER_ERROR',
+          });
+        }
+
+        // TODO:
+        // stream user delete
+        // novu user delete
       },
     },
   },

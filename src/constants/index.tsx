@@ -23,10 +23,6 @@ export const navlinks: Navlink[] = [
     href: '/swapings',
   },
   {
-    name: 'Billings',
-    href: '#',
-  },
-  {
     name: 'Contact',
     href: '#',
   },
