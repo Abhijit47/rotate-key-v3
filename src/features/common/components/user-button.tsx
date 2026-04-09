@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { signOut, useSession } from '@/lib/auth-client';
+import { authClient, signOut, useSession } from '@/lib/auth-client';
 import Link from 'next/link';
 import NotificationInbox from './notification-inbox';
 
@@ -69,7 +69,7 @@ export default function UserButton() {
                 <Button
                   variant={'ghost'}
                   size={'icon-sm'}
-                  className={'rounded-full h-full'}
+                  className={'rounded-full h-full mt-1.5'}
                   aria-label={`${data.user.name} account menu`}>
                   <Avatar className={'size-8'}>
                     <AvatarImage
@@ -95,16 +95,15 @@ export default function UserButton() {
                     </Badge>
                   </DropdownMenuLabel>
                   <DropdownMenuItem asChild>
-                    <Link href={'#'} className='w-full'>
+                    <Link href={'/my-profile'} className='w-full'>
                       Profile
                       <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href={'#'} className='w-full'>
-                      Billing
-                      <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-                    </Link>
+                  <DropdownMenuItem
+                    onClick={() => authClient.customer.portal()}>
+                    Billing
+                    <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href={'#'} className='w-full'>

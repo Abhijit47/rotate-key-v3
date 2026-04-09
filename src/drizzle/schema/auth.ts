@@ -13,7 +13,11 @@ import {
 // import { property } from './property';
 
 export const rolesEnum = pgEnum('role', roles);
-export const plansEnum = pgEnum('plan', plans);
+export const plansEnum = pgEnum('plan_slug', plans);
+export const socialProvidersEnum = pgEnum('social_provider', [
+  'facebook',
+  'google',
+]);
 
 export const user = pgTable('user', {
   id: uuid('id')
@@ -37,12 +41,23 @@ export const user = pgTable('user', {
   isSocialSignInComplete: boolean('is_social_sign_in_complete')
     .default(false)
     .notNull(),
+  socialProvider: socialProvidersEnum('social_provider'),
   isOnboarded: boolean('is_onboarded').default(false).notNull(),
-  chatToken: text('chat_token').default('n/a'),
+  chatToken: varchar('chat_token').default('n/a'),
   chatTokenExpireAt: timestamp('chat_token_expire_at'),
   chatTokenIssuedAt: timestamp('chat_token_issued_at'),
   isSubscribed: boolean('is_subscribed').default(false).notNull(),
-  plan: plansEnum(),
+  planSlug: plansEnum('plan_slug'),
+  notificationHash: varchar('notification_hash'),
+  firstName: varchar('first_name'),
+  lastName: varchar('last_name'),
+  spokenLanguages: varchar('spoken_languages').array().default([]),
+  country: varchar('country'),
+  aboutMe: varchar('about_me', { length: 500 }),
+  yearOfBirth: varchar('year_of_birth'),
+  contactNumber: varchar('contact_number'),
+  isContactNumberVerified: boolean('is_contact_number_verified').default(false),
+  profileVerificationDocument: varchar('profile_verification_document'),
 });
 
 export const session = pgTable(
