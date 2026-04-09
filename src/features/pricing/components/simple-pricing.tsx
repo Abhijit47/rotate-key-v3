@@ -218,35 +218,42 @@ export default function SimplePricing() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className='grid gap-3 pb-6'>
-                    {plan.benefits.map((feature, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -5 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{
-                          duration: 0.3,
-                          delay: 0.5 + index * 0.05,
-                        }}
-                        className='flex items-center gap-2 text-sm'>
-                        <div
-                          className={cn(
-                            'flex h-5 w-5 items-center justify-center rounded-full',
-                            plan.popular
-                              ? 'bg-primary/10 text-primary'
-                              : 'bg-secondary text-secondary-foreground',
-                          )}>
-                          <Check className='h-3.5 w-3.5' />
-                        </div>
-                        <span
-                          className={
-                            plan.popular
-                              ? 'text-foreground'
-                              : 'text-muted-foreground'
-                          }>
-                          {feature.description}
-                        </span>
-                      </motion.div>
-                    ))}
+                    {plan.benefits.map((feature, index) => {
+                      // filter by planName.toLowerCase() and feature.metadata.tier.toLowerCase() === planName.toLowerCase()
+                      // pro: unlimited
+                      //free: 3;
+                      //basic: 5;
+
+                      return (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -5 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{
+                            duration: 0.3,
+                            delay: 0.5 + index * 0.05,
+                          }}
+                          className='flex items-center gap-2 text-sm'>
+                          <div
+                            className={cn(
+                              'flex h-5 w-5 items-center justify-center rounded-full',
+                              plan.popular
+                                ? 'bg-primary/10 text-primary'
+                                : 'bg-secondary text-secondary-foreground',
+                            )}>
+                            <Check className='h-3.5 w-3.5' />
+                          </div>
+                          <span
+                            className={
+                              plan.popular
+                                ? 'text-foreground'
+                                : 'text-muted-foreground'
+                            }>
+                            {feature.description}
+                          </span>
+                        </motion.div>
+                      );
+                    })}
                   </CardContent>
                   <CardFooter className={'mt-auto'}>
                     <Button

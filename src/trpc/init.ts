@@ -66,6 +66,9 @@ export const premiumProcedure = protectedProcedure.use(
       });
     }
 
+    const customerGrantedBenifits = customer.grantedBenefits;
+    console.log('Customer granted benefits:', customerGrantedBenifits);
+
     if (
       !customer.activeSubscriptions ||
       customer.activeSubscriptions.length === 0
