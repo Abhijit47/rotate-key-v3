@@ -38,11 +38,36 @@ export const propertyRouter = createTRPCRouter({
             message: `You do not have permission to perform this action!`,
           });
         }
+
+        // const [newProperty] = await db.transaction(async (tx) => {
+        //   const currentCount = await tx.$count(
+        //     property,
+        //     eq(property.authorId, session.user.id),
+        //   );
+
+        //   if (currentCount >= createPropertyLimit) {
+        //     throw new TRPCError({
+        //       code: 'FORBIDDEN',
+        //       message: `You've reached your plan's limit of ${createPropertyLimit} properties.`,
+        //     });
+        //   }
+
+        //   return tx
+        //     .insert(property)
+        //     .values({
+        //       ...input,
+        //       id: crypto.randomUUID(), // TODO: later remove after new migration with defaultRandom is applied
+        //       images: JSON.parse(JSON.stringify(input.images)),
+        //       amenities: JSON.parse(JSON.stringify(input.amenities)),
+        //       authorId: session.user.id,
+        //     })
+        //     .returning();
+        // });
+
         const [newProperty] = await db
           .insert(property)
           .values({
             ...input,
-            id: crypto.randomUUID(), // TODO: later remove after new migration with defaultRandom is applied
             images: JSON.parse(JSON.stringify(input.images)),
             amenities: JSON.parse(JSON.stringify(input.amenities)),
             authorId: user.id,

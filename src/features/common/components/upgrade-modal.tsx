@@ -32,48 +32,80 @@ export default function UpgradeModal(props: UpgradeModalProps) {
   const { customerState, customerError, isCustomerLoading } = useCustomerInfo();
 
   const trialEndDate = customerState?.activeSubscriptions?.[0]?.trialEnd;
+  // const benefits =
+  //   customerState?.grantedBenefits.map((b) => {
+  //     return plans.map(
+  //       (plan) =>
+  //         plan.benefits.find((benefit) => benefit.id === b.benefitId)
+  //           ?.description || '',
+  //     )[0];
+  //   }) || [];
+
+  // const benefits =
+  //   customerState?.grantedBenefits
+  //     .map(
+  //       (b) =>
+  //         plans
+  //           .flatMap((plan) => plan.benefits)
+  //           .find((benefit) => benefit.id === b.benefitId)?.description,
+  //     )
+  //     .filter((description): description is string => Boolean(description)) ??
+  //   [];
+
   const benefits =
-    customerState?.grantedBenefits.map((b) => {
-      return plans.map(
-        (plan) =>
-          plan.benefits.find((benefit) => benefit.id === b.benefitId)
-            ?.description || '',
-      )[0];
+    customerState?.grantedBenefits.flatMap((grantedBenefit) => {
+      const description = plans
+        .find((plan) =>
+          plan.benefits.some(
+            (benefit) => benefit.id === grantedBenefit.benefitId,
+          ),
+        )
+        ?.benefits.find(
+          (benefit) => benefit.id === grantedBenefit.benefitId,
+        )?.description;
+      return description ? [description] : [];
     }) || [];
 
-  const planName = plans.find((plan) =>
-    customerState?.activeSubscriptions?.[0]?.productId.includes(plan.id),
-  )?.name;
-  const title = planName ? `Current plan: ${planName}` : 'Free plan';
+  const productId = customerState?.activeSubscriptions?.[0]?.productId;
+  const planName = productId
+    ? plans.find((plan) => productId.includes(plan.id))?.name
+    : undefined;
+
+  // const planName = plans.find((plan) =>
+  //   customerState?.activeSubscriptions?.[0]?.productId.includes(plan.id),
+  // )?.name;
+  const title = planName ? `Current plan: ${planName}` : '';
 
   if (isCustomerLoading) {
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle className={'flex items-center gap-2'}>
-            <AlertCircle className={'size-4'} />
-            Upgrade your plan
-          </AlertDialogTitle>
-          <AlertDialogDescription></AlertDialogDescription>
-        </AlertDialogHeader>
-        <Separator />
-        <div className={'p-4 text-center space-y-4'}>
-          <span className={'text-sm text-muted-foreground'}>
-            Loading your subscription information...
-          </span>
-          <Skeleton className={'w-full h-24 mt-4'} />
-          <Skeleton className={'w-full h-24 mt-4'} />
-          <Skeleton className={'w-full h-24 mt-4'} />
-          <Skeleton className={'w-full h-24 mt-4'} />
-        </div>
-        <Separator />
-        <AlertDialogFooter>
-          <AlertDialogCancel variant={'outline'} size={'sm'}>
-            Cancel
-          </AlertDialogCancel>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>;
+    return (
+      <AlertDialog open={open} onOpenChange={onOpenChange}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className={'flex items-center gap-2'}>
+              <AlertCircle className={'size-4'} />
+              Upgrade your plan
+            </AlertDialogTitle>
+            <AlertDialogDescription></AlertDialogDescription>
+          </AlertDialogHeader>
+          <Separator />
+          <div className={'p-4 text-center space-y-4'}>
+            <span className={'text-sm text-muted-foreground'}>
+              Loading your subscription information...
+            </span>
+            <Skeleton className={'w-full h-24 mt-4'} />
+            <Skeleton className={'w-full h-24 mt-4'} />
+            <Skeleton className={'w-full h-24 mt-4'} />
+            <Skeleton className={'w-full h-24 mt-4'} />
+          </div>
+          <Separator />
+          <AlertDialogFooter>
+            <AlertDialogCancel variant={'outline'} size={'sm'}>
+              Cancel
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
   }
 
   return (

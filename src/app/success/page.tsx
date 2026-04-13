@@ -22,7 +22,33 @@ type PageProps = {
 export default async function PaymentSuccessPage(props: PageProps) {
   const searchParams = await props.searchParams;
   const checkoutId = searchParams.checkout_id;
-  // const customerSessionToken = searchParams.customer_session_token;
+
+  if (!checkoutId) {
+    return (
+      <main className={'h-dvh flex items-center justify-center'}>
+        <Card className={'max-w-md mx-auto gap-4'}>
+          <CardHeader>
+            <CardTitle className={'text-center'}>Invalid Payment</CardTitle>
+            <CardDescription>
+              No checkout ID was provided. Please try your payment again.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Link
+              href='/'
+              className={buttonVariants({
+                variant: 'default',
+                size: 'sm',
+                className: 'w-full',
+              })}>
+              <ArrowLeftCircle className={'size-4'} />
+              Go to Home
+            </Link>
+          </CardFooter>
+        </Card>
+      </main>
+    );
+  }
 
   return (
     <main className={'h-dvh flex items-center justify-center'}>

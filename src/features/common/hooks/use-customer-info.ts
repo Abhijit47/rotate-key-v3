@@ -7,7 +7,7 @@ import type { Subscription } from '@polar-sh/sdk/models/components/subscription'
 import { authClient } from '@/lib/auth-client';
 
 export function useCustomerInfo() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
   const [customerState, setCustomerState] = useState<CustomerState>();
@@ -21,7 +21,7 @@ export function useCustomerInfo() {
 
   useEffect(() => {
     try {
-      async function checkCustomerInfo() {
+      (async function () {
         setLoading(true);
         const [state, benefits, subscriptions] = await Promise.all([
           authClient.customer.state(),
@@ -51,10 +51,27 @@ export function useCustomerInfo() {
           setSubscriptions(subscriptions.data.result.items);
           setLoading(false);
         }
-      }
-      checkCustomerInfo();
+      })();
     } catch (error) {
       console.error('Error fetching customer data in useUpgradeModal:', error);
+      // eslint-disable-next-line
+      setIsError(true);
+      setCustomerError({
+        status: 500,
+        statusText: 'Internal Server Error',
+        message: 'Failed to fetch customer data',
+      });
+      setBenefitError({
+        status: 500,
+        statusText: 'Internal Server Error',
+        message: 'Failed to fetch benefits data',
+      });
+      setSubscriptionsError({
+        status: 500,
+        statusText: 'Internal Server Error',
+        message: 'Failed to fetch subscriptions data',
+      });
+      setLoading(false);
     }
   }, []);
 

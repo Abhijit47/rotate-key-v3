@@ -90,6 +90,7 @@ export function CancelSubscriptionDialog(props: CancelSubscriptionDialogProps) {
       setError(
         err instanceof Error ? err.message : 'Failed to cancel subscription',
       );
+      setIsLoading(false);
     }
   };
 

@@ -138,6 +138,6 @@ export const premiumProcedure = protectedProcedure.use(
       });
     }
 
-    return next({ ctx: { ...ctx, customer } });
+    return next({ ctx: { ...ctx, customer, createPropertyLimit: limit } });
   },
 );

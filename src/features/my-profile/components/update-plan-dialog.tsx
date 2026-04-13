@@ -30,6 +30,14 @@ export interface UpdatePlanDialogProps {
 
 const easing = [0.4, 0, 0.2, 1] as const;
 
+const localeToCurrency = {
+  'en-IN': 'inr',
+  'en-US': 'usd',
+  'en-GB': 'gbp',
+  'de-DE': 'eur',
+  'fr-FR': 'eur',
+} as Record<string, string>;
+
 export function UpdatePlanDialog(props: UpdatePlanDialogProps) {
   const { triggerText, title, className, onPlanChange } = props;
 
@@ -42,17 +50,31 @@ export function UpdatePlanDialog(props: UpdatePlanDialogProps) {
 
   const { subscriptions, isCustomerLoading } = useCustomerInfo();
 
+  const browserLanguage =
+    typeof window !== 'undefined' ? navigator.language : 'en-US';
+
   const filteredPlan = isYearly
     ? plans.filter((plan) => plan.recurringInterval === 'year')
     : plans.filter((plan) => plan.recurringInterval === 'month');
 
   const getCurrentPrice = useCallback(
     (plan: Plan) => {
-      const price = plans.find(
+      const preferredCurrency = localeToCurrency[browserLanguage] || 'usd';
+      const matchingPlan = plans.find(
         (p) =>
           p.recurringInterval === (isYearly ? 'year' : 'month') &&
           p.id === plan.id,
-      )?.prices[0];
+      );
+      const price =
+        matchingPlan?.prices.find(
+          (p) => p.priceCurrency === preferredCurrency,
+        ) ?? matchingPlan?.prices[0];
+
+      // const price = plans.find(
+      //   (p) =>
+      //     p.recurringInterval === (isYearly ? 'year' : 'month') &&
+      //     p.id === plan.id,
+      // )?.prices[0];
 
       return price
         ? `${(price.priceAmount / 100).toFixed(2)} ${price.priceCurrency}`
@@ -60,7 +82,7 @@ export function UpdatePlanDialog(props: UpdatePlanDialogProps) {
 
       // return price ? `${price.priceCurrency}${price.priceAmount}` : 'N/A';
     },
-    [isYearly],
+    [isYearly, browserLanguage],
   );
 
   const handlePlanChange = useCallback((planId: string) => {
