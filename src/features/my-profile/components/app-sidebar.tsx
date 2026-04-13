@@ -3,6 +3,7 @@
 import {
   Icon,
   IconChessKing,
+  IconCoinRupee,
   IconDashboard,
   IconHome2,
   IconLockAccessOff,
@@ -63,6 +64,11 @@ const profileLinks: ProfileLink = {
       title: 'Chat',
       url: '#',
       icon: IconMessage,
+    },
+    {
+      title: 'Subscription',
+      url: '/my-profile/subscriptions',
+      icon: IconCoinRupee,
     },
   ],
   // navClouds: [

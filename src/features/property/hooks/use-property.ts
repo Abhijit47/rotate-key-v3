@@ -37,6 +37,7 @@ export function useCreateProperty() {
         // if (err.data?.code === 'FORBIDDEN') {
         //   toast.error(err.message);
         // }
+        return err.message;
       },
     }),
   );
@@ -98,5 +99,20 @@ export function useUserProperty(propertyId: string) {
 
   return useSuspenseQuery(
     trpc.property.getUserProperty.queryOptions({ id: propertyId }),
+  );
+}
+
+// TODO: this is just for testing, will remove later, we can use this to gate any premium features in the future
+export function useTestPremium() {
+  const trpc = useTRPC();
+  return useMutation(
+    trpc.property.testPremium.mutationOptions({
+      onSuccess: async () => {
+        console.log('Premium feature test successful');
+      },
+      onError: (err) => {
+        console.error({ err });
+      },
+    }),
   );
 }
