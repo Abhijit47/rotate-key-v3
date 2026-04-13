@@ -74,8 +74,8 @@ export function CancelSubscriptionDialog(props: CancelSubscriptionDialogProps) {
     setError(null);
   };
 
+  const productId = customerState?.activeSubscriptions?.[0]?.productId;
   const handleConfirmCancellation = async () => {
-    const productId = customerState?.activeSubscriptions[0].productId;
     if (!productId) {
       setError('No active subscription found');
       return;
@@ -95,7 +95,6 @@ export function CancelSubscriptionDialog(props: CancelSubscriptionDialogProps) {
   };
 
   const handleKeepSubscription = async () => {
-    const productId = customerState?.activeSubscriptions[0].productId;
     if (!productId) {
       setError('No active subscription found');
       return;

@@ -31,7 +31,9 @@ export default function UpgradeModal(props: UpgradeModalProps) {
 
   const { customerState, customerError, isCustomerLoading } = useCustomerInfo();
 
-  const trialEndDate = customerState?.activeSubscriptions?.[0]?.trialEnd;
+  // const trialEndDate = customerState?.activeSubscriptions?.[0]?.trialEnd;
+  const activeSubscription = customerState?.activeSubscriptions?.[0];
+  const trialEndDate = activeSubscription?.trialEnd;
   // const benefits =
   //   customerState?.grantedBenefits.map((b) => {
   //     return plans.map(
@@ -131,10 +133,10 @@ export default function UpgradeModal(props: UpgradeModalProps) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <Separator />
-        {customerState ? (
+        {customerState && trialEndDate ? (
           <TrialExpiryCard
             title={title}
-            trialEndDate={trialEndDate!}
+            trialEndDate={trialEndDate}
             onUpgrade={() => {
               console.log('Upgrade clicked');
             }}
