@@ -22,9 +22,8 @@ type PageProps = {
 export default async function PaymentSuccessPage(props: PageProps) {
   const searchParams = await props.searchParams;
   const checkoutId = searchParams.checkout_id;
-  const customerSessionToken = searchParams.customer_session_token;
+  // const customerSessionToken = searchParams.customer_session_token;
 
-  // /success?checkout_id=ade41909-d392-4b78-92a2-98edee00934e&customer_session_token=polar_cst_bNhMMWhKw9ZpX8KQjNwKJVFyuIoJZsR86x9BI1sq7Pn
   return (
     <main className={'h-dvh flex items-center justify-center'}>
       <Card className={'max-w-md mx-auto gap-4'}>
@@ -44,9 +43,6 @@ export default async function PaymentSuccessPage(props: PageProps) {
           </CardAction>
           <code className={'font-serif text-xs inline-block'}>
             Checkout ID: {checkoutId}
-          </code>
-          <code className={'font-serif text-xs inline-block'}>
-            Session: {customerSessionToken}
           </code>
         </CardContent>
         <CardFooter>
