@@ -1,4 +1,4 @@
-export const plans: Plan = [
+export const plans: Plan[] = [
   {
     id: '75b68aa7-45d4-41a8-a658-9c0b9cd60695',
     createdAt: '2026-04-09T12:28:51.171Z',
@@ -1033,7 +1033,7 @@ export type Plan = {
   medias: never[];
   attachedCustomFields: never[];
   popular: boolean;
-}[];
+};
 
 export interface Price {
   createdAt: string;

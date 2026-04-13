@@ -47,7 +47,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useUpgradeModal } from '@/features/common/hooks/use-upgrade-modal';
-import { useCreateProperty } from '../hooks/use-property';
+import { TRPCClientError } from '@trpc/client';
+import { useCreateProperty, useTestPremium } from '../hooks/use-property';
 
 const propertyTypes = [
   { value: 'apartment', label: 'Apartment' },
@@ -113,6 +114,8 @@ export default function NewPropertyForm() {
   const watchAll = useWatch({ control: form.control });
 
   const { mutateAsync, isPending } = useCreateProperty();
+  // TODO: this is just for testing, will remove later, we can use this to gate any premium features in the future
+  const { mutateAsync: testMutate } = useTestPremium();
 
   const onError: SubmitErrorHandler<PropertyValues> = (errors) => {
     console.error({ errors });
@@ -133,10 +136,8 @@ export default function NewPropertyForm() {
         return 'Property created successfully';
       },
       error: (err) => {
-        // handleError(err);
-        // return err.message || 'Failed to create property';
-        if (handleError(err)) {
-          return 'Upgrade required to create more properties.';
+        if (err instanceof TRPCClientError) {
+          handleError(err);
         }
         return err.message || 'Failed to create property';
       },
@@ -362,6 +363,28 @@ export default function NewPropertyForm() {
             <FieldSeparator />
 
             <Field orientation='horizontal' className={'justify-end gap-2'}>
+              {/* TODO: this is just for testing, will remove later, we can use this to gate any premium features in the future */}
+              <Button
+                type='button'
+                onClick={() => {
+                  toast.promise(testMutate(), {
+                    loading: 'Testing premium access...',
+                    success: (data) => {
+                      console.log('Premium test result:', data);
+                      return data.message;
+                    },
+                    error: (err) => {
+                      console.error('Premium test error:', err);
+                      if (err instanceof TRPCClientError) {
+                        handleError(err);
+                      }
+                      return err.message;
+                    },
+                  });
+                }}>
+                Test Premium
+              </Button>
+
               <Button
                 variant='outline'
                 type='button'

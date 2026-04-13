@@ -224,4 +224,11 @@ export const propertyRouter = createTRPCRouter({
 
     return properties;
   }),
+
+  // TODO: this is just for testing, will remove later, we can use this to gate any premium features in the future
+  testPremium: premiumProcedure.mutation(async () => {
+    return {
+      message: 'You have access to premium features!',
+    };
+  }),
 });
