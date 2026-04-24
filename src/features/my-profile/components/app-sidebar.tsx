@@ -62,7 +62,7 @@ const profileLinks: ProfileLink = {
     },
     {
       title: 'Chat',
-      url: '#',
+      url: '/chat',
       icon: IconMessage,
     },
     {

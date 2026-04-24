@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { Baumans, Freehand, Poppins } from 'next/font/google';
 
+import { AuthDevtoolsWrapper } from '@/components/auth-devtools-wrapper';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { devtools } from '@/lib/auth/devtools';
 import { ConsentProvider } from '@/providers/consent-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { TRPCReactProvider } from '@/trpc/client';
@@ -57,6 +59,7 @@ export default function AppLayout({
             </ConsentProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
+        <AuthDevtoolsWrapper panelProps={devtools.panelProps} />
       </body>
     </html>
   );

@@ -46,12 +46,12 @@ import {
   createUserSchema,
   CreateUserValues,
 } from '@/lib/validators/admin-schemas';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import { useCreateUser } from '../hooks/use-admin';
 
 export default function AddUserModal() {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
-  const router = useRouter();
+  // const router = useRouter();
   const form = useForm<CreateUserValues>({
     resolver: zodResolver(createUserSchema),
     defaultValues: {
@@ -82,7 +82,7 @@ export default function AddUserModal() {
       loading: 'Creating user...',
       success: () => {
         setIsOpenAddUser(false);
-        router.refresh();
+        // router.refresh();
         return 'User created successfully!';
       },
       error: 'Failed to create user.',

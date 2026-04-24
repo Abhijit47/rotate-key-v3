@@ -15,6 +15,7 @@ import { admin as adminPlugin } from 'better-auth/plugins';
 import { db } from '@/drizzle/db';
 import * as schema from '@/drizzle/schema';
 import { env } from '@/env';
+import { devtools } from './auth/devtools';
 import userConfig from './auth/user-configs';
 import { ac, admin, moderator, user } from './permissions';
 import { polarClient } from './polar';
@@ -203,6 +204,7 @@ export const auth = betterAuth({
       ],
     }),
     nextCookies(),
+    devtools.serverPlugin,
   ],
 });
 

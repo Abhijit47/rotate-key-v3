@@ -14,8 +14,10 @@ export function useCreateUser() {
 
   return useMutation(
     trpc.admin.createUser.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries(trpc.admin.getUsers.queryOptions({}));
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.admin.getUsers.queryOptions({}),
+        );
       },
       onError: (err) => {
         console.error({ err });
@@ -42,8 +44,10 @@ export function useDeleteUser() {
 
   return useMutation(
     trpc.admin.deleteUser.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries(trpc.admin.getUsers.queryOptions({}));
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.admin.getUsers.queryOptions({}),
+        );
       },
       onError: (err) => {
         console.error({ err });
