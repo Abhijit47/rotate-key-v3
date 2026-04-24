@@ -29,6 +29,7 @@ export const devtoolsConfig = defineDevtoolsConfig({
       .values({
         name: args.template.label,
         email: args.email,
+        role: args.template.meta.role as Role,
       })
       .returning();
 

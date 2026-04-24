@@ -71,6 +71,10 @@ export default function StreamChatInterface(props: Props) {
 
   // const chatChannel = chatClient.channel(matchedRecord.channelType, channelId);
 
+  if (!matchedRecord) {
+    return <Skeleton className={'h-dvh w-full animate-pulse'} />;
+  }
+
   const rawChannelId = matchedRecord.channelId ?? '';
   const [, parsedChannelId] = rawChannelId.split(':');
 

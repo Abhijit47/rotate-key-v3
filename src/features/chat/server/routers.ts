@@ -68,6 +68,7 @@ export const chatRouter = createTRPCRouter({
               channelId: newChannel.channel.cid,
               channelType: 'messaging',
             })
+            .onConflictDoNothing()
             .returning();
 
           if (newMatch.length === 0) {
@@ -93,7 +94,7 @@ export const chatRouter = createTRPCRouter({
       const myId = ctx.auth.user.id;
       const ownerId = input.ownerId;
 
-      const result = await db.transaction(async (tx) => {
+      const deletedMatch = await db.transaction(async (tx) => {
         const [res] = await tx
           .delete(matches)
           .where(
@@ -114,49 +115,60 @@ export const chatRouter = createTRPCRouter({
           });
         }
 
-        const serverClient = StreamChat.getInstance(
-          env.NEXT_PUBLIC_STREAM_API_KEY,
-          env.STREAM_API_SECRET,
-        );
-        const filter = { type: 'messaging', members: { $in: [myId, ownerId] } };
-        const sort = [{ last_message_at: -1 }];
-        const options = { limit: 15 };
+        return res;
+      });
 
+      const serverClient = StreamChat.getInstance(
+        env.NEXT_PUBLIC_STREAM_API_KEY,
+        env.STREAM_API_SECRET,
+      );
+
+      let channelCid = deletedMatch.channelId;
+
+      // If row doesn't have channel id, fall back to exact members matching.
+      if (!channelCid) {
+        const filter = {
+          type: 'messaging' as const,
+          members: { $eq: [myId, ownerId] },
+        };
+        const sort = [{ last_message_at: -1 }];
+        const options = { limit: 1 };
         const channels = await serverClient.queryChannels(
           filter,
           sort,
           options,
         );
-        if (channels.length === 0) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'No channel found between these users',
-          });
-        }
-        // server-side hard delete
-        const response = await serverClient.deleteChannels([channels[0].cid], {
-          hard_delete: true,
-        });
-        const result = await serverClient.getTask(response.task_id!);
+        channelCid = channels[0]?.cid;
+      }
 
-        // Stream hard-delete is async; poll until completion
-        const maxAttempts = 30;
-        let attempts = 0;
-        while (attempts < maxAttempts) {
-          const taskStatus = await serverClient.getTask(response.task_id!);
-          if (taskStatus['status'] === 'completed') {
-            return result;
-          }
-          attempts++;
-          await new Promise((r) => setTimeout(r, 500)); // backoff
-        }
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Channel deletion task did not complete',
-        });
+      // Best-effort external cleanup should not undo a committed DB delete.
+      if (!channelCid) {
+        return deletedMatch;
+      }
+
+      const response = await serverClient.deleteChannels([channelCid], {
+        hard_delete: true,
       });
 
-      return result;
+      if (!response.task_id) {
+        return deletedMatch;
+      }
+
+      const maxAttempts = 30;
+      let attempts = 0;
+      while (attempts < maxAttempts) {
+        const taskStatus = await serverClient.getTask(response.task_id);
+        if (taskStatus['status'] === 'completed') {
+          return taskStatus;
+        }
+        attempts++;
+        await new Promise((r) => setTimeout(r, 500));
+      }
+
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Channel deletion task did not complete',
+      });
     }),
 
   refreshChatToken: protectedProcedure.mutation(async ({ ctx }) => {
@@ -182,8 +194,8 @@ export const chatRouter = createTRPCRouter({
         .update(userTable)
         .set({
           chatToken: freshToken.token,
-          chatTokenExpireAt: new Date(freshToken.expireTime),
-          chatTokenIssuedAt: new Date(freshToken.issuedAt),
+          chatTokenExpireAt: new Date(freshToken.expireTime * 1000),
+          chatTokenIssuedAt: new Date(freshToken.issuedAt * 1000),
         })
         .where(eq(userTable.id, user.id));
 

@@ -103,7 +103,7 @@ export function ChatUIError() {
         <EmptyMedia variant='icon'>
           <IconFolderCode />
         </EmptyMedia>
-        <EmptyTitle>Something went wrong</EmptyTitle>+{' '}
+        <EmptyTitle>Something went wrong</EmptyTitle>
         <EmptyDescription>
           We couldn&apos;t load the chat interface. Please retry or return to
           the chat list.
@@ -143,7 +143,11 @@ type Props = {
 };
 
 export function ChatUI({ user, matchedUserId }: Props) {
-  const { data: matchedRecord } = useMatchedUser(matchedUserId);
+  const {
+    data: matchedRecord,
+    isPending: isMatchPending,
+    isError: isMatchError,
+  } = useMatchedUser(matchedUserId);
 
   const { chatClient, isTokenPending } = useCustomChatContext();
 
@@ -152,8 +156,12 @@ export function ChatUI({ user, matchedUserId }: Props) {
   // const currentTheme = theme === 'system' ? 'dark' : theme;
   const currentTheme = resolvedTheme ?? 'dark';
 
-  if (!chatClient || isTokenPending) {
+  if (!chatClient || isTokenPending || isMatchPending) {
     return <Skeleton className={'h-dvh w-full animate-pulse'} />;
+  }
+
+  if (isMatchError || !matchedRecord) {
+    return <ChatUIError />;
   }
 
   return (
