@@ -10,32 +10,53 @@ export const getWholeChar = (str: string, i: number) => {
 
   if (Number.isNaN(code)) return '';
 
-  if (code < 0xd800 || code > 0xdfff) return str.charAt(i);
+  // if (code < 0xd800 || code > 0xdfff) return str.charAt(i);
 
+  // if (0xd800 <= code && code <= 0xdbff) {
+  //   if (str.length <= i + 1) {
+  //     throw 'High surrogate without following low surrogate';
+  //   }
+
+  //   const next = str.charCodeAt(i + 1);
+
+  //   if (0xdc00 > next || next > 0xdfff) {
+  //     throw 'High surrogate without following low surrogate';
+  //   }
+
+  //   return str.charAt(i) + str.charAt(i + 1);
+  // }
+
+  // if (i === 0) {
+  //   throw 'Low surrogate without preceding high surrogate';
+  // }
+
+  // const prev = str.charCodeAt(i - 1);
+
+  // if (0xd800 > prev || prev > 0xdbff) {
+  //   throw 'Low surrogate without preceding high surrogate';
+  // }
+
+  // return '';
+
+  /**
+   * 1.
+   * throw 'High surrogate…' / throw 'Low surrogate…' throw strings, not Error instances — no stack trace, they fail instanceof Error checks, and most logging/monitoring (Sentry) will treat them as non-Errors. Throw new Error(...) instead.
+   */
+
+  /**
+   * 2.
+   * getWholeChar is called synchronously during Avatar render (line 76) with nameStr which originates from stream-chat UserResponse.name — arbitrary, user-provided data. A malformed lone surrogate in a remote user's display name will throw during render and take down the subtree unless there's an error boundary above every Avatar. Return a safe fallback (e.g. empty string) for malformed input instead of throwing.
+   */
+
+  // suggested by coderabbit
   if (0xd800 <= code && code <= 0xdbff) {
-    if (str.length <= i + 1) {
-      throw 'High surrogate without following low surrogate';
-    }
-
+    if (str.length <= i + 1) return ''; // lone high surrogate
     const next = str.charCodeAt(i + 1);
-
-    if (0xdc00 > next || next > 0xdfff) {
-      throw 'High surrogate without following low surrogate';
-    }
-
+    if (0xdc00 > next || next > 0xdfff) return '';
     return str.charAt(i) + str.charAt(i + 1);
   }
 
-  if (i === 0) {
-    throw 'Low surrogate without preceding high surrogate';
-  }
-
-  const prev = str.charCodeAt(i - 1);
-
-  if (0xd800 > prev || prev > 0xdbff) {
-    throw 'Low surrogate without preceding high surrogate';
-  }
-
+  // low surrogate: already consumed by the preceding high surrogate
   return '';
 };
 
@@ -69,6 +90,7 @@ export const Avatar = (props: AvatarProps) => {
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line
     setError(false);
   }, [image]);
 
@@ -82,10 +104,13 @@ export const Avatar = (props: AvatarProps) => {
         `str-chat__avatar str-chat__message-sender-avatar`,
         className,
         {
-          ['str-chat__avatar--multiple-letters']: initials.length > 1,
-          ['str-chat__avatar--no-letters']: !initials.length,
-          ['str-chat__avatar--one-letter']: initials.length === 1,
-        }
+          // ['str-chat__avatar--multiple-letters']: initials.length > 1,
+          // ['str-chat__avatar--no-letters']: !initials.length,
+          // ['str-chat__avatar--one-letter']: initials.length === 1,
+          ['str-chat__avatar--multiple-letters']: [...initials].length > 1,
+          ['str-chat__avatar--no-letters']: initials.length === 0,
+          ['str-chat__avatar--one-letter']: [...initials].length === 1,
+        },
       )}
       data-testid='avatar'
       onClick={onClick}

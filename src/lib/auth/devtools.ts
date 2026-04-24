@@ -6,6 +6,9 @@ import {
 } from 'better-auth-devtools/plugin';
 import { eq } from 'drizzle-orm';
 
+const ALLOWED_ROLES = ['admin', 'moderator', 'user'] as const;
+type Role = (typeof ALLOWED_ROLES)[number];
+
 export const devtoolsConfig = defineDevtoolsConfig({
   templates: {
     admin: { label: 'Admin', meta: { role: 'admin' } },
@@ -53,9 +56,12 @@ export const devtoolsConfig = defineDevtoolsConfig({
     };
   },
   async patchSession(args) {
+    const nextRole = ALLOWED_ROLES.includes(args.patch.role as Role)
+      ? (args.patch.role as Role)
+      : 'user';
     await db
       .update(user)
-      .set({ role: args.patch.role as 'admin' | 'moderator' | 'user' })
+      .set({ role: nextRole })
       .where(eq(user.id, args.userId));
 
     // await db.user.update({

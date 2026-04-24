@@ -41,7 +41,7 @@ export default function CustomChannelHeader() {
   // @ts-ignore
   const { member_count, subtitle } = channel?.data || {};
 
-  const live = true;
+  const live = (watcher_count ?? 0) > 0;
 
   return (
     <div className='str-chat__channel-header'>
@@ -88,16 +88,20 @@ export default function CustomChannelHeader() {
           <p className='str-chat__channel-header-subtitle'>{subtitle}</p>
         )}
         <p className='str-chat__channel-header-info'>
-          {!live && !!member_count && member_count > 0 && (
+          {/* {!live && !!member_count && member_count > 0 && (
             <>
-              {/* {t('{{ memberCount }} members', {
+              {t('{{ memberCount }} members', {
                 memberCount: member_count,
-              })} */}
+              })}
               , {member_count} members
             </>
-          )}
+          )} */}
           {/* {t('{{ watcherCount }} online', { watcherCount: watcher_count })} */}
-          {watcher_count} online
+          {/* {watcher_count} online */}
+          {!live && !!member_count && member_count > 0 && (
+            <>{member_count} members</>
+          )}
+          {live && <>{watcher_count} online</>}
         </p>
       </div>
 

@@ -4,7 +4,7 @@ import { StreamChat } from 'stream-chat';
 import z from 'zod';
 
 import { db } from '@/drizzle/db';
-import { matches } from '@/drizzle/schema';
+import { matches, user as userTable } from '@/drizzle/schema';
 import { generateChannelId } from '@/lib/helpers';
 import { generateTokenForUser } from '@/lib/stream';
 import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
@@ -21,6 +21,13 @@ export const chatRouter = createTRPCRouter({
       const myId = ctx.auth.user.id;
       const ownerId = input.ownerId;
 
+      if (myId === ownerId) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Cannot friend yourself',
+        });
+      }
+
       const result = await db.transaction(async (tx) => {
         // 1. if any match between this two user with the isActive=true return that
         const exisitingMatch = await tx.query.matches.findFirst({
@@ -34,6 +41,8 @@ export const chatRouter = createTRPCRouter({
         });
 
         if (!exisitingMatch) {
+          const [user1Id, user2Id] = [myId, ownerId].sort();
+
           const serverClient = StreamChat.getInstance(
             env.NEXT_PUBLIC_STREAM_API_KEY,
             env.STREAM_API_SECRET,
@@ -50,11 +59,11 @@ export const chatRouter = createTRPCRouter({
 
           const newChannel = await channelInstance.create();
 
-          const newMatch = await db
+          const newMatch = await tx
             .insert(matches)
             .values({
-              user1Id: myId,
-              user2Id: ownerId,
+              user1Id,
+              user2Id,
               isActive: true,
               channelId: newChannel.channel.cid,
               channelType: 'messaging',
@@ -72,7 +81,7 @@ export const chatRouter = createTRPCRouter({
         }
 
         // 2. return the existing match record
-        console.log('existing match found', { exisitingMatch });
+        // console.log('existing match found', { exisitingMatch });
         return exisitingMatch;
       });
       return result;
@@ -83,7 +92,8 @@ export const chatRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const myId = ctx.auth.user.id;
       const ownerId = input.ownerId;
-      await db.transaction(async (tx) => {
+
+      const result = await db.transaction(async (tx) => {
         const [res] = await tx
           .delete(matches)
           .where(
@@ -96,7 +106,6 @@ export const chatRouter = createTRPCRouter({
             ),
           )
           .returning();
-        console.log({ res });
 
         if (!res) {
           throw new TRPCError({
@@ -129,15 +138,25 @@ export const chatRouter = createTRPCRouter({
           hard_delete: true,
         });
         const result = await serverClient.getTask(response.task_id!);
-        if (result['status'] === 'completed') {
-          return { success: true };
-        } else {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Failed to delete channel',
-          });
+
+        // Stream hard-delete is async; poll until completion
+        const maxAttempts = 30;
+        let attempts = 0;
+        while (attempts < maxAttempts) {
+          const taskStatus = await serverClient.getTask(response.task_id!);
+          if (taskStatus['status'] === 'completed') {
+            return result;
+          }
+          attempts++;
+          await new Promise((r) => setTimeout(r, 500)); // backoff
         }
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Channel deletion task did not complete',
+        });
       });
+
+      return result;
     }),
 
   refreshChatToken: protectedProcedure.mutation(async ({ ctx }) => {
@@ -157,6 +176,16 @@ export const chatRouter = createTRPCRouter({
       return user.chatToken;
     } else {
       const freshToken = await generateTokenForUser(user.id);
+
+      // update the user record with the new token and expiration
+      await db
+        .update(userTable)
+        .set({
+          chatToken: freshToken.token,
+          chatTokenExpireAt: new Date(freshToken.expireTime),
+          chatTokenIssuedAt: new Date(freshToken.issuedAt),
+        })
+        .where(eq(userTable.id, user.id));
 
       return freshToken.token;
     }
@@ -222,7 +251,17 @@ export const chatRouter = createTRPCRouter({
     const { user } = ctx.auth;
     const users = await db.query.user.findMany({
       // exclude current user
+      // where: (userTable, { ne }) => ne(userTable.id, user.id),
       where: (userTable, { ne }) => ne(userTable.id, user.id),
+      columns: {
+        id: true,
+        name: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        image: true,
+        country: true,
+      },
     });
     return users;
   }),

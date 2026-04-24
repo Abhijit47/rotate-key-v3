@@ -36,7 +36,11 @@ export function ChatCustomContextProvider(props: Props) {
   const chatClient = useCreateChatClient({
     apiKey: env.NEXT_PUBLIC_STREAM_API_KEY,
     tokenOrProvider: mutateAsync,
-    userData: user,
+    userData: {
+      id: user.id,
+      name: user.fullName,
+      image: user.avatar ?? undefined,
+    },
   });
 
   const filters: ChannelFilters = {

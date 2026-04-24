@@ -78,8 +78,8 @@ export function ChatUILoading() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent className='flex-row justify-center gap-2'>
-        <Button>Create Project</Button>
-        <Button variant='outline'>Import Project</Button>
+        <Button>Start a Chat</Button>
+        <Button variant='outline'>No Conversations</Button>
       </EmptyContent>
       <Button
         variant='link'
@@ -103,9 +103,10 @@ export function ChatUIError() {
         <EmptyMedia variant='icon'>
           <IconFolderCode />
         </EmptyMedia>
-        <EmptyTitle>Loading Chat Interface...</EmptyTitle>
+        <EmptyTitle>Something went wrong</EmptyTitle>+{' '}
         <EmptyDescription>
-          Please wait while we load the chat interface for you.
+          We couldn&apos;t load the chat interface. Please retry or return to
+          the chat list.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent className='flex-row justify-center gap-2'>
@@ -146,9 +147,10 @@ export function ChatUI({ user, matchedUserId }: Props) {
 
   const { chatClient, isTokenPending } = useCustomChatContext();
 
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
-  const currentTheme = theme === 'system' ? 'dark' : theme;
+  // const currentTheme = theme === 'system' ? 'dark' : theme;
+  const currentTheme = resolvedTheme ?? 'dark';
 
   if (!chatClient || isTokenPending) {
     return <Skeleton className={'h-dvh w-full animate-pulse'} />;

@@ -16,7 +16,7 @@ export function useAddFriend() {
   return useMutation(
     trpc.chat.addFriend.mutationOptions({
       onSuccess: async () => {
-        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
+        queryClient.invalidateQueries(trpc.chat.getUsers.queryOptions());
       },
       onError: (err) => {
         console.error({ err });
@@ -36,7 +36,7 @@ export function useRemoveFriend() {
   return useMutation(
     trpc.chat.removeFriend.mutationOptions({
       onSuccess: async () => {
-        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
+        queryClient.invalidateQueries(trpc.chat.getUsers.queryOptions());
       },
       onError: (err) => {
         console.error({ err });
@@ -56,7 +56,7 @@ export function useRefreshChatToken() {
   return useMutation(
     trpc.chat.refreshChatToken.mutationOptions({
       onSuccess: async () => {
-        queryClient.invalidateQueries(trpc.auth.getCurrentUser.queryOptions());
+        queryClient.invalidateQueries(trpc.chat.getUsers.queryOptions());
       },
       onError: (err) => {
         console.error({ err });

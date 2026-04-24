@@ -5,7 +5,7 @@ export default function FreeTierMessage() {
   return (
     <div className='p-2 bg-muted-foreground/20 backdrop-blur-md text-center'>
       <p>
-        You have reached the free tier message limit. Please
+        You have reached the free tier message limit. Please{' '}
         <Link
           href={'#'}
           className={buttonVariants({

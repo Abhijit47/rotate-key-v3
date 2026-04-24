@@ -67,9 +67,25 @@ export default function StreamChatInterface(props: Props) {
     return <Skeleton className={'h-dvh w-full animate-pulse'} />;
   }
 
-  const channelId = matchedRecord.channelId?.split(':')[1];
+  // const channelId = matchedRecord.channelId?.split(':')[1];
 
-  const chatChannel = chatClient.channel(matchedRecord.channelType, channelId);
+  // const chatChannel = chatClient.channel(matchedRecord.channelType, channelId);
+
+  const rawChannelId = matchedRecord.channelId ?? '';
+  const [, parsedChannelId] = rawChannelId.split(':');
+
+  if (!parsedChannelId) {
+    return (
+      <div className='p-4 text-sm text-muted-foreground'>
+        This conversation isn&apos;t ready yet. Please try again in a moment.
+      </div>
+    );
+  }
+
+  const chatChannel = chatClient.channel(
+    matchedRecord.channelType,
+    parsedChannelId,
+  );
 
   // channel list filters/sort/options are unused here because we open a specific channel
   // const filters: ChannelFilters = {

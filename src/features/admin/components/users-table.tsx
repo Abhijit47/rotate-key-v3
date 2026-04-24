@@ -334,10 +334,19 @@ export function UsersTable() {
   const { data: users } = useGetUsers();
   // const usersData = users;
 
-  const [data, setData] = React.useState(users);
+  const [data, setData] = React.useState(users ?? []);
 
   React.useEffect(() => {
-    setData(users);
+    setData((prev) => {
+      const incoming = users ?? [];
+      const byId = new Map(incoming.map((u) => [u.id, u]));
+      const kept = prev
+        .filter((u) => byId.has(u.id))
+        .map((u) => byId.get(u.id)!);
+      const keptIds = new Set(kept.map((u) => u.id));
+      const added = incoming.filter((u) => !keptIds.has(u.id));
+      return [...kept, ...added];
+    });
   }, [users]);
 
   // const data = React.useMemo(() => usersData || [], [usersData]);
@@ -372,7 +381,7 @@ export function UsersTable() {
 
   // eslint-disable-next-line
   const table = useReactTable({
-    data: data ?? [],
+    data: data,
     columns,
     state: {
       sorting,
