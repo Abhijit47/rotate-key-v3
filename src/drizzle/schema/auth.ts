@@ -7,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
@@ -126,25 +127,46 @@ export const verification = pgTable(
   (table) => [index('verification_identifier_idx').on(table.identifier)],
 );
 
-// export const userRelations = relations(user, ({ many }) => ({
-//   sessions: many(session),
-//   accounts: many(account),
-//   properties: many(property),
-// }));
+export const devtoolsUser = pgTable('devtools_user', {
+  id: uuid('id')
+    .default(sql`pg_catalog.gen_random_uuid()`)
+    .primaryKey(),
+  userId: text('user_id').notNull(),
+  templateKey: text('template_key').notNull(),
+  label: text('label').notNull(),
+  email: text('email').notNull(),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull(),
+});
 
-// export const sessionRelations = relations(session, ({ one }) => ({
-//   user: one(user, {
-//     fields: [session.userId],
-//     references: [user.id],
-//   }),
-// }));
+export const matches = pgTable(
+  'matches',
+  {
+    id: uuid('id').primaryKey().unique().defaultRandom().notNull(),
+    user1Id: uuid('user1_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    user2Id: uuid('user2_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
 
-// export const accountRelations = relations(account, ({ one }) => ({
-//   user: one(user, {
-//     fields: [account.userId],
-//     references: [user.id],
-//   }),
-// }));
+    isActive: boolean('is_active').notNull().default(false),
+
+    channelId: varchar('channel_id'),
+    channelType: text('channel_type').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex('matches_unique').on(t.user1Id, t.user2Id),
+    index('idx_matches_user1').on(t.user1Id),
+    index('idx_matches_user2').on(t.user2Id),
+    index('idx_matches_created_at').on(t.createdAt),
+  ],
+);
 
 export type InsertUser = typeof user.$inferInsert;
 export type SelectUser = typeof user.$inferSelect;
@@ -157,3 +179,6 @@ export type SelectAccount = typeof account.$inferSelect;
 
 export type InsertVerification = typeof verification.$inferInsert;
 export type SelectVerification = typeof verification.$inferSelect;
+
+export type InsertMatch = typeof matches.$inferInsert;
+export type SelectMatch = typeof matches.$inferSelect;

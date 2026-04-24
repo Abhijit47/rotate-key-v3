@@ -13,6 +13,7 @@ import {
 } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
+  arrayMove,
   // arrayMove,
   SortableContext,
   useSortable,
@@ -91,6 +92,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ClientSession } from '@/lib/auth-client';
 import { format } from 'date-fns';
+// import { useGetUsers } from '../hooks/use-admin';
 import { useGetUsers } from '../hooks/use-admin';
 import AddUserModal from './add-user-dialog';
 import DeleteUserDialog from './delete-user-dialog';
@@ -327,10 +329,18 @@ function DraggableRow({ row }: { row: Row<ClientSession['user']> }) {
 }
 
 // export function UsersTable({ data: initialData }: { data: TableItem[] }) {
+// { users }: { users: ClientSession['user'][] }
 export function UsersTable() {
-  const { data: usersData } = useGetUsers();
+  const { data: users } = useGetUsers();
+  // const usersData = users;
 
-  const data = React.useMemo(() => usersData || [], [usersData]);
+  const [data, setData] = React.useState(users);
+
+  React.useEffect(() => {
+    setData(users);
+  }, [users]);
+
+  // const data = React.useMemo(() => usersData || [], [usersData]);
 
   // const [data, setData] = React.useState(() => usersData);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -351,13 +361,18 @@ export function UsersTable() {
     useSensor(KeyboardSensor, {}),
   );
 
+  // const dataIds = React.useMemo<UniqueIdentifier[]>(
+  //   () => users?.map(({ id }) => id) || [],
+  //   [users],
+  // );
   const dataIds = React.useMemo<UniqueIdentifier[]>(
-    () => usersData?.map(({ id }) => id) || [],
-    [usersData],
+    () => data?.map(({ id }) => id) || [],
+    [data],
   );
 
+  // eslint-disable-next-line
   const table = useReactTable({
-    data,
+    data: data ?? [],
     columns,
     state: {
       sorting,
@@ -384,6 +399,12 @@ export function UsersTable() {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
+      setData((data) => {
+        const oldIndex = dataIds.indexOf(active.id);
+        const newIndex = dataIds.indexOf(over.id);
+        return arrayMove(data, oldIndex, newIndex);
+      });
+
       // setData((data) => {
       //   const oldIndex = dataIds.indexOf(active.id);
       //   const newIndex = dataIds.indexOf(over.id);

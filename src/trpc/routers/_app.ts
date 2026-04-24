@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { adminRouter } from '@/features/admin/server/routers';
 import { authRouter } from '@/features/auth/server/routers';
+import { chatRouter } from '@/features/chat/server/routers';
 import { propertyRouter } from '@/features/property/server/routers';
 import { baseProcedure, createTRPCRouter } from '../init';
 
@@ -21,6 +22,7 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
   admin: adminRouter,
   property: propertyRouter,
+  chat: chatRouter,
 });
 
 // export type definition of API

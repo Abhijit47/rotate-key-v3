@@ -10,10 +10,19 @@ import ThemeToggler from '@/features/common/components/theme-toggler';
 import { buttonVariants } from '../ui/button';
 
 import { navlinks } from '@/constants';
+import { usePathname } from 'next/navigation';
 import MobileNavigation from './mobile-navigation';
 
 export default function Header() {
+  const pathname = usePathname();
   const { modal } = useOnboardModal();
+
+  // Regex to match /chat/[userId] paths
+  const chatSlugRegex = /^\/chat\/[^/]+$/;
+
+  if (pathname && chatSlugRegex.test(pathname)) {
+    return null;
+  }
 
   return (
     <header
