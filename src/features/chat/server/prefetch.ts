@@ -3,7 +3,7 @@ import { inferInput } from '@trpc/tanstack-react-query';
 
 export type ListingsInput = inferInput<typeof trpc.chat.getUsers>;
 
-export type MatchedUserInput = inferInput<typeof trpc.chat.getMatchedUser>;
+export type MatchedUserInput = inferInput<typeof trpc.chat.getMatchedUsers>;
 
 /**
  * Prefetch all users
@@ -14,9 +14,8 @@ export function prefetchChatUsers(params: ListingsInput) {
 }
 
 /**
- * Prefetch matched user for a given ownerId
- * @param params
+ * Prefetch all matched users for the current user.
  */
-export function prefetchMatchedUser(params: MatchedUserInput) {
-  return prefetch(trpc.chat.getMatchedUser.queryOptions(params));
+export function prefetchMatchedUsers(params: MatchedUserInput) {
+  return prefetch(trpc.chat.getMatchedUsers.queryOptions(params));
 }

@@ -1,114 +1,114 @@
-import MobileNavigation from '@/components/shared/mobile-navigation';
-import { buttonVariants } from '@/components/ui/button';
-import { LazyUserButton } from '@/features/common/components/lazy-common';
-import ThemeToggler from '@/features/common/components/theme-toggler';
-import { ArrowLeftCircle } from 'lucide-react';
-import Link from 'next/link';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
-  // Avatar,
   useChannelPreviewInfo,
   useChannelStateContext,
-  useChatContext,
+  useTypingContext,
 } from 'stream-chat-react';
-import { Avatar } from './avatar';
 
-const DotIcon = () => {
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+import LocaleToggler from '@/features/common/components/locale-toggler';
+import ThemeToggler from '@/features/common/components/theme-toggler';
+import { IconArrowRightFromArc, IconLogout } from '@tabler/icons-react';
+import { DotIcon } from 'lucide-react';
+import ComposerStatus from './composer-status';
+import CustomAvatar from './custom-avatar';
+
+export const CustomChannelHeader = () => {
+  const { channel, channelConfig } = useChannelStateContext();
+  const { typing } = useTypingContext();
+  const { displayTitle, displayImage } = useChannelPreviewInfo({ channel });
+  const hasTyping =
+    channelConfig?.typing_events !== false &&
+    Object.values(typing ?? {}).some(({ parent_id }) => !parent_id);
+
+  const date = channel?.lastKeyStroke;
+  // const lastSeenDate = channel.lastMessage()?.created_at;
+
+  const formattedLastSeen = date
+    ? new Intl.DateTimeFormat('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(new Date(date))
+    : 'No messages yet';
+
   return (
-    <svg
-      className={'fill-green-500 size-2.5'}
-      xmlns='http://www.w3.org/2000/svg'
-      viewBox='0 0 512 512'
-      fill='currentColor'>
-      <path d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z' />
-    </svg>
-  );
-};
+    <header className='bg-background flex h-(--header-height) shrink-0 items-center justify-between gap-2 border-b px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) lg:px-6 sticky top-0 z-10'>
+      <SidebarTrigger className='-ml-1' />
 
-export default function CustomChannelHeader() {
-  const { channel, watcher_count } = useChannelStateContext('ChannelHeader');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { openMobileNav } = useChatContext('ChannelHeader');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { displayImage, displayTitle, groupChannelDisplayInfo } =
-    useChannelPreviewInfo({
-      channel,
-      // overrideImage,
-      // overrideTitle,
-    });
-  // const { t } = useTranslationContext('ChannelHeader');
-
-  // eslint-disable-next-line
-  // @ts-ignore
-  const { member_count, subtitle } = channel?.data || {};
-
-  const live = (watcher_count ?? 0) > 0;
-
-  return (
-    <div className='str-chat__channel-header'>
-      {/* <Button
-        variant={'ghost'}
-        size={'icon'}
-        // aria-label={t('aria/Menu')}
-        // className='str-chat__header-hamburger'
-        onClick={openMobileNav}>
-        <MenuIcon />
-      </Button> */}
-
-      <div className='hidden md:block'>
-        <Link
-          href={'/chat'}
-          className={buttonVariants({
-            variant: 'ghost',
-            size: 'icon',
-          })}>
-          <ArrowLeftCircle className={''} />
-        </Link>
-      </div>
-
-      <div className='flex items-center md:hidden'>
-        <MobileNavigation />
-      </div>
-      <Avatar
-        className='str-chat__avatar--channel-header'
-        // groupChannelDisplayInfo={groupChannelDisplayInfo}
-        image={displayImage}
-        name={displayTitle}
-      />
-      <div className='str-chat__channel-header-end'>
-        <p className='str-chat__channel-header-title flex items-center gap-1'>
-          {displayTitle}{' '}
-          {live && (
-            <span className='str-chat__header-livestream-livelabel'>
-              {/* {t('live')} */}
-              <DotIcon />
+      <p className='text-sm font-medium flex flex-col items-center'>
+        <span className={'capitalize'}>{displayTitle}</span>
+        <span>
+          {hasTyping ? (
+            <span className='text-xs font-normal text-muted-foreground'>
+              {displayTitle} is typing...
+            </span>
+          ) : (
+            <span className='text-xs font-normal text-muted-foreground'>
+              Last seen: {formattedLastSeen}
             </span>
           )}
-        </p>
-        {subtitle && (
-          <p className='str-chat__channel-header-subtitle'>{subtitle}</p>
-        )}
-        <p className='str-chat__channel-header-info'>
-          {/* {!live && !!member_count && member_count > 0 && (
-            <>
-              {t('{{ memberCount }} members', {
-                memberCount: member_count,
-              })}
-              , {member_count} members
-            </>
-          )} */}
-          {/* {t('{{ watcherCount }} online', { watcherCount: watcher_count })} */}
-          {/* {watcher_count} online */}
-          {!live && !!member_count && member_count > 0 && (
-            <>{member_count} members</>
-          )}
-          {live && <>{watcher_count} online</>}
-        </p>
-      </div>
+        </span>
+      </p>
 
-      <div className={'flex items-center gap-2'}>
-        <ThemeToggler />
-        <LazyUserButton />
-      </div>
-    </div>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button className='flex items-center rounded-full transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary size-10'>
+            <CustomAvatar
+              size={'xs'}
+              imageUrl={displayImage}
+              userName={displayTitle || 'Channel Avatar'}
+              className='rounded-full!'
+            />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent align='end' className='w-48 p-2'>
+          <div className={'flex items-center justify-between'}>
+            <Badge variant={'outline'} className={'capitalize'}>
+              {displayTitle}
+            </Badge>
+            <span className={'size-10'}>
+              <DotIcon className='size-full text-green-500 animate-pulse' />
+            </span>
+          </div>
+
+          <Separator className={'mb-2'} />
+          <ComposerStatus />
+          <Separator className={'my-2'} />
+
+          <div className={'flex items-center justify-between'}>
+            <ThemeToggler />
+            <LocaleToggler />
+          </div>
+
+          <Separator className={'my-2'} />
+
+          <div className={'flex flex-col gap-2'}>
+            {/* TODO: Implement later */}
+            <Button
+              variant={'secondary'}
+              className={'w-full text-sm!'}
+              size={'xs'}>
+              <IconArrowRightFromArc className='size-4' />
+              Go Back
+            </Button>
+            {/* TODO: Implement later */}
+            <Button
+              variant={'destructive'}
+              className={'w-full text-sm!'}
+              size={'xs'}>
+              <IconLogout className='size-4' />
+              Log Out
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </header>
   );
-}
+};

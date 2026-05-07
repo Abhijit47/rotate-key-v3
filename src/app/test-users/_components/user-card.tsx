@@ -26,7 +26,7 @@ export default function UserCard() {
     toast.promise(add({ ownerId }), {
       loading: 'Adding friend...',
       success: () => {
-        router.push(`/chat/${ownerId}`);
+        router.push(`/chat`);
         return 'Friend added successfully!';
       },
       error: (err) => {
