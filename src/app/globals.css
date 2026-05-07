@@ -55,6 +55,17 @@
   --font-mono: var(--mono-family);
   --font-mono-weight: 400;
   --font-mono-tracking: 0em;
+
+  --animate-slide-out: slideOut 0.5s ease-in;
+
+  @keyframes slideOut {
+    0% {
+      transform: translateY(0%);
+    }
+    100% {
+      transform: translateY(-100%);
+    }
+  }
 }
 
 /* :root {

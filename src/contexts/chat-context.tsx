@@ -1,11 +1,16 @@
 'use client';
 
-import { createContext, ReactNode, useContext } from 'react';
+import { useRouter } from 'next/navigation';
+import { createContext, ReactNode, useContext, useEffect } from 'react';
+import { ChannelFilters, ChannelOptions, ChannelSort } from 'stream-chat';
 import { useCreateChatClient } from 'stream-chat-react';
 
 import { env } from '@/env';
-import { useRefreshChatToken } from '@/features/chat/hooks/use-chat';
-import { ChannelFilters, ChannelOptions, ChannelSort } from 'stream-chat';
+import {
+  useMatchedUsers,
+  useRefreshChatToken,
+} from '@/features/chat/hooks/use-chat';
+import { toast } from 'sonner';
 
 type ChatContextType = {
   chatClient: ReturnType<typeof useCreateChatClient>;
@@ -13,6 +18,7 @@ type ChatContextType = {
   filters: ChannelFilters;
   sort: ChannelSort;
   options: ChannelOptions;
+  isMatchedUsers: boolean;
 };
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -31,7 +37,11 @@ type Props = {
 
 export function ChatCustomContextProvider(props: Props) {
   const { children, user } = props;
+
+  const router = useRouter();
+
   const { mutateAsync, isPending: isTokenPending } = useRefreshChatToken();
+  const { data, isLoading: isMatchedUsers } = useMatchedUsers();
 
   const chatClient = useCreateChatClient({
     apiKey: env.NEXT_PUBLIC_STREAM_API_KEY,
@@ -49,12 +59,23 @@ export function ChatCustomContextProvider(props: Props) {
   const sort: ChannelSort = { last_message_at: -1 };
   const options: ChannelOptions = { limit: 10 };
 
+  useEffect(() => {
+    if (data?.length === 0) {
+      router.push('/');
+      toast.error(
+        'You have no matches yet. Please match with someone to start chatting.',
+      );
+      return;
+    }
+  }, [data, router]);
+
   const values = {
     chatClient,
     isTokenPending,
     filters,
     sort,
     options,
+    isMatchedUsers,
   };
 
   return <ChatContext.Provider value={values}>{children}</ChatContext.Provider>;

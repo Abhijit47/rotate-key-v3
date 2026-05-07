@@ -1,0 +1,91 @@
+import { forwardRef, useRef } from 'react';
+import {
+  Button,
+  Callout,
+  IconVoice,
+  RecordingPermission,
+  useAttachmentManagerState,
+  useComponentContext,
+  useDialogOnNearestManager,
+  useMessageComposerContext,
+} from 'stream-chat-react';
+
+import { RecordingPermissionDeniedNotification as DefaultRecordingPermissionDeniedNotification } from './RecordingPermissionDeniedNotification';
+import { RecordingAttachmentType } from './types';
+
+const dialogId = 'recording-permission-denied-notification';
+
+export const AudioRecordingButtonWithNotification = () => {
+  const {
+    RecordingPermissionDeniedNotification = DefaultRecordingPermissionDeniedNotification,
+    StartRecordingAudioButton = DefaultStartRecordingAudioButton,
+  } = useComponentContext();
+  const { asyncMessagesMultiSendEnabled, recordingController } =
+    useMessageComposerContext();
+  const { attachments } = useAttachmentManagerState();
+
+  const { dialog, dialogManager } = useDialogOnNearestManager({ id: dialogId });
+
+  const audioRecordingBtnRef = useRef<HTMLButtonElement | null>(null);
+  const isRecording = !!recordingController.recordingState;
+
+  return (
+    <>
+      <StartRecordingAudioButton
+        disabled={
+          isRecording ||
+          (!asyncMessagesMultiSendEnabled &&
+            attachments.some(
+              (a) => a.type === RecordingAttachmentType.VOICE_RECORDING,
+            ))
+        }
+        onClick={() => {
+          recordingController.recorder?.start();
+
+          const recordingEnabled = !!(
+            recordingController.recorder && navigator.mediaDevices
+          );
+
+          const shouldShowNotification =
+            recordingEnabled &&
+            recordingController.permissionState === 'denied';
+          if (shouldShowNotification) dialog.open();
+        }}
+        ref={audioRecordingBtnRef}
+      />
+      <Callout
+        className='str-chat__recording-permission-denied-notification'
+        dialogManagerId={dialogManager?.id}
+        id={dialogId}
+        onClose={dialog.close}
+        placement={'top-start'}
+        referenceElement={audioRecordingBtnRef.current}>
+        <RecordingPermissionDeniedNotification
+          permissionName={RecordingPermission.MIC}
+        />
+      </Callout>
+    </>
+  );
+};
+
+export type StartRecordingAudioButtonProps = React.ComponentProps<'button'>;
+
+export const DefaultStartRecordingAudioButton = forwardRef<
+  HTMLButtonElement,
+  StartRecordingAudioButtonProps
+>(function StartRecordingAudioButton(props, ref) {
+  return (
+    <Button
+      appearance='ghost'
+      aria-label='Start recording audio'
+      circular
+      className='str-chat__start-recording-audio-button'
+      data-testid='start-recording-audio-button'
+      size='sm'
+      variant='secondary'
+      {...props}
+      ref={ref}>
+      <IconVoice />
+    </Button>
+  );
+});

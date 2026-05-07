@@ -7,6 +7,7 @@ import {
 import { toast } from 'sonner';
 
 /**
+ * TEST HOOK, LATER WILL REMOVE THIS
  * Hook for add a new friend
  */
 export function useAddFriend() {
@@ -27,6 +28,7 @@ export function useAddFriend() {
 }
 
 /**
+ * TEST HOOK, LATER WILL REMOVE THIS
  * Hook for remove a friend
  */
 export function useRemoveFriend() {
@@ -44,6 +46,15 @@ export function useRemoveFriend() {
       },
     }),
   );
+}
+
+/**
+ * TEST HOOK, LATER WILL REMOVE THIS
+ * Hook to get all users
+ */
+export function useAllUsers() {
+  const trpc = useTRPC();
+  return useSuspenseQuery(trpc.chat.getUsers.queryOptions());
 }
 
 /**
@@ -67,19 +78,9 @@ export function useRefreshChatToken() {
 }
 
 /**
- * Hook to get all users
+ * Hook to get all matched users for the current user
  */
-export function useAllUsers() {
+export function useMatchedUsers() {
   const trpc = useTRPC();
-  return useSuspenseQuery(trpc.chat.getUsers.queryOptions());
-}
-
-/**
- * Hook to get matched user for a given friendId
- */
-export function useMatchedUser(friendId: string) {
-  const trpc = useTRPC();
-  return useSuspenseQuery(
-    trpc.chat.getMatchedUser.queryOptions({ ownerId: friendId }),
-  );
+  return useSuspenseQuery(trpc.chat.getMatchedUsers.queryOptions());
 }

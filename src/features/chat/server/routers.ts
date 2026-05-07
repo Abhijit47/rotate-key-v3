@@ -1,6 +1,11 @@
 import { env } from '@/env';
 import { TRPCError } from '@trpc/server';
-import { StreamChat } from 'stream-chat';
+import {
+  ChannelFilters,
+  MessageFilters,
+  SearchOptions,
+  StreamChat,
+} from 'stream-chat';
 import z from 'zod';
 
 import { db } from '@/drizzle/db';
@@ -254,8 +259,56 @@ export const chatRouter = createTRPCRouter({
           message: 'No match record found for this user',
         });
       }
-
       return matchedRecord;
+    }),
+
+  getUserByMatchId: protectedProcedure
+    .input(z.object({ matchId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { user } = ctx.auth;
+      const { matchId } = input;
+      const matchedRecord = await db.query.matches.findFirst({
+        where: (matches, { eq, or }) =>
+          and(
+            eq(matches.channelId, matchId),
+            eq(matches.isActive, true),
+            or(eq(matches.user1Id, user.id), eq(matches.user2Id, user.id)),
+          ),
+      });
+
+      if (!matchedRecord) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No match record found for this ID',
+        });
+      }
+
+      const matchedUserId =
+        matchedRecord.user1Id === user.id
+          ? matchedRecord.user2Id
+          : matchedRecord.user1Id;
+
+      const matchedUser = await db.query.user.findFirst({
+        where: (userTable, { eq }) => eq(userTable.id, matchedUserId),
+        columns: {
+          id: true,
+          name: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          image: true,
+          country: true,
+        },
+      });
+
+      if (!matchedUser) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No user found for the matched user ID',
+        });
+      }
+
+      return matchedUser;
     }),
 
   // TODO: WILL REMOVE LATER TEST PURPOSE ONLY
@@ -276,5 +329,79 @@ export const chatRouter = createTRPCRouter({
       },
     });
     return users;
+  }),
+
+  checkMyMessagesLimit: protectedProcedure.query(async ({ ctx }) => {
+    const myId = ctx.auth.user.id;
+    const serverClient = StreamChat.getInstance(
+      env.NEXT_PUBLIC_STREAM_API_KEY,
+      env.STREAM_API_SECRET,
+    );
+
+    const FREE_TIER_MESSAGES_LIMIT = 10;
+    const PAGE_SIZE = 100;
+
+    // let sentMessagesCount = 0;
+    // let offset = 0;
+
+    // Tip: Always include members: { $in: [userID] } in your filter to ensure consistent
+    const channelFilters: ChannelFilters = {
+      members: { $in: [myId] },
+      // message_count: { $exists: true },
+    };
+    const messageFilters: string | MessageFilters = {
+      // text: { $exists: true },
+      user_id: { $eq: myId },
+      // attachments: { $exists: true },
+    };
+    const searchOptions: SearchOptions = { limit: 10 };
+
+    // Search with message filters
+    const filtered = await serverClient.search(
+      channelFilters,
+      messageFilters,
+      searchOptions,
+    );
+
+    console.log('sent messages', filtered.results.length);
+
+    // while (true) {
+    //   // Channel filter: only channels where current user is a member
+    //   const channelFilter: ChannelFilters = {
+    //     type: 'messaging' as const,
+    //     members: { $in: [myId] },
+    //   };
+
+    //   const response = await serverClient.search(
+    //     channelFilter,
+    //     '',
+    //     {
+    //       limit: PAGE_SIZE,
+    //       offset,
+    //       sort: [{ created_at: -1 }],
+    //       // Message filter: only messages sent by current user
+    //       message_filter_conditions: {
+    //         'user.id': { $eq: myId },
+    //       },
+    //     }, // SDK typings may not include message_filter_conditions
+    //   );
+
+    //   const pageCount = response.results.length;
+    //   sentMessagesCount += pageCount;
+
+    //   if (pageCount < PAGE_SIZE) break;
+    //   offset += PAGE_SIZE;
+    // }
+
+    // const isFreeTierLimitReached =
+    //   sentMessagesCount >= FREE_TIER_MESSAGES_LIMIT;
+
+    // return {
+    //   sentMessagesCount,
+    //   freeTierLimit: FREE_TIER_MESSAGES_LIMIT,
+    //   isFreeTierLimitReached,
+    // };
+
+    return 'This endpoint is currently disabled for testing purposes.';
   }),
 });
