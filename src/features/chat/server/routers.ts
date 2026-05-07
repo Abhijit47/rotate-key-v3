@@ -268,8 +268,12 @@ export const chatRouter = createTRPCRouter({
       const { user } = ctx.auth;
       const { matchId } = input;
       const matchedRecord = await db.query.matches.findFirst({
-        where: (matches, { eq }) =>
-          and(eq(matches.channelId, matchId), eq(matches.isActive, true)),
+        where: (matches, { eq, or }) =>
+          and(
+            eq(matches.channelId, matchId),
+            eq(matches.isActive, true),
+            or(eq(matches.user1Id, user.id), eq(matches.user2Id, user.id)),
+          ),
       });
 
       if (!matchedRecord) {
