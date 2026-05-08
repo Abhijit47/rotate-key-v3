@@ -3,19 +3,26 @@
 import './custom.css';
 
 import data from '@emoji-mart/data';
+import { TRPCClientError } from '@trpc/client';
 import { init, SearchIndex } from 'emoji-mart';
 import { useTheme } from 'next-themes';
 import { KeyboardEvent, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import {
   Channel,
   Chat,
   MessageComposer,
+  MessageComposerProps,
   MessageList,
   Thread,
+  useMessageComposerController,
   Window,
   WithComponents,
 } from 'stream-chat-react';
 import { EmojiPicker } from 'stream-chat-react/emojis';
+
+import { useUpgradeModal } from '@/features/common/hooks/use-upgrade-modal';
+import { useMyCheck } from '../hooks/use-chat';
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { useCustomChatContext } from '@/contexts/chat-context';
@@ -91,11 +98,6 @@ export default function ChatInterface() {
     storedValue.channelId,
   );
 
-  const defaultShouldSubmit = (event: KeyboardEvent) =>
-    event.key === 'Enter' && !event.shiftKey;
-
-  const isFreeTierLimitReached = false; // Replace with actual logic to determine if the free tier limit has been reached
-
   return (
     <SidebarProvider
       style={
@@ -130,19 +132,8 @@ export default function ChatInterface() {
                           AttachmentSelector: CustomAttachmentSelector,
                           // MessageComposerUI: CustomMessageComposer,
                         }}> */}
-                      <MessageComposer
-                        audioRecordingEnabled={true}
-                        emojiSearchIndex={SearchIndex}
-                        focus={true}
-                        hideSendButton={isFreeTierLimitReached}
-                        // overrideSubmitHandler={{
-                        //   cid: 'string',
-                        //   localMessage: '',
-                        //   message: '',
-                        //   sendOptions: {},
-                        // }}
-                        shouldSubmit={defaultShouldSubmit}
-                      />
+
+                      <Composer />
                       {/* </WithComponents> */}
                     </Window>
                     <Thread />
@@ -156,3 +147,72 @@ export default function ChatInterface() {
     </SidebarProvider>
   );
 }
+
+const Composer = () => {
+  const { handleError, modal } = useUpgradeModal();
+  const { mutateAsync: checkLimit } = useMyCheck();
+  const messageComposer = useMessageComposerController();
+
+  const overrideSubmitHandler: MessageComposerProps['overrideSubmitHandler'] =
+    ({ cid, localMessage, message, sendOptions }) => {
+      // custom logic here
+      // await sendMessageToBackend({ cid, localMessage, message, sendOptions });
+
+      checkLimit()
+        .then(async (res) => {
+          console.log('Chat limit check result:', res);
+          if (res.isMessageLimitReached) {
+            handleError(
+              'You have reached the free tier message limit. Please upgrade to continue chatting.',
+            );
+            return; // void — cancels send
+          }
+
+          if (!messageComposer?.channel) {
+            // throw new Error('No channel available to send message');
+            toast.error(
+              'No channel available to send message. Please try again later.',
+            );
+            return;
+          }
+          // If limit not reached, proceed to send the message
+          // console.log('Message can be sent:', {
+          //   cid,
+          //   localMessage,
+          //   message,
+          //   sendOptions,
+          // });
+          // send the composed message via the channel
+          await messageComposer.channel.sendMessage(message, sendOptions);
+
+          // clear composer state (match library's default flow)
+          messageComposer.clear();
+        })
+        .catch((err) => {
+          console.error('Error in overrideSubmitHandler:', err);
+          if (err instanceof TRPCClientError) {
+            handleError(err);
+          } else {
+            toast.error('Failed to send message. Please try again.');
+            return;
+          }
+        });
+    };
+
+  const defaultShouldSubmit = (event: KeyboardEvent) =>
+    event.key === 'Enter' && !event.shiftKey;
+
+  return (
+    <>
+      {modal}
+      <MessageComposer
+        audioRecordingEnabled={true}
+        emojiSearchIndex={SearchIndex}
+        focus={true}
+        shouldSubmit={defaultShouldSubmit}
+        hideSendButton={false}
+        overrideSubmitHandler={overrideSubmitHandler}
+      />
+    </>
+  );
+};

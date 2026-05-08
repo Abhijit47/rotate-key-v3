@@ -6,6 +6,8 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { ChatCustomContextProvider } from '@/contexts/chat-context';
 import ChatInterface from '@/features/chat/components/chat-interface';
+import EmptyChatState from '@/features/chat/components/empty-chat-state';
+import ErrorChatState from '@/features/chat/components/error-chat-state';
 import { prefetchMatchedUsers } from '@/features/chat/server/prefetch';
 import { requireAuth } from '@/lib/requireAuth';
 import { HydrateClient } from '@/trpc/server';
@@ -17,7 +19,7 @@ export default async function ChatPage() {
 
   return (
     <HydrateClient>
-      <ErrorBoundary fallback={<div>Something went wrong, chat page.</div>}>
+      <ErrorBoundary fallback={<ErrorChatState />}>
         <ChatCustomContextProvider
           user={{
             id: user.id,
@@ -27,7 +29,7 @@ export default async function ChatPage() {
             expireTime: user.chatTokenExpireAt,
             issuedAt: user.chatTokenIssuedAt,
           }}>
-          <Suspense fallback={<div>Loading chat interface...</div>}>
+          <Suspense fallback={<EmptyChatState />}>
             <ChatInterface />
           </Suspense>
         </ChatCustomContextProvider>

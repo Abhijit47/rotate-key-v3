@@ -57,7 +57,11 @@ export function TRPCReactProvider(
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
         {props.children}
         {process.env.NODE_ENV === 'development' && (
-          <ReactQueryDevtools theme='system' initialIsOpen={false} />
+          <ReactQueryDevtools
+            theme='system'
+            initialIsOpen={false}
+            buttonPosition={'top-right'}
+          />
         )}
       </TRPCProvider>
     </QueryClientProvider>

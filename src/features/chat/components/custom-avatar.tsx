@@ -11,9 +11,9 @@ export default function CustomAvatar({
     <Avatar
       {...rest}
       imageUrl={imageUrl}
-      size={size || 'lg'}
+      size={size || '2xl'}
       userName={userName}
-      className={className ?? 'rounded-full!'}
+      className={className ?? 'rounded-full! w-full! h-full!'}
     />
   );
 }

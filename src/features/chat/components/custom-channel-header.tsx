@@ -59,9 +59,9 @@ export const CustomChannelHeader = () => {
 
       <Popover>
         <PopoverTrigger asChild>
-          <button className='flex items-center rounded-full transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary size-10'>
+          <button className='flex items-center rounded-full transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary size-8'>
             <CustomAvatar
-              size={'xs'}
+              size={'md'}
               imageUrl={displayImage}
               userName={displayTitle || 'Channel Avatar'}
               className='rounded-full!'
