@@ -19,9 +19,7 @@ export default function ErrorChatState() {
 
   return (
     <div
-      className={
-        'flex h-screen w-full flex-col items-center justify-between select-none pointer-events-none transition-opacity animate-slide-out'
-      }>
+      className={'flex h-screen w-full flex-col items-center justify-between'}>
       <Empty className='h-full'>
         <EmptyHeader>
           <EmptyMedia variant='icon' className='animate-pulse mb-4'>

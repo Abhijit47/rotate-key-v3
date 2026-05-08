@@ -136,7 +136,7 @@ export default function ChatInterface() {
                       <Composer />
                       {/* </WithComponents> */}
                     </Window>
-                    <Thread />
+                    <CustomThread />
                   </Channel>
                 </WithComponents>
               )}
@@ -148,59 +148,136 @@ export default function ChatInterface() {
   );
 }
 
+function CustomThread() {
+  const { handleError, modal } = useUpgradeModal();
+  const { mutateAsync: checkLimit } = useMyCheck();
+  const messageComposer = useMessageComposerController();
+
+  const overrideSubmitHandler2: MessageComposerProps['overrideSubmitHandler'] =
+    async ({ cid, localMessage, message, sendOptions }) => {
+      try {
+        const res = await checkLimit();
+        if (res.isMessageLimitReached) {
+          handleError(
+            'You have reached the free tier message limit. Please upgrade to continue chatting.',
+          );
+          return;
+        }
+
+        if (!messageComposer?.channel) {
+          toast.error(
+            'No channel available to send message. Please try again later.',
+          );
+          return;
+        }
+
+        await messageComposer.channel.sendMessage(message, sendOptions);
+        messageComposer.clear();
+      } catch (err) {
+        console.error('Error in overrideSubmitHandler:', err);
+        if (err instanceof TRPCClientError) {
+          handleError(err);
+        } else {
+          toast.error('Failed to send message. Please try again.');
+        }
+      }
+    };
+
+  return (
+    <>
+      {modal}
+      <Thread
+        additionalMessageComposerProps={{
+          overrideSubmitHandler: overrideSubmitHandler2,
+        }}
+      />
+    </>
+  );
+}
+
 const Composer = () => {
   const { handleError, modal } = useUpgradeModal();
   const { mutateAsync: checkLimit } = useMyCheck();
   const messageComposer = useMessageComposerController();
 
-  const overrideSubmitHandler: MessageComposerProps['overrideSubmitHandler'] =
-    ({ cid, localMessage, message, sendOptions }) => {
-      // custom logic here
-      // await sendMessageToBackend({ cid, localMessage, message, sendOptions });
+  // const overrideSubmitHandler: MessageComposerProps['overrideSubmitHandler'] =
+  //   ({ cid, localMessage, message, sendOptions }) => {
+  //     // custom logic here
+  //     // await sendMessageToBackend({ cid, localMessage, message, sendOptions });
 
-      checkLimit()
-        .then(async (res) => {
-          console.log('Chat limit check result:', res);
-          if (res.isMessageLimitReached) {
-            handleError(
-              'You have reached the free tier message limit. Please upgrade to continue chatting.',
-            );
-            return; // void — cancels send
-          }
+  //     checkLimit()
+  //       .then(async (res) => {
+  //         console.log('Chat limit check result:', res);
+  //         if (res.isMessageLimitReached) {
+  //           handleError(
+  //             'You have reached the free tier message limit. Please upgrade to continue chatting.',
+  //           );
+  //           return; // void — cancels send
+  //         }
 
-          if (!messageComposer?.channel) {
-            // throw new Error('No channel available to send message');
-            toast.error(
-              'No channel available to send message. Please try again later.',
-            );
-            return;
-          }
-          // If limit not reached, proceed to send the message
-          // console.log('Message can be sent:', {
-          //   cid,
-          //   localMessage,
-          //   message,
-          //   sendOptions,
-          // });
-          // send the composed message via the channel
-          await messageComposer.channel.sendMessage(message, sendOptions);
+  //         if (!messageComposer?.channel) {
+  //           // throw new Error('No channel available to send message');
+  //           toast.error(
+  //             'No channel available to send message. Please try again later.',
+  //           );
+  //           return;
+  //         }
+  //         // If limit not reached, proceed to send the message
+  //         // console.log('Message can be sent:', {
+  //         //   cid,
+  //         //   localMessage,
+  //         //   message,
+  //         //   sendOptions,
+  //         // });
+  //         // send the composed message via the channel
+  //         await messageComposer.channel.sendMessage(message, sendOptions);
 
-          // clear composer state (match library's default flow)
-          messageComposer.clear();
-        })
-        .catch((err) => {
-          console.error('Error in overrideSubmitHandler:', err);
-          if (err instanceof TRPCClientError) {
-            handleError(err);
-          } else {
-            toast.error('Failed to send message. Please try again.');
-            return;
-          }
-        });
+  //         // clear composer state (match library's default flow)
+  //         messageComposer.clear();
+  //       })
+  //       .catch((err) => {
+  //         console.error('Error in overrideSubmitHandler:', err);
+  //         if (err instanceof TRPCClientError) {
+  //           handleError(err);
+  //         } else {
+  //           toast.error('Failed to send message. Please try again.');
+  //           return;
+  //         }
+  //       });
+  //   };
+
+  const overrideSubmitHandler2: MessageComposerProps['overrideSubmitHandler'] =
+    async ({ cid, localMessage, message, sendOptions }) => {
+      try {
+        const res = await checkLimit();
+        if (res.isMessageLimitReached) {
+          handleError(
+            'You have reached the free tier message limit. Please upgrade to continue chatting.',
+          );
+          return;
+        }
+
+        if (!messageComposer?.channel) {
+          toast.error(
+            'No channel available to send message. Please try again later.',
+          );
+          return;
+        }
+
+        await messageComposer.channel.sendMessage(message, sendOptions);
+        messageComposer.clear();
+      } catch (err) {
+        console.error('Error in overrideSubmitHandler:', err);
+        if (err instanceof TRPCClientError) {
+          handleError(err);
+        } else {
+          toast.error('Failed to send message. Please try again.');
+        }
+      }
     };
 
   const defaultShouldSubmit = (event: KeyboardEvent) =>
-    event.key === 'Enter' && !event.shiftKey;
+    event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing;
 
   return (
     <>
@@ -211,7 +288,7 @@ const Composer = () => {
         focus={true}
         shouldSubmit={defaultShouldSubmit}
         hideSendButton={false}
-        overrideSubmitHandler={overrideSubmitHandler}
+        overrideSubmitHandler={overrideSubmitHandler2}
       />
     </>
   );

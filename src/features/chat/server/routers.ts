@@ -341,6 +341,7 @@ export const chatRouter = createTRPCRouter({
       env.STREAM_API_SECRET,
     );
 
+    // TODO: will come products ids will come polar API
     const PRODUCT_TIER_MAP: Record<string, string> = {
       '75b68aa7-45d4-41a8-a658-9c0b9cd60695': 'free',
       'd8839644-f591-4ae4-b4cf-5df7eebe1005': 'basic-monthly',
@@ -355,7 +356,17 @@ export const chatRouter = createTRPCRouter({
       customer = await polarClient.customers.getStateExternal({
         externalId: ctx.auth.user.id,
       });
+      // TODO: remove after testing
       console.log({ customer });
+      Sentry.addBreadcrumb({
+        category: 'subscription',
+        message: 'Fetched customer subscription state',
+        level: 'info',
+        data: {
+          userId: ctx.auth.user.id,
+          hasCustomer: Boolean(customer),
+        },
+      });
     } catch (error) {
       Sentry.captureException(error, {
         extra: {
