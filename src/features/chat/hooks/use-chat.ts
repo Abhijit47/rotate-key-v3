@@ -84,3 +84,26 @@ export function useMatchedUsers() {
   const trpc = useTRPC();
   return useSuspenseQuery(trpc.chat.getMatchedUsers.queryOptions());
 }
+
+/**
+ * Hook to check per user check
+ */
+export function useMyCheck() {
+  const trpc = useTRPC();
+
+  return useMutation(
+    trpc.chat.checkMyChatLimit.mutationOptions({
+      onSuccess: async () => {
+        // TESTING PURPOSEs
+        // toast.success('Checked chat limit successfully');
+      },
+      onError: (err) => {
+        console.error({ err });
+        // if (err.data?.code === 'FORBIDDEN') {
+        //   toast.error(err.message);
+        // }
+        return err.message;
+      },
+    }),
+  );
+}

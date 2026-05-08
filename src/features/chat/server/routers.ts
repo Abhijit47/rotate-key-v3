@@ -1,4 +1,5 @@
 import { env } from '@/env';
+import * as Sentry from '@sentry/nextjs';
 import { TRPCError } from '@trpc/server';
 import {
   ChannelFilters,
@@ -11,6 +12,7 @@ import z from 'zod';
 import { db } from '@/drizzle/db';
 import { matches, user as userTable } from '@/drizzle/schema';
 import { generateChannelId } from '@/lib/helpers';
+import { polarClient } from '@/lib/polar';
 import { generateTokenForUser } from '@/lib/stream';
 import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
 import { and, eq, or } from 'drizzle-orm';
@@ -331,15 +333,124 @@ export const chatRouter = createTRPCRouter({
     return users;
   }),
 
-  checkMyMessagesLimit: protectedProcedure.query(async ({ ctx }) => {
+  checkMyChatLimit: protectedProcedure.mutation(async ({ ctx }) => {
     const myId = ctx.auth.user.id;
+
     const serverClient = StreamChat.getInstance(
       env.NEXT_PUBLIC_STREAM_API_KEY,
       env.STREAM_API_SECRET,
     );
 
-    const FREE_TIER_MESSAGES_LIMIT = 10;
-    const PAGE_SIZE = 100;
+    // TODO: will come products ids will come polar API
+    const PRODUCT_TIER_MAP: Record<string, string> = {
+      '75b68aa7-45d4-41a8-a658-9c0b9cd60695': 'free',
+      'd8839644-f591-4ae4-b4cf-5df7eebe1005': 'basic-monthly',
+      'ac96bf48-4e16-4943-9f65-5fe37afa6819': 'basic-yearly',
+      '44057f38-5c6b-431d-9633-be7ef9433c0e': 'pro-monthly',
+      'e5cb95ff-a6be-4549-81d0-5c10170a52ca': 'pro-yearly',
+    };
+
+    let customer;
+
+    try {
+      customer = await polarClient.customers.getStateExternal({
+        externalId: ctx.auth.user.id,
+      });
+      // TODO: remove after testing
+      console.log({ customer });
+      Sentry.addBreadcrumb({
+        category: 'subscription',
+        message: 'Fetched customer subscription state',
+        level: 'info',
+        data: {
+          userId: ctx.auth.user.id,
+          hasCustomer: Boolean(customer),
+        },
+      });
+    } catch (error) {
+      Sentry.captureException(error, {
+        extra: {
+          context: 'Error fetching customer subscription status',
+          userId: ctx.auth.user.id,
+        },
+      });
+      throw new TRPCError({
+        code: 'SERVICE_UNAVAILABLE',
+        message:
+          'Unable to verify subscription right now. Please try again shortly.',
+      });
+    }
+
+    // 1. Check if the customer has an active subscription
+    if (
+      !customer.activeSubscriptions ||
+      customer.activeSubscriptions.length === 0
+    ) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message:
+          'Active subscription required to access this resource. Please upgrade your plan.',
+      });
+    }
+
+    const activeSubscription = customer.activeSubscriptions[0];
+    const tier = PRODUCT_TIER_MAP[activeSubscription.productId];
+
+    if (!tier) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Unknown subscription plan. Please contact support.',
+      });
+    }
+
+    const voiceCallsBenefitId = 'b1404eae-afb4-4159-8971-74b8d1acbfdd';
+    const videoCallsBenefitId = '33c6880a-2b06-4ac2-912b-55a6594f031e';
+    const messageSendingBenefitId = 'b27278f8-ba2e-46a6-be9b-2440c1c61e1d';
+
+    const messageBenefit = customer.grantedBenefits.find(
+      (benefit) => benefit.benefitId === messageSendingBenefitId,
+    );
+    const voiceCallBenefit = customer.grantedBenefits.find(
+      (benefit) => benefit.benefitId === voiceCallsBenefitId,
+    );
+    const videoCallBenefit = customer.grantedBenefits.find(
+      (benefit) => benefit.benefitId === videoCallsBenefitId,
+    );
+
+    if (!messageBenefit || !voiceCallBenefit || !videoCallBenefit) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'Your plan does not include chat access.',
+      });
+    }
+
+    const messageRawLimit = messageBenefit.benefitMetadata?.[tier];
+    const messageLimit =
+      messageRawLimit === 'unlimited'
+        ? Infinity
+        : parseInt(String(messageRawLimit), 10);
+
+    const voiceCallRawLimit = voiceCallBenefit.benefitMetadata?.[tier];
+    const voiceCallLimit =
+      voiceCallRawLimit === 'unlimited'
+        ? Infinity
+        : parseInt(String(voiceCallRawLimit), 10);
+
+    const videoCallRawLimit = videoCallBenefit.benefitMetadata?.[tier];
+    const videoCallLimit =
+      videoCallRawLimit === 'unlimited'
+        ? Infinity
+        : parseInt(String(videoCallRawLimit), 10);
+
+    if (isNaN(messageLimit) || isNaN(voiceCallLimit) || isNaN(videoCallLimit)) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Could not determine your chat limit.',
+      });
+    }
+
+    // const FREE_TIER_MESSAGES_LIMIT = 10;
+    // const PAGE_SIZE = 100;
 
     // let sentMessagesCount = 0;
     // let offset = 0;
@@ -365,6 +476,26 @@ export const chatRouter = createTRPCRouter({
 
     console.log('sent messages', filtered.results.length);
 
+    // how much properties the user has listed
+    const currentMessagesCount = filtered.results.length;
+
+    if (currentMessagesCount >= messageLimit) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: `You've reached your plan's limit of ${messageLimit} messages. Please upgrade to send more.`,
+      });
+    }
+
+    // TODO: in the future, we can also check voice and video call usage against those limits as well
+
+    return {
+      isMessageLimitReached: currentMessagesCount >= messageLimit,
+      sentMessagesCount: currentMessagesCount,
+      messageLimit,
+      voiceCallLimit,
+      videoCallLimit,
+    };
+
     // while (true) {
     //   // Channel filter: only channels where current user is a member
     //   const channelFilter: ChannelFilters = {
@@ -380,9 +511,11 @@ export const chatRouter = createTRPCRouter({
     //       offset,
     //       sort: [{ created_at: -1 }],
     //       // Message filter: only messages sent by current user
-    //       message_filter_conditions: {
-    //         'user.id': { $eq: myId },
-    //       },
+
+    //       // TODO: NEED TO CHECK DOCS, SDK typings may not include message_filter_conditions
+    //       // message_filter_conditions: {
+    //       //   'user.id': { $eq: myId },
+    //       // },
     //     }, // SDK typings may not include message_filter_conditions
     //   );
 
@@ -401,7 +534,5 @@ export const chatRouter = createTRPCRouter({
     //   freeTierLimit: FREE_TIER_MESSAGES_LIMIT,
     //   isFreeTierLimitReached,
     // };
-
-    return 'This endpoint is currently disabled for testing purposes.';
   }),
 });
