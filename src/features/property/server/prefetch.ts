@@ -11,6 +11,14 @@ export function prefetchPublicProperties(params: PropertiesInput) {
 }
 
 /**
+ * Prefetch user properties with params
+ * @param params
+ */
+export function prefetchUserProperties(params: PropertiesInput) {
+  return prefetch(trpc.property.getUserProperties.queryOptions(params));
+}
+
+/**
  * Prefetch one property by ID
  * @param propertyId
  */

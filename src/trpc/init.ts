@@ -44,6 +44,8 @@ export const protectedProcedure = baseProcedure.use(
     return next({ ctx: { ...ctx, auth: session } });
   }),
 );
+
+// TODO: Will place inside premium router later, but for now we need it here to check the engagement limit when liking a property
 export const premiumProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
     const { user } = ctx.auth;

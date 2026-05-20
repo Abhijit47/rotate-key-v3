@@ -21,6 +21,12 @@ export const updatePropertySchema = propertySchema
 
 export const deletePropertySchema = updatePropertySchema.pick({ id: true });
 
+export const addLikeToPropertySchema = z.object({
+  propertyId: z.uuid(),
+  path: z.string(),
+});
+
 export type PropertyValues = z.infer<typeof propertySchema>;
 export type UpdatePropertyValues = z.infer<typeof updatePropertySchema>;
 export type DeletePropertyValues = z.infer<typeof deletePropertySchema>;
+export type AddLikeToPropertyValues = z.infer<typeof addLikeToPropertySchema>;

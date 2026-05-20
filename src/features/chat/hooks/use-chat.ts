@@ -10,43 +10,43 @@ import { toast } from 'sonner';
  * TEST HOOK, LATER WILL REMOVE THIS
  * Hook for add a new friend
  */
-export function useAddFriend() {
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
+// export function useAddFriend() {
+//   const trpc = useTRPC();
+//   const queryClient = useQueryClient();
 
-  return useMutation(
-    trpc.chat.addFriend.mutationOptions({
-      onSuccess: async () => {
-        queryClient.invalidateQueries(trpc.chat.getUsers.queryOptions());
-      },
-      onError: (err) => {
-        console.error({ err });
-        toast.error('Failed to add friend. Please try again.');
-      },
-    }),
-  );
-}
+//   return useMutation(
+//     trpc.chat.addFriend.mutationOptions({
+//       onSuccess: async () => {
+//         queryClient.invalidateQueries(trpc.chat.getUsers.queryOptions());
+//       },
+//       onError: (err) => {
+//         console.error({ err });
+//         toast.error('Failed to add friend. Please try again.');
+//       },
+//     }),
+//   );
+// }
 
 /**
  * TEST HOOK, LATER WILL REMOVE THIS
  * Hook for remove a friend
  */
-export function useRemoveFriend() {
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
+// export function useRemoveFriend() {
+//   const trpc = useTRPC();
+//   const queryClient = useQueryClient();
 
-  return useMutation(
-    trpc.chat.removeFriend.mutationOptions({
-      onSuccess: async () => {
-        queryClient.invalidateQueries(trpc.chat.getUsers.queryOptions());
-      },
-      onError: (err) => {
-        console.error({ err });
-        toast.error('Failed to remove friend. Please try again.');
-      },
-    }),
-  );
-}
+//   return useMutation(
+//     trpc.chat.removeFriend.mutationOptions({
+//       onSuccess: async () => {
+//         queryClient.invalidateQueries(trpc.chat.getUsers.queryOptions());
+//       },
+//       onError: (err) => {
+//         console.error({ err });
+//         toast.error('Failed to remove friend. Please try again.');
+//       },
+//     }),
+//   );
+// }
 
 /**
  * TEST HOOK, LATER WILL REMOVE THIS

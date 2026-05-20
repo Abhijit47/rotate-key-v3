@@ -7,11 +7,9 @@ import {
   pgTable,
   text,
   timestamp,
-  uniqueIndex,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-// import { property } from './property';
 
 export const rolesEnum = pgEnum('role', roles);
 export const plansEnum = pgEnum('plan_slug', plans);
@@ -139,35 +137,6 @@ export const devtoolsUser = pgTable('devtools_user', {
   updatedAt: timestamp('updated_at').notNull(),
 });
 
-export const matches = pgTable(
-  'matches',
-  {
-    id: uuid('id').primaryKey().unique().defaultRandom().notNull(),
-    user1Id: uuid('user1_id')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    user2Id: uuid('user2_id')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-
-    isActive: boolean('is_active').notNull().default(false),
-
-    channelId: varchar('channel_id'),
-    channelType: text('channel_type').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at')
-      .defaultNow()
-      .$onUpdate(() => /* @__PURE__ */ new Date())
-      .notNull(),
-  },
-  (t) => [
-    uniqueIndex('matches_unique').on(t.user1Id, t.user2Id),
-    index('idx_matches_user1').on(t.user1Id),
-    index('idx_matches_user2').on(t.user2Id),
-    index('idx_matches_created_at').on(t.createdAt),
-  ],
-);
-
 export type InsertUser = typeof user.$inferInsert;
 export type SelectUser = typeof user.$inferSelect;
 
@@ -179,6 +148,3 @@ export type SelectAccount = typeof account.$inferSelect;
 
 export type InsertVerification = typeof verification.$inferInsert;
 export type SelectVerification = typeof verification.$inferSelect;
-
-export type InsertMatch = typeof matches.$inferInsert;
-export type SelectMatch = typeof matches.$inferSelect;
