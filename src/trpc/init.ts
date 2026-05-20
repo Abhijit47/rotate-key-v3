@@ -44,6 +44,8 @@ export const protectedProcedure = baseProcedure.use(
     return next({ ctx: { ...ctx, auth: session } });
   }),
 );
+
+// TODO: Move this into a premium router later; for now it lives here because it enforces premium/property-listing limits.
 export const premiumProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
     const { user } = ctx.auth;

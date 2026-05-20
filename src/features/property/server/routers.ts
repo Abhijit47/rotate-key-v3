@@ -1,16 +1,24 @@
 import { and, eq } from 'drizzle-orm';
+import { revalidatePath } from 'next/cache';
+import { StreamChat } from 'stream-chat';
 
 import { db } from '@/drizzle/db';
-import { property } from '@/drizzle/schema';
+import { property as PropertyTable } from '@/drizzle/schema';
+import { like as LikeTable } from '@/drizzle/schema/like';
+import { match as MatchTable } from '@/drizzle/schema/match';
+import { env } from '@/env';
 import { auth } from '@/lib/auth';
+import { generateChannelId } from '@/lib/helpers';
+import { paymentPolicyCheckProcedure } from '@/lib/property-actions';
 import {
+  addLikeToPropertySchema,
   deletePropertySchema,
   propertyIdSchema,
   propertySchema,
   updatePropertySchema,
 } from '@/lib/validators/property-schema';
 import {
-  baseProcedure,
+  // baseProcedure,
   createTRPCRouter,
   premiumProcedure,
   protectedProcedure,
@@ -39,33 +47,8 @@ export const propertyRouter = createTRPCRouter({
           });
         }
 
-        // const [newProperty] = await db.transaction(async (tx) => {
-        //   const currentCount = await tx.$count(
-        //     property,
-        //     eq(property.authorId, session.user.id),
-        //   );
-
-        //   if (currentCount >= createPropertyLimit) {
-        //     throw new TRPCError({
-        //       code: 'FORBIDDEN',
-        //       message: `You've reached your plan's limit of ${createPropertyLimit} properties.`,
-        //     });
-        //   }
-
-        //   return tx
-        //     .insert(property)
-        //     .values({
-        //       ...input,
-        //       id: crypto.randomUUID(), // TODO: later remove after new migration with defaultRandom is applied
-        //       images: JSON.parse(JSON.stringify(input.images)),
-        //       amenities: JSON.parse(JSON.stringify(input.amenities)),
-        //       authorId: session.user.id,
-        //     })
-        //     .returning();
-        // });
-
         const [newProperty] = await db
-          .insert(property)
+          .insert(PropertyTable)
           .values({
             ...input,
             images: JSON.parse(JSON.stringify(input.images)),
@@ -108,7 +91,10 @@ export const propertyRouter = createTRPCRouter({
         const { id, ...updateData } = input;
 
         const existingProperty = await db.query.property.findFirst({
-          where: and(eq(property.id, id), eq(property.authorId, user.id)),
+          where: and(
+            eq(PropertyTable.id, id),
+            eq(PropertyTable.authorId, user.id),
+          ),
         });
 
         if (!existingProperty) {
@@ -119,7 +105,7 @@ export const propertyRouter = createTRPCRouter({
         }
 
         const [updatedProperty] = await db
-          .update(property)
+          .update(PropertyTable)
           .set({
             ...updateData,
             images: updateData.images
@@ -129,7 +115,9 @@ export const propertyRouter = createTRPCRouter({
               ? updateData.amenities
               : existingProperty.amenities,
           })
-          .where(and(eq(property.id, id), eq(property.authorId, user.id)))
+          .where(
+            and(eq(PropertyTable.id, id), eq(PropertyTable.authorId, user.id)),
+          )
           .returning();
         return updatedProperty;
       } catch (error) {
@@ -170,7 +158,10 @@ export const propertyRouter = createTRPCRouter({
         const { id } = input;
 
         const existingProperty = await db.query.property.findFirst({
-          where: and(eq(property.id, id), eq(property.authorId, user.id)),
+          where: and(
+            eq(PropertyTable.id, id),
+            eq(PropertyTable.authorId, user.id),
+          ),
         });
 
         if (!existingProperty) {
@@ -181,8 +172,10 @@ export const propertyRouter = createTRPCRouter({
         }
 
         const deleted = await db
-          .delete(property)
-          .where(and(eq(property.id, id), eq(property.authorId, user.id)))
+          .delete(PropertyTable)
+          .where(
+            and(eq(PropertyTable.id, id), eq(PropertyTable.authorId, user.id)),
+          )
           .returning();
         return deleted;
       } catch (error) {
@@ -202,7 +195,7 @@ export const propertyRouter = createTRPCRouter({
 
     // get properties that associated with the user
     const properties = await db.query.property.findMany({
-      where: eq(property.authorId, user.id),
+      where: eq(PropertyTable.authorId, user.id),
       orderBy: (property, { desc }) => desc(property.createdAt),
     });
 
@@ -224,7 +217,10 @@ export const propertyRouter = createTRPCRouter({
 
       // get properties that associated with the user or not within the user
       const removeProperty = await db.query.property.findFirst({
-        where: and(eq(property.id, id), eq(property.authorId, user.id)),
+        where: and(
+          eq(PropertyTable.id, id),
+          eq(PropertyTable.authorId, user.id),
+        ),
       });
 
       if (!removeProperty) {
@@ -237,9 +233,57 @@ export const propertyRouter = createTRPCRouter({
       return removeProperty;
     }),
 
-  getPublicProperties: baseProcedure.query(async () => {
+  getUserProperties: protectedProcedure.query(async ({ ctx }) => {
+    const { user } = ctx.auth;
+    // get all user properties
+    const properties = await db.query.property.findMany({
+      with: {
+        author: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      where: (property, { eq, and }) => {
+        return and(
+          eq(property.isAvailable, true),
+          eq(property.authorId, user.id),
+        );
+      },
+      orderBy: (property, { desc }) => desc(property.createdAt),
+    });
+
+    if (!properties) {
+      return [];
+    }
+
+    return properties;
+  }),
+
+  getPublicProperties: protectedProcedure.query(async ({ ctx }) => {
+    const { user } = ctx.auth;
     // get all properties
     const properties = await db.query.property.findMany({
+      with: {
+        author: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+        receivedLikes: {
+          columns: {
+            fromUserId: true,
+          },
+        },
+      },
+      where: (property, { eq, and, not }) => {
+        return and(
+          eq(property.isAvailable, true),
+          not(eq(property.authorId, user.id)),
+        );
+      },
       orderBy: (property, { desc }) => desc(property.createdAt),
     });
 
@@ -256,4 +300,195 @@ export const propertyRouter = createTRPCRouter({
       message: 'You have access to premium features!',
     };
   }),
+
+  addLikeToProperty: protectedProcedure
+    .input(addLikeToPropertySchema)
+    .mutation(async ({ input, ctx }) => {
+      const { user } = ctx.auth;
+
+      const { propertyId, path } = input;
+
+      const fromUserId = user.id;
+
+      const checkEngagementLimit = await paymentPolicyCheckProcedure({
+        type: 'propertyEngagement',
+      });
+      // console.log('Engagement limit check result:', checkEngagementLimit);
+      if (checkEngagementLimit.success) {
+        try {
+          return await db.transaction(async (trx) => {
+            // 1. Insert like if not already present
+            const existing = await trx.query.like.findFirst({
+              where: and(
+                eq(LikeTable.fromUserId, fromUserId),
+                eq(LikeTable.propertyId, propertyId),
+              ),
+            });
+            if (existing) {
+              return {
+                success: false,
+                isMatch: false,
+                message: 'You already liked this property.',
+              };
+            }
+
+            // 2. Get property and owner
+            const ownerProperty = await trx.query.property.findFirst({
+              where: and(
+                eq(PropertyTable.id, propertyId),
+                eq(PropertyTable.isAvailable, true),
+              ),
+            });
+            if (!ownerProperty) {
+              return {
+                success: false,
+                isMatch: false,
+                message: 'Property not available.',
+              };
+            }
+            const ownerId = ownerProperty.authorId;
+
+            // 3. Self-like, never matched
+            if (ownerId === fromUserId) {
+              await trx.insert(LikeTable).values({ fromUserId, propertyId });
+              return {
+                success: true,
+                isMatch: false,
+                message: 'Like recorded (self-like, no match possible).',
+              };
+            }
+
+            // 4. Insert the like
+            await trx.insert(LikeTable).values({ fromUserId, propertyId });
+
+            // 5. Prevent duplicate match for the same user-pair (regardless of property)
+            let user1Id = fromUserId,
+              user2Id = ownerId;
+            if (user2Id < user1Id) {
+              [user1Id, user2Id] = [user2Id, user1Id];
+            }
+            // Check if a match exists between these users on ANY property pair
+            const matchExists = await trx.query.match.findFirst({
+              where: and(
+                eq(MatchTable.user1Id, user1Id),
+                eq(MatchTable.user2Id, user2Id),
+              ),
+            });
+            if (matchExists) {
+              return {
+                success: true,
+                isMatch: false,
+                message:
+                  'Like recorded, already matched with this user before.',
+              };
+            }
+
+            // 6. Check if this like makes a mutual match (does owner like any of my properties?)
+            const myProperties = await trx.query.property.findMany({
+              where: eq(PropertyTable.authorId, fromUserId),
+            });
+            for (const myProp of myProperties) {
+              const reverseLike = await trx.query.like.findFirst({
+                where: and(
+                  eq(LikeTable.fromUserId, ownerId),
+                  eq(LikeTable.propertyId, myProp.id),
+                ),
+              });
+              if (reverseLike) {
+                // Normalize property1Id / property2Id with the sorted user IDs.
+                const [property1Id, property2Id] =
+                  user1Id === fromUserId
+                    ? [myProp.id, propertyId]
+                    : [propertyId, myProp.id];
+                // No previous match, so first match: pick this property-pair
+                // let property1Id = myProp.id,
+                //   property2Id = propertyId;
+                // Ensure property1 and property2 ordering matches user1/user2 ordering
+                // if (user2Id < user1Id) {
+                //   [property1Id, property2Id] = [property2Id, property1Id];
+                // }
+
+                const [newMatch] = await trx
+                  .insert(MatchTable)
+                  .values({
+                    user1Id,
+                    user2Id,
+                    property1Id,
+                    property2Id,
+                    isActive: true,
+                    channelType: 'messaging',
+                  })
+                  .returning({ id: MatchTable.id });
+
+                // 1️⃣: Stream Chat setup
+                const serverClient = StreamChat.getInstance(
+                  env.NEXT_PUBLIC_STREAM_API_KEY,
+                  env.STREAM_API_SECRET,
+                );
+
+                // 2️⃣: Deterministic channel ID
+                const channelId = generateChannelId(
+                  fromUserId,
+                  ownerId,
+                  32,
+                  'match',
+                );
+
+                // 3️⃣: Create or get the channel
+                const channelInstance = serverClient.channel(
+                  'messaging',
+                  channelId,
+                  {
+                    members: [fromUserId, ownerId],
+                    created_by_id: fromUserId, // or ownerId, doesn't matter
+                  },
+                );
+
+                await channelInstance.create();
+
+                await trx
+                  .update(MatchTable)
+                  .set({
+                    channelId: channelInstance.id,
+                    channelType: 'messaging',
+                  })
+                  .where(eq(MatchTable.id, newMatch.id));
+
+                return {
+                  success: true,
+                  isMatch: true,
+                  message: `🎊 It's a Match! Now only one match exists between you and this user.`,
+                };
+              }
+            }
+
+            // 7. No mutual like found, just a like
+            return {
+              success: true,
+              isMatch: false,
+              message: 'Like recorded, no match yet.',
+            };
+          });
+        } catch (error) {
+          console.error('Error in likePropertyAndMaybeMatch:', error);
+          return {
+            success: false,
+            isMatch: false,
+            message: 'Internal server error',
+          };
+        } finally {
+          if (path) {
+            const finalPath = `/(root)/${path}`;
+            revalidatePath(finalPath, 'page');
+          } else {
+            revalidatePath('/(root)/swappings', 'page');
+          }
+        }
+      } else {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: checkEngagementLimit.message,
+        });
+      }
+    }),
 });

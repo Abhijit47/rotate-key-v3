@@ -17,6 +17,14 @@ export function usePublicProperties() {
 }
 
 /**
+ * Hook for getting my properties.
+ */
+export function useUserProperties() {
+  const trpc = useTRPC();
+  return useSuspenseQuery(trpc.property.getUserProperties.queryOptions());
+}
+
+/**
  * Hook for create a property
  */
 export function useCreateProperty() {
@@ -109,6 +117,28 @@ export function useTestPremium() {
     trpc.property.testPremium.mutationOptions({
       onSuccess: async () => {
         console.log('Premium feature test successful');
+      },
+      onError: (err) => {
+        console.error({ err });
+      },
+    }),
+  );
+}
+
+/**
+ * Hook for Adding a like to a property
+ * @param propertyId
+ */
+export function useLikeProperty() {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    trpc.property.addLikeToProperty.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.property.getPublicProperties.queryOptions(),
+        );
       },
       onError: (err) => {
         console.error({ err });

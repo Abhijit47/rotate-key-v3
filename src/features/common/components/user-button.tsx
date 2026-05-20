@@ -89,8 +89,11 @@ export default function UserButton() {
               </DropdownMenuTrigger>
               <DropdownMenuContent className='min-w-60 w-full' align='end'>
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel>
+                  <DropdownMenuLabel className='space-x-1'>
                     <Badge variant='outline' className='capitalize'>
+                      {data.user.name}
+                    </Badge>
+                    <Badge variant='default' className='capitalize'>
                       {data.user.role}
                     </Badge>
                   </DropdownMenuLabel>
@@ -133,7 +136,7 @@ export default function UserButton() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href={'#'} className='w-full'>
+                    <Link href={'/my-properties'} className='w-full'>
                       My Properties
                       <DropdownMenuShortcut>⌘M</DropdownMenuShortcut>
                     </Link>

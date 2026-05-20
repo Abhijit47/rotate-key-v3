@@ -1,16 +1,20 @@
 'use client';
 
 import { IconHomePlus } from '@tabler/icons-react';
+import { TRPCClientError } from '@trpc/client';
 import {
   ArrowUpRightFromSquareIcon,
   ArrowUpRightIcon,
   CheckCheckIcon,
   HeartIcon,
   PenLineIcon,
+  ThumbsDownIcon,
   ThumbsUpIcon,
 } from 'lucide-react';
+import { Route } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -32,10 +36,13 @@ import { Separator } from '@/components/ui/separator';
 
 import {
   useDeleteProperty,
+  useLikeProperty,
   usePublicProperties,
+  useUserProperties,
   useUserProperty,
 } from '../hooks/use-property';
 
+import { Badge } from '@/components/ui/badge';
 import {
   Empty,
   EmptyContent,
@@ -44,6 +51,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useUpgradeModal } from '@/features/common/hooks/use-upgrade-modal';
 import { useSession } from '@/lib/auth-client';
 
 function prettifyText(text: string) {
@@ -89,12 +102,165 @@ export function EmptyPropertiesState() {
 
 export function PropertyListings() {
   const { data: properties } = usePublicProperties();
+  const { mutateAsync: likeProperty, isPending: isLikePending } =
+    useLikeProperty();
+  const { handleError, modal } = useUpgradeModal();
+  const { data } = useSession();
+
+  const router = useRouter();
+
+  function handleLikeProperty(propertyId: string) {
+    toast.promise(likeProperty({ propertyId: propertyId, path: 'swapings' }), {
+      loading: 'In progress...',
+      success: (data) => {
+        router.push(`/property/${propertyId}`);
+        return data.message;
+      },
+      error: (err) => {
+        if (err instanceof TRPCClientError) {
+          handleError(err);
+        }
+        return err.message || 'Failed to engage with this property.';
+      },
+    });
+    return;
+  }
+
+  return (
+    <div>
+      {modal}
+      {properties?.length === 0 ? (
+        <EmptyPropertiesState />
+      ) : (
+        <div className={'grid grid-cols-3 gap-6'}>
+          {properties?.map((property) => {
+            // const isSelfProperty =
+            //   property.authorId === data?.user?.id || false;
+
+            const isLikedByMe = property.receivedLikes.some(
+              (like) => like.fromUserId === data?.user?.id,
+            );
+
+            return (
+              <Card key={property.id} className={'py-4 gap-4'}>
+                <CardContent className={'px-4'}>
+                  <Carousel>
+                    <CarouselContent>
+                      {property.images.map((image, index) => (
+                        <CarouselItem key={index}>
+                          <Image
+                            src={image}
+                            alt={`Property Image ${index + 1}`}
+                            className={'w-full h-full object-cover rounded-md'}
+                            width={400}
+                            height={300}
+                          />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                  </Carousel>
+                </CardContent>
+                <Separator />
+                <CardHeader className={'px-4'}>
+                  <CardTitle className={'capitalize'}>
+                    {property.type}
+                  </CardTitle>
+                  <CardDescription className={'capitalize'}>
+                    {property.streetAddress}
+                  </CardDescription>
+                  <CardDescription className={'capitalize'}>
+                    Owner:
+                    <Badge variant={'secondary'}>{property.author.name}</Badge>
+                  </CardDescription>
+                  <CardAction className={'self-center space-x-2'}>
+                    {/* TODO: Added in future */}
+                    <Button
+                      variant={'destructive'}
+                      size={'icon-sm'}
+                      disabled
+                      aria-label={'Save property (currently unavailable)'}
+                      title={'Save property (currently unavailable)'}>
+                      <HeartIcon className={'size-4'} />
+                    </Button>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={isLikedByMe ? 'default' : 'outline'}
+                          size={'icon-sm'}
+                          disabled={isLikePending}
+                          aria-label={
+                            isLikedByMe ? 'Already Liked' : 'Like property'
+                          }
+                          title={
+                            isLikedByMe ? 'Already Liked' : 'Like property'
+                          }
+                          onClick={
+                            isLikedByMe
+                              ? undefined
+                              : () => handleLikeProperty(property.id)
+                          }>
+                          {isLikedByMe ? (
+                            <ThumbsDownIcon className={'size-4 text-white'} />
+                          ) : (
+                            <ThumbsUpIcon className={'size-4 text-primary'} />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          {isLikedByMe
+                            ? 'You have already liked this property.'
+                            : 'Like this property to show your interest to the owner.'}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardAction>
+                </CardHeader>
+                <Separator />
+                <CardContent className={'px-4'}>
+                  {property.amenities.map((amenity, index) => (
+                    <p key={index} className={'text-sm text-muted-foreground'}>
+                      <span className={'inline-flex items-center gap-1'}>
+                        <CheckCheckIcon className={'size-4'} />
+                        {prettifyText(amenity)}
+                      </span>
+                    </p>
+                  ))}
+                </CardContent>
+                <CardFooter className={'px-4 justify-end mt-auto'}>
+                  <Link
+                    prefetch={'auto'}
+                    href={`/property/${property.id}`}
+                    className={buttonVariants({
+                      variant: 'outline',
+                      size: 'sm',
+                    })}>
+                    View Details{' '}
+                    <ArrowUpRightFromSquareIcon className={'size-4'} />
+                  </Link>
+                </CardFooter>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function MyPropertyListings() {
+  const { data: properties } = useUserProperties();
   const { mutateAsync, isPending } = useDeleteProperty();
   const { data } = useSession();
 
-  // const hasUserProperty = data?.user
-  //   ? properties?.some((property) => property.authorId === data.user.id)
-  //   : false;
+  // function handlePreventLikeOwnProperty() {
+  //   toast.error('You cannot like your own property.', {
+  //     description: 'This action is not allowed.',
+  //     icon: '⚠️',
+  //   });
+  //   return;
+  // }
 
   function handleDeleteProperty(propertyId: string) {
     if (confirm('Are you sure you want to delete this property?')) {
@@ -112,101 +278,87 @@ export function PropertyListings() {
         <EmptyPropertiesState />
       ) : (
         <div className={'grid grid-cols-3 gap-6'}>
-          {properties?.map((property) => (
-            <Card key={property.id} className={'py-4 gap-4'}>
-              <CardContent className={'px-4'}>
-                <Carousel>
-                  <CarouselContent>
-                    {property.images.map((image, index) => (
-                      <CarouselItem key={index}>
-                        <Image
-                          src={image}
-                          alt={`Property Image ${index + 1}`}
-                          className={'w-full h-full object-cover rounded-md'}
-                          width={400}
-                          height={300}
-                        />
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                </Carousel>
-              </CardContent>
-              <Separator />
-              <CardHeader className={'px-4'}>
-                <CardTitle className={'capitalize'}>{property.type}</CardTitle>
-                <CardDescription className={'capitalize'}>
-                  {property.streetAddress}
-                </CardDescription>
-                <CardAction className={'self-center space-x-2'}>
-                  {/* TODO: Added in future */}
-                  <Button
-                    variant={'destructive'}
-                    size={'icon-xs'}
-                    disabled
-                    aria-label={'Save property (currently unavailable)'}
-                    title={'Save property (currently unavailable)'}>
-                    <HeartIcon className={'size-4'} />
-                  </Button>
+          {properties?.map((property) => {
+            return (
+              <Card key={property.id} className={'py-4 gap-4'}>
+                <CardContent className={'px-4'}>
+                  <Carousel>
+                    <CarouselContent>
+                      {property.images.map((image, index) => (
+                        <CarouselItem key={index}>
+                          <Image
+                            src={image}
+                            alt={`Property Image ${index + 1}`}
+                            className={'w-full h-full object-cover rounded-md'}
+                            width={400}
+                            height={300}
+                          />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                  </Carousel>
+                </CardContent>
+                <Separator />
+                <CardHeader className={'px-4'}>
+                  <CardTitle className={'capitalize'}>
+                    {property.type}
+                  </CardTitle>
+                  <CardDescription className={'capitalize'}>
+                    {property.streetAddress}
+                  </CardDescription>
+                  <CardAction className={'self-center space-x-2'}>
+                    <Badge variant={'outline'}>{property.author.name}</Badge>
+                  </CardAction>
+                </CardHeader>
+                <Separator />
+                <CardContent className={'px-4'}>
+                  {property.amenities.map((amenity, index) => (
+                    <p key={index} className={'text-sm text-muted-foreground'}>
+                      <span className={'inline-flex items-center gap-1'}>
+                        <CheckCheckIcon className={'size-4'} />
+                        {prettifyText(amenity)}
+                      </span>
+                    </p>
+                  ))}
+                </CardContent>
+                <CardFooter className={'px-4 justify-end mt-auto'}>
+                  {property.authorId === data?.user?.id ? (
+                    <>
+                      <Link
+                        prefetch={'auto'}
+                        href={`/property/${property.id}/update` as Route}
+                        className={buttonVariants({
+                          variant: 'outline',
+                          size: 'sm',
+                          className: 'mr-4',
+                        })}>
+                        Edit Details <PenLineIcon className={'size-4'} />
+                      </Link>
 
-                  {/* TODO: Added in future */}
-                  <Button
-                    variant={'default'}
-                    size={'icon-xs'}
-                    disabled
-                    aria-label={'Like property (currently unavailable)'}
-                    title={'Like property (currently unavailable)'}>
-                    <ThumbsUpIcon className={'size-4 text-white'} />
-                  </Button>
-                </CardAction>
-              </CardHeader>
-              <Separator />
-              <CardContent className={'px-4'}>
-                {property.amenities.map((amenity, index) => (
-                  <p key={index} className={'text-sm text-muted-foreground'}>
-                    <span className={'inline-flex items-center gap-1'}>
-                      <CheckCheckIcon className={'size-4'} />
-                      {prettifyText(amenity)}
-                    </span>
-                  </p>
-                ))}
-              </CardContent>
-              <CardFooter className={'px-4 justify-end mt-auto'}>
-                {property.authorId === data?.user?.id ? (
-                  <>
-                    <Link
-                      prefetch={'auto'}
-                      href={`/property/${property.id}/update`}
-                      className={buttonVariants({
-                        variant: 'outline',
-                        size: 'sm',
-                        className: 'mr-4',
-                      })}>
-                      Edit Details <PenLineIcon className={'size-4'} />
-                    </Link>
-
-                    <Button
-                      variant={'destructive'}
-                      size={'sm'}
-                      className={'mr-4'}
-                      onClick={() => handleDeleteProperty(property.id)}
-                      disabled={isPending}>
-                      {isPending ? 'Deleting...' : 'Delete'}
-                    </Button>
-                  </>
-                ) : null}
-                <Link
-                  prefetch={'auto'}
-                  href={`/property/${property.id}`}
-                  className={buttonVariants({
-                    variant: 'outline',
-                    size: 'sm',
-                  })}>
-                  View Details{' '}
-                  <ArrowUpRightFromSquareIcon className={'size-4'} />
-                </Link>
-              </CardFooter>
-            </Card>
-          ))}
+                      <Button
+                        variant={'destructive'}
+                        size={'sm'}
+                        className={'mr-4'}
+                        onClick={() => handleDeleteProperty(property.id)}
+                        disabled={isPending}>
+                        {isPending ? 'Deleting...' : 'Delete'}
+                      </Button>
+                    </>
+                  ) : null}
+                  <Link
+                    prefetch={'auto'}
+                    href={`/property/${property.id}`}
+                    className={buttonVariants({
+                      variant: 'outline',
+                      size: 'sm',
+                    })}>
+                    View Details{' '}
+                    <ArrowUpRightFromSquareIcon className={'size-4'} />
+                  </Link>
+                </CardFooter>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

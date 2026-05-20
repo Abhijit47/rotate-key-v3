@@ -1,5 +1,12 @@
 // import { relations } from 'drizzle-orm';
-import { jsonb, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  jsonb,
+  pgTable,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { user } from './auth';
 
 export const property = pgTable('property', {
@@ -11,6 +18,9 @@ export const property = pgTable('property', {
   zipCode: varchar('zip_code'),
   images: jsonb('images').$type<string[]>().notNull(),
   amenities: jsonb('amenities').$type<string[]>().notNull(),
+
+  isAvailable: boolean('is_available').default(true).notNull(),
+
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at')
     .defaultNow()
