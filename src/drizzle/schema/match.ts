@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   index,
@@ -41,7 +42,10 @@ export const match = pgTable(
       .notNull(),
   },
   (t) => [
-    uniqueIndex('matches_unique').on(t.user1Id, t.user2Id),
+    uniqueIndex('matches_unique').on(
+      sql`LEAST(${t.user1Id}, ${t.user2Id})`,
+      sql`GREATEST(${t.user1Id}, ${t.user2Id})`,
+    ),
     index('idx_matches_user1').on(t.user1Id),
     index('idx_matches_user2').on(t.user2Id),
     index('idx_matches_created_at').on(t.createdAt),

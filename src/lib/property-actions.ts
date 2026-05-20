@@ -110,8 +110,8 @@ export const paymentPolicyCheckProcedure = protectedAction
       });
     }
 
-    // const propertyListingBenefitId = '80e0511a-1961-4554-addc-9d72e872f8dd';
     // TODO: in the future, we can check for these other benefits to gate those features as well
+    // const propertyListingBenefitId = '80e0511a-1961-4554-addc-9d72e872f8dd';
     // const voiceCallsBenefitId = 'b1404eae-afb4-4159-8971-74b8d1acbfdd';
     // const videoCallsBenefitId = '33c6880a-2b06-4ac2-912b-55a6594f031e';
     // const messageSendingBenefitId = 'b27278f8-ba2e-46a6-be9b-2440c1c61e1d';
@@ -139,7 +139,7 @@ export const paymentPolicyCheckProcedure = protectedAction
       });
     }
 
-    // how much like this user has done already this billing period
+    // how much like this user has done already
     const currentLikeCount = await db.$count(
       LikeTable,
       eq(LikeTable.fromUserId, user.id),

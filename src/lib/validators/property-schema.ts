@@ -23,7 +23,15 @@ export const deletePropertySchema = updatePropertySchema.pick({ id: true });
 
 export const addLikeToPropertySchema = z.object({
   propertyId: z.uuid(),
-  path: z.string(),
+  path: z
+    .string()
+    .trim()
+    .min(1, 'Path cannot be empty')
+    .regex(
+      /^\/(?!\/)(?!.*\.\.)(?:[A-Za-z0-9\-._~!$&'()*+,;=:@/]|%[0-9A-Fa-f]{2})*$/,
+      'Path must be a safe application-relative path',
+    )
+    .optional(),
 });
 
 export type PropertyValues = z.infer<typeof propertySchema>;

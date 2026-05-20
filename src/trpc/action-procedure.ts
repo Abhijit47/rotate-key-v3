@@ -3,6 +3,7 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import { experimental_nextAppDirCaller } from '@trpc/server/adapters/next-app-dir';
 import { headers } from 'next/headers';
 import { cache } from 'react';
+import superjson from 'superjson';
 
 interface Meta {
   span: string;
@@ -24,7 +25,7 @@ export const t = initTRPC.meta<Meta>().context<TRPCContext>().create({
   /**
    * @see https://trpc.io/docs/server/data-transformers
    */
-  // transformer: superjson,
+  transformer: superjson,
 });
 
 export const serverActionProcedure = t.procedure.experimental_caller(

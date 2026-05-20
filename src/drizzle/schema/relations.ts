@@ -37,15 +37,12 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
     fields: [property.authorId],
     references: [user.id],
   }),
-  bookings: one(bookings, {
-    fields: [property.id],
-    references: [bookings.propertyId],
-  }),
+  bookings: many(bookings),
   // All likes received by this property
   receivedLikes: many(like, { relationName: 'property' }),
 }));
 
-export const matchRelations = relations(match, ({ one }) => ({
+export const matchRelations = relations(match, ({ one, many }) => ({
   user1: one(user, {
     fields: [match.user1Id],
     references: [user.id],
@@ -66,10 +63,7 @@ export const matchRelations = relations(match, ({ one }) => ({
     references: [property.id],
     relationName: 'property2match',
   }),
-  bookings: one(bookings, {
-    fields: [match.id],
-    references: [bookings.matchId],
-  }),
+  bookings: many(bookings),
 }));
 
 export const bookingRelations = relations(bookings, ({ one }) => ({

@@ -26,7 +26,7 @@ import {
 import { TRPCError } from '@trpc/server';
 
 export const propertyRouter = createTRPCRouter({
-  createProperty: protectedProcedure
+  createProperty: premiumProcedure
     .input(propertySchema)
     .mutation(async ({ input, ctx }) => {
       const { user } = ctx.auth;
@@ -313,7 +313,7 @@ export const propertyRouter = createTRPCRouter({
       const checkEngagementLimit = await paymentPolicyCheckProcedure({
         type: 'propertyEngagement',
       });
-      console.log('Engagement limit check result:', checkEngagementLimit);
+      // console.log('Engagement limit check result:', checkEngagementLimit);
       if (checkEngagementLimit.success) {
         try {
           return await db.transaction(async (trx) => {
@@ -395,13 +395,18 @@ export const propertyRouter = createTRPCRouter({
                 ),
               });
               if (reverseLike) {
+                // Normalize property1Id / property2Id with the sorted user IDs.
+                const [property1Id, property2Id] =
+                  user1Id === fromUserId
+                    ? [myProp.id, propertyId]
+                    : [propertyId, myProp.id];
                 // No previous match, so first match: pick this property-pair
-                let property1Id = myProp.id,
-                  property2Id = propertyId;
+                // let property1Id = myProp.id,
+                //   property2Id = propertyId;
                 // Ensure property1 and property2 ordering matches user1/user2 ordering
-                if (user2Id < user1Id) {
-                  [property1Id, property2Id] = [property2Id, property1Id];
-                }
+                // if (user2Id < user1Id) {
+                //   [property1Id, property2Id] = [property2Id, property1Id];
+                // }
 
                 const [newMatch] = await trx
                   .insert(MatchTable)

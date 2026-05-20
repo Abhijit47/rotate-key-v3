@@ -120,7 +120,7 @@ export function PropertyListings() {
         if (err instanceof TRPCClientError) {
           handleError(err);
         }
-        return err.message || 'Failed to engagements in property';
+        return err.message || 'Failed to engage with this property.';
       },
     });
     return;

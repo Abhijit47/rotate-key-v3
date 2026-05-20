@@ -45,7 +45,7 @@ export const protectedProcedure = baseProcedure.use(
   }),
 );
 
-// TODO: Will place inside premium router later, but for now we need it here to check the engagement limit when liking a property
+// TODO: Move this into a premium router later; for now it lives here because it enforces premium/property-listing limits.
 export const premiumProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
     const { user } = ctx.auth;
