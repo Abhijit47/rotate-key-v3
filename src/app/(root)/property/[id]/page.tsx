@@ -1,6 +1,7 @@
 import { buttonVariants } from '@/components/ui/button';
 import { PropertyListing } from '@/features/property/components/property-listings';
-import { prefetchUserProperty } from '@/features/property/server/prefetch';
+import { prefetchPropertyDetails } from '@/features/property/server/prefetch';
+// import { prefetchUserProperty } from '@/features/property/server/prefetch';
 import { requireAuth } from '@/lib/requireAuth';
 import { HydrateClient } from '@/trpc/server';
 import { ArrowLeftCircle } from 'lucide-react';
@@ -17,7 +18,7 @@ export default async function PropertyPage(props: PageProps<'/property/[id]'>) {
     notFound();
   }
 
-  prefetchUserProperty(propertyId);
+  prefetchPropertyDetails(propertyId);
 
   return (
     <HydrateClient>

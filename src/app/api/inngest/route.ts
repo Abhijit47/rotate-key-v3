@@ -1,7 +1,13 @@
 import { serve } from 'inngest/next';
 
+import {
+  deleteNovuUsers,
+  deletePolarUsers,
+  deleteStreamUsers,
+} from '@/inngest/admin-fn';
 import { inngest } from '@/inngest/client';
 import {
+  createChannelBetweenMatchedUsers,
   helloWorld,
   oauthSignUpComplete,
   userCreated,
@@ -21,6 +27,12 @@ export const { GET, POST, PUT } = serve({
     userOnboardingComplete,
     userCreated,
     userDeleted,
+    createChannelBetweenMatchedUsers,
+
+    // for development/testing purposes only
+    deletePolarUsers,
+    deleteStreamUsers,
+    deleteNovuUsers,
   ],
   logLevel: 'error',
 });

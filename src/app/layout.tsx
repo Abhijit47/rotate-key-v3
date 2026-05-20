@@ -6,7 +6,6 @@ import { Baumans, Freehand, Poppins } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 // import { devtools } from '@/lib/auth/devtools';
-import { ConsentProvider } from '@/providers/consent-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { TRPCReactProvider } from '@/trpc/client';
 import './globals.css';
@@ -51,12 +50,12 @@ export default function AppLayout({
             defaultTheme='system'
             enableSystem
             disableTransitionOnChange>
-            <ConsentProvider>
-              <TRPCReactProvider>
-                <TooltipProvider>{children}</TooltipProvider>
-                <Toaster position='top-center' richColors closeButton />
-              </TRPCReactProvider>
-            </ConsentProvider>
+            {/* <ConsentProvider> */}
+            <TRPCReactProvider>
+              <TooltipProvider>{children}</TooltipProvider>
+              <Toaster position='top-center' richColors closeButton />
+            </TRPCReactProvider>
+            {/* </ConsentProvider> */}
           </ThemeProvider>
         </NextIntlClientProvider>
         {/* <AuthDevtoolsWrapper panelProps={devtools.panelProps} /> */}

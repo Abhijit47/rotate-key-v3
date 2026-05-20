@@ -12,6 +12,7 @@ export async function generateTokenForUser(userId: string) {
   const serverClient = StreamChat.getInstance(
     env.NEXT_PUBLIC_STREAM_API_KEY,
     env.STREAM_API_SECRET,
+    { timeout: 6000, enableWSFallback: true },
   );
 
   // generate a token for the user

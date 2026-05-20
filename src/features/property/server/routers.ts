@@ -1,14 +1,12 @@
 import { and, eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { StreamChat } from 'stream-chat';
 
 import { db } from '@/drizzle/db';
 import { property as PropertyTable } from '@/drizzle/schema';
 import { like as LikeTable } from '@/drizzle/schema/like';
 import { match as MatchTable } from '@/drizzle/schema/match';
-import { env } from '@/env';
+import { inngest } from '@/inngest/client';
 import { auth } from '@/lib/auth';
-import { generateChannelId } from '@/lib/helpers';
 import { paymentPolicyCheckProcedure } from '@/lib/property-actions';
 import {
   addLikeToPropertySchema,
@@ -208,6 +206,27 @@ export const propertyRouter = createTRPCRouter({
 
   // Every card in the public listings page links here, but this route prefetches and renders getUserProperty semantics. Even after the server starts honoring id, non-owners still will not be able to open someone else’s listing from the feed. This page needs a listing-by-id query; keep getUserProperty for owner-only edit flows.
 
+  getPropertyDeatils: protectedProcedure
+    .input(propertyIdSchema)
+    .query(async ({ input, ctx }) => {
+      const { user } = ctx.auth;
+      const { id } = input;
+
+      const property = await db.query.property.findFirst({
+        where: eq(PropertyTable.id, id),
+        with: {},
+      });
+
+      if (!property) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Property not found',
+        });
+      }
+
+      return property;
+    }),
+
   getUserProperty: protectedProcedure
     .input(propertyIdSchema)
     .query(async ({ input, ctx }) => {
@@ -316,7 +335,7 @@ export const propertyRouter = createTRPCRouter({
       // console.log('Engagement limit check result:', checkEngagementLimit);
       if (checkEngagementLimit.success) {
         try {
-          return await db.transaction(async (trx) => {
+          const commited = await db.transaction(async (trx) => {
             // 1. Insert like if not already present
             const existing = await trx.query.like.findFirst({
               where: and(
@@ -329,6 +348,9 @@ export const propertyRouter = createTRPCRouter({
                 success: false,
                 isMatch: false,
                 message: 'You already liked this property.',
+                user1Id: undefined,
+                user2Id: undefined,
+                newMatchId: undefined,
               };
             }
 
@@ -344,6 +366,9 @@ export const propertyRouter = createTRPCRouter({
                 success: false,
                 isMatch: false,
                 message: 'Property not available.',
+                user1Id: undefined,
+                user2Id: undefined,
+                newMatchId: undefined,
               };
             }
             const ownerId = ownerProperty.authorId;
@@ -355,6 +380,9 @@ export const propertyRouter = createTRPCRouter({
                 success: true,
                 isMatch: false,
                 message: 'Like recorded (self-like, no match possible).',
+                user1Id: undefined,
+                user2Id: undefined,
+                newMatchId: undefined,
               };
             }
 
@@ -380,6 +408,9 @@ export const propertyRouter = createTRPCRouter({
                 isMatch: false,
                 message:
                   'Like recorded, already matched with this user before.',
+                user1Id: undefined,
+                user2Id: undefined,
+                newMatchId: undefined,
               };
             }
 
@@ -420,44 +451,13 @@ export const propertyRouter = createTRPCRouter({
                   })
                   .returning({ id: MatchTable.id });
 
-                // 1️⃣: Stream Chat setup
-                const serverClient = StreamChat.getInstance(
-                  env.NEXT_PUBLIC_STREAM_API_KEY,
-                  env.STREAM_API_SECRET,
-                );
-
-                // 2️⃣: Deterministic channel ID
-                const channelId = generateChannelId(
-                  fromUserId,
-                  ownerId,
-                  32,
-                  'match',
-                );
-
-                // 3️⃣: Create or get the channel
-                const channelInstance = serverClient.channel(
-                  'messaging',
-                  channelId,
-                  {
-                    members: [fromUserId, ownerId],
-                    created_by_id: fromUserId, // or ownerId, doesn't matter
-                  },
-                );
-
-                await channelInstance.create();
-
-                await trx
-                  .update(MatchTable)
-                  .set({
-                    channelId: channelInstance.id,
-                    channelType: 'messaging',
-                  })
-                  .where(eq(MatchTable.id, newMatch.id));
-
                 return {
                   success: true,
                   isMatch: true,
                   message: `🎊 It's a Match! Now only one match exists between you and this user.`,
+                  user1Id: fromUserId,
+                  user2Id: ownerId,
+                  newMatchId: newMatch.id,
                 };
               }
             }
@@ -467,14 +467,47 @@ export const propertyRouter = createTRPCRouter({
               success: true,
               isMatch: false,
               message: 'Like recorded, no match yet.',
+              user1Id: undefined,
+              user2Id: undefined,
+              newMatchId: undefined,
             };
           });
+
+          if (
+            commited.isMatch &&
+            commited.user1Id &&
+            commited.user2Id &&
+            commited.newMatchId
+          ) {
+            // do other stuff if needed on match, e.g. send notifications, etc.
+
+            // heavy lifting take over by inngest
+            await inngest.send({
+              name: 'matched/create-channel',
+              data: {
+                user1Id: commited.user1Id,
+                user2Id: commited.user2Id,
+                newMatchId: commited.newMatchId,
+              },
+            });
+
+            // return commited;
+          }
+
+          return {
+            success: commited.success,
+            isMatch: commited.isMatch,
+            message: commited.message,
+          };
         } catch (error) {
           console.error('Error in likePropertyAndMaybeMatch:', error);
           return {
             success: false,
             isMatch: false,
             message: 'Internal server error',
+            user1Id: undefined,
+            user2Id: undefined,
+            newMatchId: undefined,
           };
         } finally {
           if (path) {

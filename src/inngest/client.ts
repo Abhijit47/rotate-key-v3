@@ -22,6 +22,22 @@ type Events = {
   'test/hello.world': {
     data: { email: string };
   };
+  'test/delete-polar-users': {
+    data: undefined;
+  };
+  'test/delete-stream-users': {
+    data: undefined;
+  };
+  'test/delete-novu-users': {
+    data: undefined;
+  };
+  'matched/create-channel': {
+    data: {
+      user1Id: string;
+      user2Id: string;
+      newMatchId: string;
+    };
+  };
   'user/new.signup.complete': UserSignup;
   'user/oauth.signup.complete': UserSignup;
   'user/onboarding.complete': UserOnboarding;

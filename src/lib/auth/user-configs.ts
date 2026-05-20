@@ -1,5 +1,9 @@
 import { APIError, BetterAuthDBOptions, BetterAuthOptions } from 'better-auth';
-// import { polarClient } from '../polar';
+import { StreamChat } from 'stream-chat';
+
+import { env } from '@/env';
+import { novuClient } from '@/novu/client';
+import { polarClient } from '../polar';
 
 const additionalFields = {
   whereAreYouFrom: {
@@ -133,9 +137,23 @@ const userConfig = {
     enabled: true,
     afterDelete: async (user) => {
       try {
-        // await polarClient.customers.deleteExternal({
-        //   externalId: user.id,
-        // });
+        const serverClient = StreamChat.getInstance(
+          env.NEXT_PUBLIC_STREAM_API_KEY,
+          env.STREAM_API_SECRET,
+          { timeout: 6000, enableWSFallback: true },
+        );
+
+        await polarClient.customers.deleteExternal({
+          externalId: user.id,
+        });
+
+        await serverClient.deleteUser(user.id, {
+          delete_conversation_channels: true,
+          hard_delete: true,
+          mark_messages_deleted: true,
+        });
+
+        await novuClient.subscribers.delete(user.id);
       } catch (error) {
         // Log but don't throw - user deletion should complete even if Polar cleanup fails
         console.error(
@@ -147,10 +165,6 @@ const userConfig = {
           code: 'INTERNAL_SERVER_ERROR',
         });
       }
-
-      // TODO:
-      // stream user delete
-      // novu user delete
     },
   },
 } satisfies BetterAuthOptions['user'];

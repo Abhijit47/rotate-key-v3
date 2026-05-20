@@ -1,6 +1,5 @@
 'use client';
 
-import type { BenefitGrant } from '@polar-sh/sdk/models/components/benefitgrant';
 import type { CustomerState } from '@polar-sh/sdk/models/components/customerstate';
 import type { Subscription } from '@polar-sh/sdk/models/components/subscription';
 import { Circle, X } from 'lucide-react';
@@ -16,6 +15,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { CustomerBenefitGrant } from '@polar-sh/sdk/models/components/customerbenefitgrant.js';
+import { CustomerSubscription } from '@polar-sh/sdk/models/components/customersubscription.js';
 
 export interface CancelSubscriptionDialogProps {
   title: string;
@@ -36,8 +37,8 @@ export interface CancelSubscriptionDialogProps {
   onDialogClose?: () => void;
   className?: string;
   customerState?: CustomerState;
-  benefits: BenefitGrant[];
-  subscriptions: Subscription[];
+  benefits: CustomerBenefitGrant[] | undefined;
+  subscriptions: CustomerSubscription[] | Subscription[];
 }
 
 export function CancelSubscriptionDialog(props: CancelSubscriptionDialogProps) {
@@ -220,7 +221,7 @@ export function CancelSubscriptionDialog(props: CancelSubscriptionDialogProps) {
                 </Badge>
               </div>
               <ul className='flex flex-col gap-2'>
-                {benefits.map((feature, index) => (
+                {benefits?.map((feature, index) => (
                   <li key={index} className='flex items-center gap-2'>
                     <Circle className='fill-primary text-primary h-2 w-2' />
                     <span className='text-muted-foreground text-sm'>

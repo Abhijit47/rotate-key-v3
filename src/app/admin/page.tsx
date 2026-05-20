@@ -2,12 +2,14 @@ import { ChartAreaInteractive } from '@/features/admin/components/chart-area-int
 
 import { DataTable } from '@/features/admin/components/data-table';
 import { SectionCards } from '@/features/admin/components/section-cards';
+import TestingMode from '@/features/admin/components/testing-mode';
 import data from '@/features/admin/data.json';
 
 export default function Page() {
   return (
     <div className='flex flex-col gap-4 py-4 md:gap-6 md:py-6'>
       <SectionCards />
+      <TestingMode />
       <div className='px-4 lg:px-6'>
         <ChartAreaInteractive />
       </div>

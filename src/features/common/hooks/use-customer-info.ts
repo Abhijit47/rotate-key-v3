@@ -1,23 +1,30 @@
 import { useEffect, useState } from 'react';
 
-import type { BenefitGrant } from '@polar-sh/sdk/models/components/benefitgrant';
 import type { CustomerState } from '@polar-sh/sdk/models/components/customerstate';
 import type { Subscription } from '@polar-sh/sdk/models/components/subscription';
 
 import { authClient } from '@/lib/auth-client';
+import { CustomerBenefitGrant } from '@polar-sh/sdk/models/components/customerbenefitgrant.js';
+import { CustomerSubscription } from '@polar-sh/sdk/models/components/customersubscription.js';
 
 export function useCustomerInfo() {
   const [loading, setLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
   const [customerState, setCustomerState] = useState<CustomerState>();
-  const [benefits, setBenefits] = useState<BenefitGrant[]>([]);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [benefits, setBenefits] = useState<CustomerBenefitGrant[]>();
+  const [subscriptions, setSubscriptions] = useState<
+    CustomerSubscription[] | Subscription[]
+  >([]);
 
-  const [customerError, setCustomerError] = useState<CustomerStateError>();
-  const [benefitError, setBenefitError] = useState<CustomerStateError>();
+  const [customerError, setCustomerError] = useState<CustomerStateError | null>(
+    null,
+  );
+  const [benefitError, setBenefitError] = useState<CustomerStateError | null>(
+    null,
+  );
   const [subscriptionsError, setSubscriptionsError] =
-    useState<CustomerStateError>();
+    useState<CustomerStateError | null>(null);
 
   useEffect(() => {
     try {

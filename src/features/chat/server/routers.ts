@@ -337,6 +337,7 @@ export const chatRouter = createTRPCRouter({
     const serverClient = StreamChat.getInstance(
       env.NEXT_PUBLIC_STREAM_API_KEY,
       env.STREAM_API_SECRET,
+      { timeout: 6000, enableWSFallback: true },
     );
 
     // TODO: will come products ids will come polar API

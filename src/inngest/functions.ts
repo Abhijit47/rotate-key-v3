@@ -4,8 +4,10 @@ import { StreamChat, UserResponse } from 'stream-chat';
 
 import { db } from '@/drizzle/db';
 import { user } from '@/drizzle/schema';
+import { match as MatchTable } from '@/drizzle/schema/match';
 import { env } from '@/env';
 import { auth } from '@/lib/auth';
+import { generateChannelId } from '@/lib/helpers';
 import { polarClient } from '@/lib/polar';
 import {
   createSubscriber,
@@ -37,6 +39,7 @@ export const userSignUpComplete = inngest.createFunction(
     const serverClient = StreamChat.getInstance(
       env.NEXT_PUBLIC_STREAM_API_KEY,
       env.STREAM_API_SECRET,
+      { timeout: 6000, enableWSFallback: true },
     );
 
     const foundUser = await step.run('find-the-user', async () => {
@@ -63,7 +66,7 @@ export const userSignUpComplete = inngest.createFunction(
         username: event.data.name,
       } as UserResponse;
 
-      await serverClient.upsertUsers([streamUser]);
+      await serverClient.upsertUser(streamUser);
     });
 
     await step.run('subscriber-creating', async () => {
@@ -109,6 +112,7 @@ export const oauthSignUpComplete = inngest.createFunction(
     const serverClient = StreamChat.getInstance(
       env.NEXT_PUBLIC_STREAM_API_KEY,
       env.STREAM_API_SECRET,
+      { timeout: 6000, enableWSFallback: true },
     );
 
     const foundUser = await step.run('find-the-user', async () => {
@@ -202,6 +206,60 @@ export const userOnboardingComplete = inngest.createFunction(
   },
 );
 
+export const createChannelBetweenMatchedUsers = inngest.createFunction(
+  { id: 'create-channel-for-matched-users' },
+  {
+    event: 'matched/create-channel',
+  },
+  async ({ event, step }) => {
+    const { user1Id, user2Id, newMatchId } = event.data;
+    // This function is triggered when a user likes a property. It checks if there's a match and creates a chat channel if there is.
+    // 1️⃣: Stream Chat setup
+    const serverClient = StreamChat.getInstance(
+      env.NEXT_PUBLIC_STREAM_API_KEY,
+      env.STREAM_API_SECRET,
+      { timeout: 6000, enableWSFallback: true },
+    );
+
+    // 2️⃣: Deterministic channel ID
+    const channelId = await step.run('generate-channel-id', async () => {
+      // const channelId = generateChannelId(user1Id, user2Id, 32, 'match');
+      await Promise.resolve(); // simulate async work if needed
+      return generateChannelId(user1Id, user2Id, 32, 'match');
+    });
+
+    // 3️⃣: Create or get the channel
+    const channelInstance = serverClient.channel('messaging', channelId, {
+      members: [user1Id, user2Id],
+      created_by_id: user1Id, // or ownerId, doesn't matter
+    });
+
+    // 4️⃣: Create the channel if it doesn't exist
+    await step.run('create-channel-if-not-exists', async () => {
+      await channelInstance.create();
+    });
+
+    await step.sleep('wait-for-channel-creation', '2s'); // wait for a moment to ensure the channel is fully created before updating the match with channel info
+
+    // 5️⃣: Update the match with channel info
+    await step.run('update-match-with-channel-info', async () => {
+      return await db
+        .update(MatchTable)
+        .set({
+          channelId: channelInstance.id,
+          channelType: 'messaging',
+        })
+        .where(eq(MatchTable.id, newMatchId))
+        .returning();
+    });
+
+    return {
+      success: true,
+      message: `Channel ${channelInstance.id} created for matched users ${user1Id} and ${user2Id}`,
+    };
+  },
+);
+
 // ADMIN - functions
 export const userCreated = inngest.createFunction(
   { id: 'admin-user-created' },
@@ -210,6 +268,7 @@ export const userCreated = inngest.createFunction(
     const serverClient = StreamChat.getInstance(
       env.NEXT_PUBLIC_STREAM_API_KEY,
       env.STREAM_API_SECRET,
+      { timeout: 6000, enableWSFallback: true },
     );
 
     const newUser = await step.run('create-user-in-db', async () => {
@@ -283,6 +342,7 @@ export const userDeleted = inngest.createFunction(
     const serverClient = StreamChat.getInstance(
       env.NEXT_PUBLIC_STREAM_API_KEY,
       env.STREAM_API_SECRET,
+      { timeout: 6000, enableWSFallback: true },
     );
 
     const removedUser = await step.run('delete-user-from-db', async () => {

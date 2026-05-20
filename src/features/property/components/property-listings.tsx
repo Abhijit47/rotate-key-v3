@@ -37,9 +37,9 @@ import { Separator } from '@/components/ui/separator';
 import {
   useDeleteProperty,
   useLikeProperty,
+  useProperty,
   usePublicProperties,
   useUserProperties,
-  useUserProperty,
 } from '../hooks/use-property';
 
 import { Badge } from '@/components/ui/badge';
@@ -366,6 +366,6 @@ export function MyPropertyListings() {
 }
 
 export function PropertyListing({ propertyId }: { propertyId: string }) {
-  const { data: property } = useUserProperty(propertyId);
+  const { data: property } = useProperty(propertyId);
   return <div>{JSON.stringify(property, null, 2)}</div>;
 }
