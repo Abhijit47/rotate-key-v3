@@ -99,6 +99,17 @@ export function useDeleteProperty() {
 }
 
 /**
+ * Hook for getting a property details by ID
+ * @param propertyId
+ */
+export function useProperty(propertyId: string) {
+  const trpc = useTRPC();
+  return useSuspenseQuery(
+    trpc.property.getPropertyDetails.queryOptions({ id: propertyId }),
+  );
+}
+
+/**
  * Hook for getting a user property by ID
  * @param propertyId
  */

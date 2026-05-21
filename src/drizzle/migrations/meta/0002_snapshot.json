@@ -1,6 +1,6 @@
 {
-  "id": "ed13460f-e011-4e77-988d-703969f5cf54",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "833bd869-c55c-43f2-89d8-ae3f7a2a894e",
+  "prevId": "a683664b-e8aa-4f84-a17a-b6d1205a7217",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -988,6 +988,27 @@
             }
           ],
           "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_matches_property_pair": {
+          "name": "idx_matches_property_pair",
+          "columns": [
+            {
+              "expression": "LEAST(\"property1_id\", \"property2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "GREATEST(\"property1_id\", \"property2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
           "concurrently": false,
           "method": "btree",
           "with": {}

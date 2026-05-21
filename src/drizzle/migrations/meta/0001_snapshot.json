@@ -1,6 +1,6 @@
 {
-  "id": "ed13460f-e011-4e77-988d-703969f5cf54",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "a683664b-e8aa-4f84-a17a-b6d1205a7217",
+  "prevId": "ed13460f-e011-4e77-988d-703969f5cf54",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -982,6 +982,18 @@
             },
             {
               "expression": "GREATEST(\"user1_id\", \"user2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "LEAST(\"property1_id\", \"property2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "GREATEST(\"property1_id\", \"property2_id\")",
               "asc": true,
               "isExpression": true,
               "nulls": "last"

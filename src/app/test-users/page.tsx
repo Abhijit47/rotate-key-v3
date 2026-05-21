@@ -10,7 +10,7 @@ import { HydrateClient } from '@/trpc/server';
 import { MessageCircleMore } from 'lucide-react';
 import { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import UserCard from './_components/user-card';
+// import UserCard from './_components/user-card';
 
 export default function TestUsersPage() {
   prefetchChatUsers();
@@ -39,7 +39,7 @@ export default function TestUsersPage() {
 
               <CardContent>
                 <Suspense fallback={<div>Loading matches...</div>}>
-                  <UserCard />
+                  {/* <UserCard /> */}
                 </Suspense>
               </CardContent>
             </Card>

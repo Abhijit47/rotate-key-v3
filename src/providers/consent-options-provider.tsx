@@ -1,8 +1,8 @@
 'use client';
 
-import { ClientSideOptionsProvider } from '@c15t/nextjs/client';
-import type { ReactNode } from 'react';
-import { toast } from 'sonner';
+// import { ClientSideOptionsProvider } from '@c15t/nextjs/client';
+// import type { ReactNode } from 'react';
+// import { toast } from 'sonner';
 
 /**
  * Client-side consent manager wrapper for handling scripts and callbacks
@@ -20,40 +20,40 @@ import { toast } from 'sonner';
  * @see https://c15t.com/docs/frameworks/next/callbacks
  * @see https://c15t.com/docs/frameworks/next/script-loader
  */
-export function ConsentOptionsProvider({ children }: { children: ReactNode }) {
-  return (
-    <ClientSideOptionsProvider
-      // 📝 Add your integration scripts here
-      // Scripts are loaded when consent is given and removed when consent is revoked
-      scripts={
-        [
-          // Example:
-          // googleTagManager({
-          //   id: 'GTM-XXXXXX',
-          //   script: {
-          //     onLoad: () => console.log('GTM loaded'),
-          //   },
-          // }),
-        ]
-      }
-      // 📝 Add your callbacks here
-      // Callbacks allow you to react to consent events
-      callbacks={{
-        // Example:
-        // onBannerFetched(response) {
-        //   console.log('Consent banner fetched', response);
-        // },
-        // onConsentSet(response) {
-        //   console.log('Consent has been saved locally', response);
-        // },
-        onError(response) {
-          console.log('Error', response);
-          toast.error(
-            'An error occurred while managing your consent preferences. Please try again.',
-          );
-        },
-      }}>
-      {children}
-    </ClientSideOptionsProvider>
-  );
-}
+// export function ConsentOptionsProvider({ children }: { children: ReactNode }) {
+//   return (
+//     <ClientSideOptionsProvider
+//       // 📝 Add your integration scripts here
+//       // Scripts are loaded when consent is given and removed when consent is revoked
+//       scripts={
+//         [
+//           // Example:
+//           // googleTagManager({
+//           //   id: 'GTM-XXXXXX',
+//           //   script: {
+//           //     onLoad: () => console.log('GTM loaded'),
+//           //   },
+//           // }),
+//         ]
+//       }
+//       // 📝 Add your callbacks here
+//       // Callbacks allow you to react to consent events
+//       callbacks={{
+//         // Example:
+//         // onBannerFetched(response) {
+//         //   console.log('Consent banner fetched', response);
+//         // },
+//         // onConsentSet(response) {
+//         //   console.log('Consent has been saved locally', response);
+//         // },
+//         onError(response) {
+//           console.log('Error', response);
+//           toast.error(
+//             'An error occurred while managing your consent preferences. Please try again.',
+//           );
+//         },
+//       }}>
+//       {children}
+//     </ClientSideOptionsProvider>
+//   );
+// }

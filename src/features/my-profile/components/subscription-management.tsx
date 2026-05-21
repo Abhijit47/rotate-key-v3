@@ -63,6 +63,36 @@ export function SubscriptionManagement() {
     );
   }
 
+  if (customerState?.activeSubscriptions.length === 0) {
+    return (
+      <div>
+        <Card className='shadow-lg'>
+          <CardHeader className='px-4 pb-4 sm:px-6 sm:pb-6'>
+            <CardTitle className='flex items-center gap-2 text-lg sm:gap-3 sm:text-xl'>
+              <div className='bg-primary/10 ring-primary/20 rounded-lg p-1.5 ring-1 sm:p-2'>
+                <CreditCard className='text-primary h-4 w-4 sm:h-5 sm:w-5' />
+              </div>
+              No Active Subscriptions
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <UpdatePlanDialog
+              title={'Choose Your Plan'}
+              className='mx-0 shadow-lg transition-all duration-200 hover:shadow-xl'
+              // customerState={customerState}
+              // currentPlan={subscriptions[0]}
+              onPlanChange={(planId) => {
+                console.log(planId);
+              }}
+              triggerText='Subscribe a plan'
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -97,18 +127,19 @@ export function SubscriptionManagement() {
                     <div className='flex flex-wrap items-center gap-2'>
                       <Badge
                         variant={
-                          customerState?.activeSubscriptions[0].status ===
+                          customerState?.activeSubscriptions[0]?.status ===
                           'active'
                             ? 'default'
                             : 'outline'
                         }
                         className='bg-primary/90 hover:bg-primary border-0 text-xs font-medium shadow-sm sm:text-sm'>
-                        {customerState?.type === `monthly`
-                          ? `${customerState?.activeSubscriptions[0].currency}${customerState?.activeSubscriptions[0].amount}/month`
+                        {customerState?.activeSubscriptions[0]
+                          ?.recurringInterval === `month`
+                          ? `${customerState?.activeSubscriptions[0]?.currency}${customerState?.activeSubscriptions[0]?.amount}/month`
                           : customerState?.activeSubscriptions[0]
-                                .recurringInterval === `month`
-                            ? `${customerState?.activeSubscriptions[0].amount}/year`
-                            : `${customerState?.activeSubscriptions[0].amount}`}
+                                ?.recurringInterval === `year`
+                            ? `${customerState?.activeSubscriptions[0]?.amount}/year`
+                            : `${customerState?.activeSubscriptions[0]?.amount}`}
                       </Badge>
                       <Badge
                         variant='outline'
@@ -142,7 +173,7 @@ export function SubscriptionManagement() {
                   Next billing date
                 </span>
                 <div className='group-hover:text-primary text-sm font-medium transition-colors duration-200 sm:text-base'>
-                  {customerState?.activeSubscriptions[0].currentPeriodEnd.toLocaleDateString(
+                  {customerState?.activeSubscriptions[0]?.currentPeriodEnd.toLocaleDateString(
                     undefined,
                     {
                       year: 'numeric',
@@ -217,11 +248,11 @@ export function SubscriptionManagement() {
               Current Plan Features
             </h4>
             <div className='flex flex-wrap gap-2 sm:gap-3'>
-              {benefits.length === 0 ? (
+              {benefits?.length === 0 ? (
                 <p>No benefits found for this plan.</p>
               ) : (
                 <>
-                  {benefits.map((feature) => (
+                  {benefits?.map((feature) => (
                     <div
                       key={feature.id}
                       className='group border-border/80 hover:border-primary/30 hover:bg-primary/5 flex items-center gap-2 rounded-lg border p-2 transition-all duration-200 sm:p-2'>

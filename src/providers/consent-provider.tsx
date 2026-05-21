@@ -1,19 +1,19 @@
 'use client';
 
-import {
-  ConsentManagerDialog,
-  // ConsentManagerProvider,
-  CookieBanner,
-} from '@c15t/nextjs';
-import type { ReactNode } from 'react';
-// For client-only apps (non-SSR), you can use:
-import { C15TDevTools } from '@c15t/dev-tools';
-import { ConsentManagerProvider } from '@c15t/nextjs/client';
-import { useLocale } from 'next-intl';
-import { useTheme } from 'next-themes';
+// import {
+//   ConsentManagerDialog,
+//   // ConsentManagerProvider,
+//   CookieBanner,
+// } from '@c15t/nextjs';
+// import type { ReactNode } from 'react';
+// // For client-only apps (non-SSR), you can use:
+// import { C15TDevTools } from '@c15t/dev-tools';
+// import { ConsentManagerProvider } from '@c15t/nextjs/client';
+// import { useLocale } from 'next-intl';
+// import { useTheme } from 'next-themes';
 
-import { getTranslatedCookieBanner } from '@/constants/translations';
-import { ConsentOptionsProvider } from './consent-options-provider';
+// import { getTranslatedCookieBanner } from '@/constants/translations';
+// import { ConsentOptionsProvider } from './consent-options-provider';
 
 /**
  * Server-side rendered consent management wrapper for Next.js App Router
@@ -52,31 +52,31 @@ import { ConsentOptionsProvider } from './consent-options-provider';
  * }
  * ```
  */
-const isDev = process.env.NODE_ENV === 'development';
+// const isDev = process.env.NODE_ENV === 'development';
 
-export function ConsentProvider({ children }: { children: ReactNode }) {
-  const locale = useLocale();
-  const { theme } = useTheme();
+// export function ConsentProvider({ children }: { children: ReactNode }) {
+//   const locale = useLocale();
+//   const { theme } = useTheme();
 
-  const currentTheme = (theme ?? 'system') as 'light' | 'dark' | 'system';
+//   const currentTheme = (theme ?? 'system') as 'light' | 'dark' | 'system';
 
-  return (
-    <ConsentManagerProvider
-      options={{
-        mode: 'c15t',
-        backendURL: '/api/c15t',
-        consentCategories: ['necessary', 'marketing'], // Optional: Specify which consent categories to show in the banner.
-        ignoreGeoLocation: isDev, // Only ignore geo-location in development.
-        translations: getTranslatedCookieBanner(locale), // Provide translations for the consent banner and dialog.
-        react: {
-          colorScheme: currentTheme,
-        },
-      }}>
-      {isDev ? <C15TDevTools position='bottom-left' /> : null}
+//   return (
+//     <ConsentManagerProvider
+//       options={{
+//         mode: 'c15t',
+//         backendURL: '/api/c15t',
+//         consentCategories: ['necessary', 'marketing'], // Optional: Specify which consent categories to show in the banner.
+//         ignoreGeoLocation: isDev, // Only ignore geo-location in development.
+//         translations: getTranslatedCookieBanner(locale), // Provide translations for the consent banner and dialog.
+//         react: {
+//           colorScheme: currentTheme,
+//         },
+//       }}>
+//       {isDev ? <C15TDevTools position='bottom-left' /> : null}
 
-      <CookieBanner />
-      <ConsentManagerDialog />
-      <ConsentOptionsProvider>{children}</ConsentOptionsProvider>
-    </ConsentManagerProvider>
-  );
-}
+//       <CookieBanner />
+//       <ConsentManagerDialog />
+//       <ConsentOptionsProvider>{children}</ConsentOptionsProvider>
+//     </ConsentManagerProvider>
+//   );
+// }
