@@ -1,4 +1,7 @@
+import * as Sentry from '@sentry/nextjs';
+import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
+import { StepError } from 'inngest';
 import { revalidatePath } from 'next/cache';
 
 import { db } from '@/drizzle/db';
@@ -21,7 +24,6 @@ import {
   premiumProcedure,
   protectedProcedure,
 } from '@/trpc/init';
-import { TRPCError } from '@trpc/server';
 
 export const propertyRouter = createTRPCRouter({
   createProperty: premiumProcedure
@@ -206,7 +208,7 @@ export const propertyRouter = createTRPCRouter({
 
   // Every card in the public listings page links here, but this route prefetches and renders getUserProperty semantics. Even after the server starts honoring id, non-owners still will not be able to open someone else’s listing from the feed. This page needs a listing-by-id query; keep getUserProperty for owner-only edit flows.
 
-  getPropertyDeatils: protectedProcedure
+  getPropertyDetails: protectedProcedure
     .input(propertyIdSchema)
     .query(async ({ input, ctx }) => {
       const { user } = ctx.auth;
@@ -473,23 +475,31 @@ export const propertyRouter = createTRPCRouter({
             };
           });
 
+          // do other stuff if needed on match, e.g. send notifications, etc.
           if (
             commited.isMatch &&
             commited.user1Id &&
             commited.user2Id &&
             commited.newMatchId
           ) {
-            // do other stuff if needed on match, e.g. send notifications, etc.
-
-            // heavy lifting take over by inngest
-            await inngest.send({
-              name: 'matched/create-channel',
-              data: {
-                user1Id: commited.user1Id,
-                user2Id: commited.user2Id,
-                newMatchId: commited.newMatchId,
-              },
-            });
+            try {
+              // heavy lifting take over by inngest
+              await inngest.send({
+                name: 'matched/create-channel',
+                data: {
+                  user1Id: commited.user1Id,
+                  user2Id: commited.user2Id,
+                  newMatchId: commited.newMatchId,
+                },
+              });
+            } catch (error) {
+              console.error(error);
+              if (error instanceof StepError) {
+                Sentry.logger.error(error.message, {
+                  //
+                });
+              }
+            }
 
             // return commited;
           }

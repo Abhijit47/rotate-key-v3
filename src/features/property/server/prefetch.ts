@@ -34,7 +34,7 @@ export function prefetchUserProperty(propertyId: string) {
  */
 export function prefetchPropertyDetails(propertyId: string) {
   return prefetch(
-    trpc.property.getPropertyDeatils.queryOptions({ id: propertyId }),
+    trpc.property.getPropertyDetails.queryOptions({ id: propertyId }),
   );
 }
 

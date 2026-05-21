@@ -16,7 +16,7 @@ import {
   userSignUpComplete,
 } from '@/inngest/functions';
 
-// const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === 'development';
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -30,9 +30,10 @@ export const { GET, POST, PUT } = serve({
     createChannelBetweenMatchedUsers,
 
     // for development/testing purposes only
-    deletePolarUsers,
-    deleteStreamUsers,
-    deleteNovuUsers,
+    // deletePolarUsers,
+    // deleteStreamUsers,
+    // deleteNovuUsers,
+    ...(isDev ? [deletePolarUsers, deleteStreamUsers, deleteNovuUsers] : []),
   ],
   logLevel: 'error',
 });

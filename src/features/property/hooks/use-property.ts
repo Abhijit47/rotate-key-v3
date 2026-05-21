@@ -105,7 +105,7 @@ export function useDeleteProperty() {
 export function useProperty(propertyId: string) {
   const trpc = useTRPC();
   return useSuspenseQuery(
-    trpc.property.getPropertyDeatils.queryOptions({ id: propertyId }),
+    trpc.property.getPropertyDetails.queryOptions({ id: propertyId }),
   );
 }
 

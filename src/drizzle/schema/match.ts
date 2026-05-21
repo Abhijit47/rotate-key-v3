@@ -45,6 +45,8 @@ export const match = pgTable(
     uniqueIndex('matches_unique').on(
       sql`LEAST(${t.user1Id}, ${t.user2Id})`,
       sql`GREATEST(${t.user1Id}, ${t.user2Id})`,
+      sql`LEAST(${t.property1Id}, ${t.property2Id})`,
+      sql`GREATEST(${t.property1Id}, ${t.property2Id})`,
     ),
     index('idx_matches_user1').on(t.user1Id),
     index('idx_matches_user2').on(t.user2Id),

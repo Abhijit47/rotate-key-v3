@@ -6,10 +6,11 @@ import TestingMode from '@/features/admin/components/testing-mode';
 import data from '@/features/admin/data.json';
 
 export default function Page() {
+  const showTestingMode = process.env.NODE_ENV !== 'production';
   return (
     <div className='flex flex-col gap-4 py-4 md:gap-6 md:py-6'>
       <SectionCards />
-      <TestingMode />
+      {showTestingMode ? <TestingMode /> : null}
       <div className='px-4 lg:px-6'>
         <ChartAreaInteractive />
       </div>

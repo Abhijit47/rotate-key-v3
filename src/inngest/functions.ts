@@ -242,16 +242,25 @@ export const createChannelBetweenMatchedUsers = inngest.createFunction(
     await step.sleep('wait-for-channel-creation', '2s'); // wait for a moment to ensure the channel is fully created before updating the match with channel info
 
     // 5️⃣: Update the match with channel info
-    await step.run('update-match-with-channel-info', async () => {
-      return await db
-        .update(MatchTable)
-        .set({
-          channelId: channelInstance.id,
-          channelType: 'messaging',
-        })
-        .where(eq(MatchTable.id, newMatchId))
-        .returning();
-    });
+    const updatedMatches = await step.run(
+      'update-match-with-channel-info',
+      async () => {
+        return await db
+          .update(MatchTable)
+          .set({
+            channelId: channelInstance.id,
+            channelType: 'messaging',
+          })
+          .where(eq(MatchTable.id, newMatchId))
+          .returning();
+      },
+    );
+
+    if (updatedMatches.length === 0) {
+      throw new NonRetriableError(
+        `Match ${newMatchId} was not found; channel metadata was not persisted`,
+      );
+    }
 
     return {
       success: true,
