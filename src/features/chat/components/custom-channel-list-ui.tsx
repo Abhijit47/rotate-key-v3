@@ -40,10 +40,6 @@ export default function CustomChannelListUI(props: ChannelListUIProps) {
         const loadedChannelData = event.queriedChannels?.channels.find(
           (response) => response.channel.id === channelId,
         );
-        // console.log(
-        //   'Channel found in channels.queried event:',
-        //   loadedChannelData?.channel,
-        // );
         if (loadedChannelData?.channel.id !== 'general') {
           setActiveChannel(client.channel(DEFAULT_CHANNEL_TYPE, channelId));
           subscription?.unsubscribe();

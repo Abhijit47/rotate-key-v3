@@ -23,6 +23,8 @@ import { authClient, signOut, useSession } from '@/lib/auth-client';
 import Link from 'next/link';
 import NotificationInbox from './notification-inbox';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export default function UserButton() {
   const { data, isPending, isRefetching } = useSession();
 
@@ -97,6 +99,23 @@ export default function UserButton() {
                       {data.user.role}
                     </Badge>
                   </DropdownMenuLabel>
+                  {isDev ? (
+                    <DropdownMenuItem asChild>
+                      <Link href={'/test-users'} className='w-full'>
+                        Test Users
+                        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : null}
+                  {data.user.role === 'admin' ? (
+                    <DropdownMenuItem asChild>
+                      <Link href={'/admin'} className='w-full'>
+                        Admin
+                        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : null}
+
                   <DropdownMenuItem asChild>
                     <Link href={'/my-profile'} className='w-full'>
                       Profile

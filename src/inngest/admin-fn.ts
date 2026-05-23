@@ -8,26 +8,37 @@ export const deletePolarUsers = inngest.createFunction(
   { id: 'delete-polar-users' },
   { event: 'test/delete-polar-users' },
   async ({ event, step }) => {
-    const allCustomers = await polarClient.customers.list({
-      organizationId: process.env.POLAR_ORGANISATION_ID!,
-    });
-
-    console.log(
-      `Found ${allCustomers.result.items.length} customers to delete.`,
-    );
-
-    allCustomers.result.items.map(async (customer) => {
-      // Sleep for a moment before deleting each customer to avoid hitting rate limits
-
-      await step.sleep(`deleting-customer-${customer.id}`, '1s');
-
-      await polarClient.customers.deleteExternal({
-        externalId: customer.id,
+    await step.run(`delete-polar-customers`, async () => {
+      const allCustomers = await polarClient.customers.list({
+        organizationId: process.env.POLAR_ORGANISATION_ID!,
       });
+      console.log(
+        `Found ${allCustomers.result.items.length} customers to delete.`,
+      );
+
+      for (const customer of allCustomers.result.items) {
+        try {
+          console.log(`Deleting Polar customer ${customer.id}`);
+
+          await step.sleep(`deleting-polar-user-${customer.id}`, '1s');
+          await polarClient.customers.delete({
+            id: customer.id,
+          });
+
+          console.log(`Deleted Polar customer ${customer.id}`);
+        } catch (error) {
+          console.error(
+            `Failed to delete Polar customer ${customer.id}`,
+            error,
+          );
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
     });
 
     return {
-      message: `Deleted ${allCustomers.result.items.length} customers!`,
+      message: `Deleted polar customers!`,
     };
   },
 );

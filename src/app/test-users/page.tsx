@@ -5,15 +5,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { prefetchChatUsers } from '@/features/chat/server/prefetch';
+import UserTestCard from '@/features/test-purpose/components/user-test-card';
+import { prefetchTestPurposeChatUsers } from '@/features/test-purpose/server/prefetch';
 import { HydrateClient } from '@/trpc/server';
 import { MessageCircleMore } from 'lucide-react';
 import { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-// import UserCard from './_components/user-card';
 
 export default function TestUsersPage() {
-  prefetchChatUsers();
+  prefetchTestPurposeChatUsers();
   return (
     <HydrateClient>
       <ErrorBoundary fallback={<div>Something went wrong, chat page.</div>}>
@@ -39,7 +39,7 @@ export default function TestUsersPage() {
 
               <CardContent>
                 <Suspense fallback={<div>Loading matches...</div>}>
-                  {/* <UserCard /> */}
+                  <UserTestCard />
                 </Suspense>
               </CardContent>
             </Card>

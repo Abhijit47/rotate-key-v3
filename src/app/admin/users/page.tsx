@@ -1,7 +1,7 @@
 import { UsersSectionCards } from '@/features/admin/components/users-section-card';
 import { UsersTable } from '@/features/admin/components/users-table';
 import { prefetchUsers } from '@/features/admin/server/prefetch';
-import { HydrateClient } from '@/trpc/server';
+import { caller, HydrateClient } from '@/trpc/server';
 import { ErrorBoundary } from 'react-error-boundary';
 
 export default async function UsersPage(props: PageProps<'/admin/users'>) {
@@ -10,6 +10,8 @@ export default async function UsersPage(props: PageProps<'/admin/users'>) {
 
   prefetchUsers(searchParams);
 
+  const users = await caller.admin.getUsers(searchParams);
+
   return (
     <HydrateClient>
       <ErrorBoundary
@@ -17,7 +19,7 @@ export default async function UsersPage(props: PageProps<'/admin/users'>) {
         <div className='flex flex-col gap-4 py-4 md:gap-6 md:py-6'>
           <UsersSectionCards />
 
-          <UsersTable />
+          <UsersTable users={users} />
         </div>
       </ErrorBoundary>
     </HydrateClient>

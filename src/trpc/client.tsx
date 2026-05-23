@@ -60,7 +60,7 @@ export function TRPCReactProvider(
           <ReactQueryDevtools
             theme='system'
             initialIsOpen={false}
-            buttonPosition={'top-left'}
+            buttonPosition={'bottom-left'}
           />
         )}
       </TRPCProvider>

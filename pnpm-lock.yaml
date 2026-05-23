@@ -206,6 +206,9 @@ importers:
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
+      trpc-docs-generator:
+        specifier: ^0.9.0
+        version: 0.9.0
       use-form-guard:
         specifier: ^0.1.0
         version: 0.1.0(react@19.2.6)
@@ -7777,6 +7780,9 @@ packages:
 
   trough@2.2.0:
     resolution: {integrity: sha512-tmMpK00BjZiUyVyvrBK7knerNgmgvcV/KLVyuma/SC+TQN167GrMRciANTz09+k3zW8L8t60jWO1GpfkZdjTaw==}
+
+  trpc-docs-generator@0.9.0:
+    resolution: {integrity: sha512-+jccfrdIligYGC32fWsOs/qpfvdmGIGRtxsDqf0Jbg9yHiwhi0ScChBfNj2p5wny8AWkiq5Nyqo+HNrPDtZ5Sg==}
 
   ts-algebra@2.0.0:
     resolution: {integrity: sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw==}
@@ -16413,6 +16419,8 @@ snapshots:
   trim-lines@3.0.1: {}
 
   trough@2.2.0: {}
+
+  trpc-docs-generator@0.9.0: {}
 
   ts-algebra@2.0.0: {}
 

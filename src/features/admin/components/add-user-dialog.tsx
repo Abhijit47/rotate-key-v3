@@ -49,7 +49,11 @@ import {
 // import { useRouter } from 'next/navigation';
 import { useCreateUser } from '../hooks/use-admin';
 
-export default function AddUserModal() {
+type AddUserModalProps = {
+  onUpdateTableKey: React.Dispatch<React.SetStateAction<number>>;
+};
+
+export default function AddUserModal({ onUpdateTableKey }: AddUserModalProps) {
   const [isOpenAddUser, setIsOpenAddUser] = useState(false);
   // const router = useRouter();
   const form = useForm<CreateUserValues>({
@@ -86,7 +90,10 @@ export default function AddUserModal() {
         return 'User created successfully!';
       },
       error: 'Failed to create user.',
-      finally: () => form.reset(),
+      finally: () => {
+        form.reset();
+        onUpdateTableKey((prev) => prev + 1); // This will trigger a re-render of the table with the new data without remounting it, so the state (sorting, filtering, pagination, etc.) will be preserved.
+      },
       description: 'This may take a few seconds.',
       descriptionClassName: 'text-[10px] text-balance',
     });

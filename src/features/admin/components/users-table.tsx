@@ -13,7 +13,7 @@ import {
 } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
-  arrayMove,
+  // arrayMove,
   // arrayMove,
   SortableContext,
   useSortable,
@@ -93,7 +93,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ClientSession } from '@/lib/auth-client';
 import { format } from 'date-fns';
 // import { useGetUsers } from '../hooks/use-admin';
-import { useGetUsers } from '../hooks/use-admin';
+// import { useGetUsers } from '../hooks/use-admin';
 import AddUserModal from './add-user-dialog';
 import DeleteUserDialog from './delete-user-dialog';
 
@@ -330,24 +330,29 @@ function DraggableRow({ row }: { row: Row<ClientSession['user']> }) {
 
 // export function UsersTable({ data: initialData }: { data: TableItem[] }) {
 // { users }: { users: ClientSession['user'][] }
-export function UsersTable() {
-  const { data: users } = useGetUsers();
+export function UsersTable({ users }: { users: ClientSession['user'][] }) {
+  // const { data: users } = useGetUsers();
+  console.log('users data in table', users.length);
   // const usersData = users;
 
-  const [data, setData] = React.useState(users ?? []);
+  // Remounting the whole table when the data changes will reset all the state (sorting, filtering, pagination, etc.) which is not a good user experience. So we need to update the data in place without remounting the table.
+  const [tableKey, setTableKey] = React.useState(0);
 
-  React.useEffect(() => {
-    setData((prev) => {
-      const incoming = users ?? [];
-      const byId = new Map(incoming.map((u) => [u.id, u]));
-      const kept = prev
-        .filter((u) => byId.has(u.id))
-        .map((u) => byId.get(u.id)!);
-      const keptIds = new Set(kept.map((u) => u.id));
-      const added = incoming.filter((u) => !keptIds.has(u.id));
-      return [...kept, ...added];
-    });
-  }, [users]);
+  // const [data, setData] = React.useState(users ?? []);
+  const data = users;
+
+  // React.useEffect(() => {
+  //   setData((prev) => {
+  //     const incoming = users ?? [];
+  //     const byId = new Map(incoming.map((u) => [u.id, u]));
+  //     const kept = prev
+  //       .filter((u) => byId.has(u.id))
+  //       .map((u) => byId.get(u.id)!);
+  //     const keptIds = new Set(kept.map((u) => u.id));
+  //     const added = incoming.filter((u) => !keptIds.has(u.id));
+  //     return [...kept, ...added];
+  //   });
+  // }, [users]);
 
   // const data = React.useMemo(() => usersData || [], [usersData]);
 
@@ -408,12 +413,11 @@ export function UsersTable() {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
-      setData((data) => {
-        const oldIndex = dataIds.indexOf(active.id);
-        const newIndex = dataIds.indexOf(over.id);
-        return arrayMove(data, oldIndex, newIndex);
-      });
-
+      // setData((data) => {
+      //   const oldIndex = dataIds.indexOf(active.id);
+      //   const newIndex = dataIds.indexOf(over.id);
+      //   return arrayMove(data, oldIndex, newIndex);
+      // });
       // setData((data) => {
       //   const oldIndex = dataIds.indexOf(active.id);
       //   const newIndex = dataIds.indexOf(over.id);
@@ -487,7 +491,7 @@ export function UsersTable() {
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <AddUserModal />
+          <AddUserModal onUpdateTableKey={setTableKey} />
         </div>
       </div>
       <TabsContent
@@ -500,7 +504,7 @@ export function UsersTable() {
             onDragEnd={handleDragEnd}
             sensors={sensors}
             id={sortableId}>
-            <Table>
+            <Table key={tableKey}>
               <TableHeader className='sticky top-0 z-10 bg-muted'>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
