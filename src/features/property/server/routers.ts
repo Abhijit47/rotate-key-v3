@@ -214,19 +214,38 @@ export const propertyRouter = createTRPCRouter({
       const { user } = ctx.auth;
       const { id } = input;
 
-      const property = await db.query.property.findFirst({
+      const existingProperty = await db.query.property.findFirst({
         where: eq(PropertyTable.id, id),
-        with: {},
       });
 
-      if (!property) {
+      if (!existingProperty) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Property not found',
         });
       }
 
-      return property;
+      // if this current user booked this property with status "pending" send a property along with the property details {isBookedByMe:true/false}
+      const isBookedByMe = await db.query.bookings.findFirst({
+        where(fields, operators) {
+          const { eq, and } = operators;
+          return and(
+            eq(fields.propertyId, existingProperty.id),
+            eq(fields.userId, user.id),
+            eq(fields.status, 'pending'),
+          );
+        },
+        columns: {
+          createdAt: false,
+          updatedAt: false,
+        },
+      });
+
+      return {
+        ...existingProperty,
+        isBookedByMe: !!isBookedByMe,
+        bookDetailsWithCurrentUser: isBookedByMe,
+      };
     }),
 
   getUserProperty: protectedProcedure

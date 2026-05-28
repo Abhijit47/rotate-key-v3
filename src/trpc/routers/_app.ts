@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { adminRouter } from '@/features/admin/server/routers';
 import { authRouter } from '@/features/auth/server/routers';
+import { bookingRouter } from '@/features/booking/server/routers';
 import { chatRouter } from '@/features/chat/server/routers';
 import { propertyRouter } from '@/features/property/server/routers';
 import { testPurposeRouter } from '@/features/test-purpose/server/routers';
@@ -36,6 +37,7 @@ export const appRouter = createTRPCRouter({
   admin: adminRouter,
   property: propertyRouter,
   chat: chatRouter,
+  booking: bookingRouter,
   testPurpose: testPurposeRouter,
 });
 
