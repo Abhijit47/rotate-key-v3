@@ -232,6 +232,7 @@ export const propertyRouter = createTRPCRouter({
           return and(
             eq(fields.propertyId, existingProperty.id),
             eq(fields.userId, user.id),
+            eq(fields.status, 'pending'),
           );
         },
         columns: {

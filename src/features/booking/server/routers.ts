@@ -81,7 +81,7 @@ export const bookingRouter = createTRPCRouter({
             });
           }
 
-          const [newBooking] = await db
+          const [newBooking] = await trx
             .insert(BookingTable)
             .values({
               propertyId,
@@ -105,6 +105,9 @@ export const bookingRouter = createTRPCRouter({
 
         return commitBooking;
       } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         console.error('Error booking property:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -116,6 +119,7 @@ export const bookingRouter = createTRPCRouter({
   getBookings: protectedProcedure.query(async ({ ctx, input }) => {
     const { user } = ctx.auth;
 
+    // TODO: Permission will update later
     const bookings = await db.query.bookings.findMany({
       with: {
         property: true,
@@ -130,8 +134,8 @@ export const bookingRouter = createTRPCRouter({
       const { user } = ctx.auth;
       const { bookingId } = input;
 
+      // TODO: Permission will update later
       const booking = await db.query.bookings.findFirst({
-        where: eq(BookingTable.id, bookingId),
         with: {
           property: true,
         },
@@ -184,6 +188,9 @@ export const bookingRouter = createTRPCRouter({
         }
         return updatedBooking;
       } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         console.error('Error updating booking status:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -237,6 +244,9 @@ export const bookingRouter = createTRPCRouter({
         }
         return { success: true };
       } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         console.error('Error deleting booking:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',

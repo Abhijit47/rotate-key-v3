@@ -60,14 +60,20 @@ const toDate = (value?: string | null) => {
 
 const decodeDate = (value: string | undefined) => {
   if (!value) return undefined;
-  const date = stringToDate.decode(value);
-  return date;
+  try {
+    return stringToDate.decode(value);
+  } catch {
+    return undefined;
+  }
 };
 
 export default function BookingForm() {
   const [isGettingInOpen, setIsGettingInOpen] = useState(false);
   const [isGettingOutOpen, setIsGettingOutOpen] = useState(false);
   const params = useParams<{ id: string }>();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   const { data: property } = useProperty(params.id);
   const { mutateAsync, isPending } = useCreateBooking();
@@ -191,7 +197,7 @@ export default function BookingForm() {
                               selected={gettingIn}
                               disabled={(date) =>
                                 //disable past dates
-                                date < new Date() || property.isBookedByMe
+                                date < today || property.isBookedByMe
                               }
                             />
                           </PopoverHeader>
@@ -248,7 +254,7 @@ export default function BookingForm() {
                               selected={gettingOut}
                               disabled={(date) =>
                                 // disable past dates and dates before getting-in date
-                                date < new Date() ||
+                                date < today ||
                                 (gettingIn ? date <= gettingIn : false) ||
                                 property.isBookedByMe
                               }
@@ -291,9 +297,9 @@ export default function BookingForm() {
                           <SelectValue
                             className={'w-full'}
                             placeholder='Select number of guests'>
-                            {guestCount > '1'
-                              ? `${guestCount} Guest(s)`
-                              : `${guestCount} Guest`}
+                            {guestCount === '1'
+                              ? `${guestCount} Guest`
+                              : `${guestCount} Guest(s)`}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent className={'w-full'} align='start'>

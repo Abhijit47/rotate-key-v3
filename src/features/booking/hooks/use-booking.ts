@@ -62,15 +62,15 @@ export function useUpdateBookingStatus() {
     trpc.booking.updateBookingStatus.mutationOptions({
       onSuccess: async (vars) => {
         await Promise.all([
-          await queryClient.invalidateQueries(
+          queryClient.invalidateQueries(
             trpc.booking.getBookings.queryOptions(),
           ),
-          await queryClient.invalidateQueries(
+          queryClient.invalidateQueries(
             trpc.booking.getBooking.queryOptions({
               bookingId: vars.id,
             }),
           ),
-          await queryClient.invalidateQueries(
+          queryClient.invalidateQueries(
             trpc.property.getPublicProperties.queryOptions(),
           ),
         ]);

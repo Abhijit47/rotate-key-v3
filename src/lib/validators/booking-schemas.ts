@@ -21,18 +21,35 @@ export const stringToDate = z.codec(
   },
 );
 
-export const bookingFormSchema = z.object({
-  propertyId: z.string(),
-  startDate: z.date().min(new Date(), { error: 'Too old!' }),
-  endDate: z.date().min(new Date(), { error: 'Too young!' }),
-  guestCount: z.string().min(1, 'Guests is required'),
-  // startDate: stringToDate,
-  // endDate: stringToDate,
-  // guestCount: z.string().min(1, 'Guests is required'),
-});
+export const bookingFormSchema = z
+  .object({
+    propertyId: z.uuid(),
+    startDate: z.date(),
+    endDate: z.date(),
+    guestCount: z
+      .string()
+      .regex(/^[1-9]\d*$/, 'Please select at least 1 guest'),
+  })
+  .superRefine((value, ctx) => {
+    const now = new Date();
+    if (value.startDate < now) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['startDate'],
+        message: 'Start date must be in the future',
+      });
+    }
+    if (value.endDate <= value.startDate) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['endDate'],
+        message: 'End date must be after start date',
+      });
+    }
+  });
 
 export const updatedBookingStatusSchema = z.object({
-  bookingId: z.string(),
+  bookingId: z.uuid(),
   status: z.enum(['pending', 'confirmed', 'cancelled']),
 });
 
