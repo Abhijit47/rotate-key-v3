@@ -128,6 +128,30 @@ const additionalFields = {
     defaultValue: null,
     input: false,
   },
+  isProfileDocumentVerified: {
+    type: 'boolean',
+    required: false,
+    defaultValue: false,
+    input: false,
+  },
+  propertyDocument: {
+    type: 'string',
+    required: false,
+    defaultValue: null,
+    input: false,
+  },
+  isPropertyDocumentUploaded: {
+    type: 'boolean',
+    required: false,
+    defaultValue: false,
+    input: false,
+  },
+  isPropertyDocumentVerified: {
+    type: 'boolean',
+    required: false,
+    defaultValue: false,
+    input: false,
+  },
 } as const satisfies BetterAuthDBOptions<'user'>['additionalFields'];
 
 const userConfig = {

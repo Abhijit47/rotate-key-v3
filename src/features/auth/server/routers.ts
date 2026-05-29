@@ -1,8 +1,10 @@
 import { logger } from '@sentry/nextjs';
 import { TRPCError } from '@trpc/server';
 import { isAPIError } from 'better-auth/api';
+import { UploadApiOptions, UploadApiResponse } from 'cloudinary';
 import { DrizzleError, eq } from 'drizzle-orm';
 
+import cloudinary from '@/configs/cloudinary';
 import { db } from '@/drizzle/db';
 import { user as userTable } from '@/drizzle/schema';
 import { env } from '@/env';
@@ -12,6 +14,7 @@ import {
   loginSchema,
   onboardingSchema,
   signupSchema,
+  userPropertyDocumentUploadSchema,
 } from '@/lib/validators/auth-schemas';
 import {
   baseProcedure,
@@ -331,4 +334,97 @@ export const authRouter = createTRPCRouter({
       return { dispatched: false };
     }
   }),
+
+  // TODO: Later Move to user router
+  userPropertyDocumentUploadComplete: protectedProcedure
+    .input(userPropertyDocumentUploadSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { user } = ctx.auth;
+      const { pdfDocument } = input;
+
+      const fileName = `${user.id}:property-document:${Date.now()}`;
+
+      if (!pdfDocument.base64) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Document data is required.',
+        });
+      }
+
+      // Rough limit: 5MB binary is ~6.7MB base64
+      const MAX_BASE64_LENGTH = 7 * 1024 * 1024;
+      if (pdfDocument.base64.length > MAX_BASE64_LENGTH) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Document is too large (max 5MB).',
+        });
+      }
+
+      const buffer = Buffer.from(pdfDocument.base64, 'base64');
+
+      const uploadOptions: UploadApiOptions = {
+        resource_type: 'auto',
+        public_id: fileName,
+        upload_preset: env.CLOUDINARY_UPLOAD_PRESET_NAME,
+        tags: ['my-docs', `user_id:${user.id}`],
+        folder: `${env.CLOUDINARY_BASE_FOLDER_NAME}/${user.id}/my-docs`,
+        // TODO: Add notification URL to handle post-upload processing if needed
+        // notification_url: `${BASE_URL}/${locale}/api/webhooks/cloudinary`,
+        filename_override: fileName,
+      };
+
+      try {
+        // Cloudinary upload and get back the URL
+        const result: UploadApiResponse = await new Promise(
+          (resolve, reject) => {
+            cloudinary.uploader
+              .upload_stream(uploadOptions, (error, result) => {
+                if (error) reject(error);
+                else if (result) resolve(result);
+                else reject(new Error('Upload result is undefined'));
+              })
+              .end(buffer);
+          },
+        );
+
+        const [updatingUser] = await db
+          .update(userTable)
+          .set({
+            isPropertyDocumentUploaded: true,
+            propertyDocument: result.secure_url,
+          })
+          .where(eq(userTable.id, user.id))
+          .returning();
+
+        if (!updatingUser) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'User not found.',
+          });
+        }
+
+        return {
+          url: result.secure_url,
+          isUploaded: updatingUser.isPropertyDocumentUploaded,
+        };
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+        if (error instanceof DrizzleError) {
+          logger.error('Database error during property document upload', {
+            errorMessage: error.message,
+            cause: error.cause,
+          });
+        } else {
+          logger.error('Failed to upload property document', {
+            errorMessage:
+              error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to upload property document.',
+          cause: error instanceof Error ? error : 'Unknown error',
+        });
+      }
+    }),
 });

@@ -55,8 +55,20 @@ export const user = pgTable('user', {
   aboutMe: varchar('about_me', { length: 500 }),
   yearOfBirth: varchar('year_of_birth'),
   contactNumber: varchar('contact_number'),
-  isContactNumberVerified: boolean('is_contact_number_verified').default(false),
+  isContactNumberVerified: boolean('is_contact_number_verified')
+    .notNull()
+    .default(false),
   profileVerificationDocument: varchar('profile_verification_document'),
+  isProfileDocumentVerified: boolean('is_profile_document_verified')
+    .notNull()
+    .default(false),
+  propertyDocument: text('property_document'),
+  isPropertyDocumentUploaded: boolean('is_property_document_uploaded')
+    .notNull()
+    .default(false),
+  isPropertyDocumentVerified: boolean('is_property_document_verified')
+    .notNull()
+    .default(false),
 });
 
 export const session = pgTable(
