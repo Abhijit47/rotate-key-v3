@@ -66,13 +66,13 @@ export default function DocumentUploadAlertDialog({
   const onFileValidate = useCallback(
     (file: File): string | null => {
       // Validate max files
-      if (files.length >= 2) {
-        return 'You can only upload up to 2 files';
+      if (files.length >= 1) {
+        return 'You can only upload 1 file';
       }
 
       // Validate file type (only pdf)
-      if (!file.type.startsWith(ACCEPT_FILE_TYPE)) {
-        return 'Only image files are allowed';
+      if (file.type !== ACCEPT_FILE_TYPE) {
+        return 'Only PDF files are allowed';
       }
 
       // Validate file size (max 5MB)

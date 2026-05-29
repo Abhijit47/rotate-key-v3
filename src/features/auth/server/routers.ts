@@ -344,14 +344,30 @@ export const authRouter = createTRPCRouter({
 
       const fileName = `${user.id}:property-document:${Date.now()}`;
 
+      if (!pdfDocument.base64) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Document data is required.',
+        });
+      }
+
+      // Rough limit: 5MB binary is ~6.7MB base64
+      const MAX_BASE64_LENGTH = 7 * 1024 * 1024;
+      if (pdfDocument.base64.length > MAX_BASE64_LENGTH) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Document is too large (max 5MB).',
+        });
+      }
+
       const buffer = Buffer.from(pdfDocument.base64, 'base64');
 
       const uploadOptions: UploadApiOptions = {
         resource_type: 'auto',
         public_id: fileName,
-        upload_preset: 'rotate-key',
+        upload_preset: env.CLOUDINARY_UPLOAD_PRESET_NAME,
         tags: ['my-docs', `user_id:${user.id}`],
-        folder: `rotate-key/${user.id}/my-docs`,
+        folder: `${env.CLOUDINARY_BASE_FOLDER_NAME}/${user.id}/my-docs`,
         // TODO: Add notification URL to handle post-upload processing if needed
         // notification_url: `${BASE_URL}/${locale}/api/webhooks/cloudinary`,
         filename_override: fileName,
@@ -392,12 +408,23 @@ export const authRouter = createTRPCRouter({
           isUploaded: updatingUser.isPropertyDocumentUploaded,
         };
       } catch (error) {
+        if (error instanceof TRPCError) throw error;
         if (error instanceof DrizzleError) {
           logger.error('Database error during property document upload', {
             errorMessage: error.message,
             cause: error.cause,
           });
+        } else {
+          logger.error('Failed to upload property document', {
+            errorMessage:
+              error instanceof Error ? error.message : 'Unknown error',
+          });
         }
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to upload property document.',
+          cause: error instanceof Error ? error : 'Unknown error',
+        });
       }
     }),
 });

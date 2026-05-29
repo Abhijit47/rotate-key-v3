@@ -39,10 +39,12 @@ export const onboardingSchema = z.object({
 
 export const userPropertyDocumentUploadSchema = z.object({
   pdfDocument: z.object({
-    base64: z.string(),
+    base64: z.string().min(1, 'Document is required'),
     name: z.string().optional(),
-    type: z.string().optional(),
-    size: z.number().optional(),
+    type: z
+      .string()
+      .refine((t) => t === 'application/pdf', 'Only PDF files are allowed'),
+    size: z.number().max(5 * 1024 * 1024, 'File must be 5MB or smaller'),
     lastModified: z.number().optional(),
   }),
 });
