@@ -22,6 +22,20 @@
       "when": 1779342318475,
       "tag": "0002_happy_amazoness",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779978329621,
+      "tag": "0003_sweet_harpoon",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779984151278,
+      "tag": "0004_complex_valkyrie",
+      "breakpoints": true
     }
   ]
 }

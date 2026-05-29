@@ -37,6 +37,19 @@ export const onboardingSchema = z.object({
   whereDoYouWantToGo: z.string().trim().min(1, 'This field is required'),
 });
 
+export const userPropertyDocumentUploadSchema = z.object({
+  pdfDocument: z.object({
+    base64: z.string(),
+    name: z.string().optional(),
+    type: z.string().optional(),
+    size: z.number().optional(),
+    lastModified: z.number().optional(),
+  }),
+});
+
 export type SignupValues = z.infer<typeof signupSchema>;
 export type LoginValues = z.infer<typeof loginSchema>;
 export type OnboardingValues = z.infer<typeof onboardingSchema>;
+export type UserPropertyDocumentUploadValues = z.infer<
+  typeof userPropertyDocumentUploadSchema
+>;

@@ -131,3 +131,24 @@ export function useSignInWithFacebook() {
     }),
   );
 }
+
+/**
+ * Hook to upload a property document for a user
+ */
+export function useUserPropertyDocumentUpload() {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    trpc.auth.userPropertyDocumentUploadComplete.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.auth.getCurrentUser.queryOptions(),
+        );
+      },
+      onError: (err) => {
+        console.error({ err });
+      },
+    }),
+  );
+}

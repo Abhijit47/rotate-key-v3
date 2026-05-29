@@ -8,6 +8,7 @@ import { bookings } from './booking';
 import { like } from './like';
 import { match } from './match';
 import { property } from './property';
+import { SwapsTable } from './swap';
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
@@ -16,6 +17,9 @@ export const userRelations = relations(user, ({ many }) => ({
   user1Matches: many(match, { relationName: 'user1Match' }),
   user2Matches: many(match, { relationName: 'user2Match' }),
   bookings: many(bookings, { relationName: 'userBookings' }),
+
+  swapsAsUser1: many(SwapsTable, { relationName: 'swapUser1' }), // new
+  swapsAsUser2: many(SwapsTable, { relationName: 'swapUser2' }), // new
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -64,6 +68,8 @@ export const matchRelations = relations(match, ({ one, many }) => ({
     relationName: 'property2match',
   }),
   bookings: many(bookings),
+
+  swaps: many(SwapsTable, { relationName: 'matchSwap' }),
 }));
 
 export const bookingRelations = relations(bookings, ({ one }) => ({
@@ -98,5 +104,33 @@ export const likesRelations = relations(like, ({ one }) => ({
     fields: [like.propertyId],
     references: [property.id],
     relationName: 'property',
+  }),
+}));
+
+export const swapRelations = relations(SwapsTable, ({ one }) => ({
+  user1: one(user, {
+    fields: [SwapsTable.user1Id],
+    references: [user.id],
+    relationName: 'swapUser1',
+  }),
+  user2: one(user, {
+    fields: [SwapsTable.user2Id],
+    references: [user.id],
+    relationName: 'swapUser2',
+  }),
+  match: one(match, {
+    fields: [SwapsTable.matchId],
+    references: [match.id],
+    relationName: 'matchSwap',
+  }),
+  property1: one(property, {
+    fields: [SwapsTable.property1Id],
+    references: [property.id],
+    relationName: 'property1Swap',
+  }),
+  property2: one(property, {
+    fields: [SwapsTable.property2Id],
+    references: [property.id],
+    relationName: 'property2Swap',
   }),
 }));
