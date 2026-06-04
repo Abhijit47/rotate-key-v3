@@ -65,7 +65,10 @@ export default function ChatInterface() {
     sort,
     options,
     sidebarOpen,
+    user,
   } = useCustomChatContext();
+
+  // const { documentAlertModal } = useDocumentUploadAlert(user);
 
   const [storedValue] = useChatSessionStorage('chat-session', {
     channelId: 'general',
@@ -390,11 +393,7 @@ function OverrideChannelListUI(props: ChannelListUIProps) {
           (response) => response.channel.id === channelId,
         );
 
-        // if (loadedChannelData?.channel.id !== 'general') {
-        if (
-          loadedChannelData?.channel.id &&
-          loadedChannelData.channel.id !== DEFAULT_CHANNEL_ID
-        ) {
+        if (loadedChannelData?.channel.id !== 'general') {
           setActiveChannel(client.channel(DEFAULT_CHANNEL_TYPE, channelId));
           subscription?.unsubscribe();
           return;

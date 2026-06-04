@@ -178,8 +178,8 @@ export default function DocumentUploadAlertDialog() {
 
   return (
     <AlertDialog
-      // open={!isOpenDocumentDialog && !hasDocumentMessageFromCurrentUser}
-      open={isOpenDocumentDialog && !hasDocumentMessageFromCurrentUser}
+      open={!isOpenDocumentDialog && !hasDocumentMessageFromCurrentUser}
+      // open={isOpenDocumentDialog && !hasDocumentMessageFromCurrentUser}
       onOpenChange={onOpenDocumentDialog}>
       <AlertDialogContent>
         <AlertDialogHeader>

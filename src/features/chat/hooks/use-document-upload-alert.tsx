@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useChatContext } from 'stream-chat-react';
 
-import { useCustomChatContext } from '@/contexts/chat-context';
 import { useSession } from '@/lib/auth-client';
 
 import { Button } from '@/components/ui/button';
@@ -19,13 +18,24 @@ import { Field, FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+type User = {
+  id: string;
+  fullName: string;
+  avatar: string | null | undefined;
+  streamToken: string | null | undefined;
+  expireTime: Date | null | undefined;
+  issuedAt: Date | null | undefined;
+  isPropertyDocumentUploaded: boolean;
+  propertyDocument: string | null | undefined;
+};
+
 const PREDEFINED_MESSAGE_TITLE = 'Uploaded Document';
 
-export function useDocumentUploadAlert() {
+export function useDocumentUploadAlert(user: User) {
   const { refetch } = useSession();
   const { client, channel } = useChatContext();
 
-  const { user } = useCustomChatContext();
+  // const { user } = useCustomChatContext();
 
   const hasDocument = useMemo(() => {
     if (!client || !channel?.cid) return false;
@@ -41,20 +51,6 @@ export function useDocumentUploadAlert() {
       return sentByCurrentUser && hasDocumentAttachment;
     });
   }, [channel?.state.messages, client]);
-
-  // const hasDocumentMessageFromCurrentUser = channel?.state.messages.some(
-  //   (msg) => {
-  //     const sentByCurrentUser = msg?.user?.id === client.userID;
-  //     const hasDocumentAttachment = msg.attachments?.some(
-  //       (att) =>
-  //         att.type === 'file' &&
-  //         !!att.asset_url &&
-  //         att.title === PREDEFINED_MESSAGE_TITLE,
-  //     );
-
-  //     return sentByCurrentUser && hasDocumentAttachment;
-  //   },
-  // );
 
   const userId = user.id;
   const storageKey = userId ? `document-upload:${userId}` : null;

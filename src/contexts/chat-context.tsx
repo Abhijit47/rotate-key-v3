@@ -117,17 +117,17 @@ export function ChatCustomContextProvider(props: Props) {
   }, [matchedUsers, router]);
 
   useEffect(() => {
-    // if (shouldPrompt && !dismissed) {
-    //   console.log(
-    //     "triggering document upload dialog because user hasn't dismissed it yet",
-    //   );
-    //   // setIsOpenDocumentDialog(true);
-    // }
-    if (dismissed) {
-      setIsOpenDocumentDialog(false);
-      return;
+    if (shouldPrompt && !dismissed) {
+      console.log(
+        "triggering document upload dialog because user hasn't dismissed it yet",
+      );
+      // setIsOpenDocumentDialog(true);
     }
-    if (shouldPrompt) setIsOpenDocumentDialog(true);
+    // if (dismissed) {
+    //   setIsOpenDocumentDialog(false);
+    //   return;
+    // }
+    // if (shouldPrompt) setIsOpenDocumentDialog(true);
   }, [shouldPrompt, dismissed]);
 
   async function handleClose() {
