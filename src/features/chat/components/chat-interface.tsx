@@ -390,7 +390,11 @@ function OverrideChannelListUI(props: ChannelListUIProps) {
           (response) => response.channel.id === channelId,
         );
 
-        if (loadedChannelData?.channel.id !== 'general') {
+        // if (loadedChannelData?.channel.id !== 'general') {
+        if (
+          loadedChannelData?.channel.id &&
+          loadedChannelData.channel.id !== DEFAULT_CHANNEL_ID
+        ) {
           setActiveChannel(client.channel(DEFAULT_CHANNEL_TYPE, channelId));
           subscription?.unsubscribe();
           return;

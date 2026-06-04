@@ -25,15 +25,18 @@ export function useDocumentUploadAlert() {
   const { refetch } = useSession();
   const { client, channel } = useChatContext();
 
-  const { onOpenDocumentDialog, user } = useCustomChatContext();
+  const { user } = useCustomChatContext();
 
   const hasDocument = useMemo(() => {
-    if (!client || !channel?.cid) return;
+    if (!client || !channel?.cid) return false;
 
     return channel?.state.messages.some((msg) => {
       const sentByCurrentUser = msg?.user?.id === client.userID;
       const hasDocumentAttachment = msg.attachments?.some(
-        (att) => att.type === 'file' && !!att.asset_url,
+        (att) =>
+          att.type === 'file' &&
+          !!att.asset_url &&
+          att.title === PREDEFINED_MESSAGE_TITLE,
       );
       return sentByCurrentUser && hasDocumentAttachment;
     });
@@ -69,7 +72,7 @@ export function useDocumentUploadAlert() {
 
   useEffect(() => {
     if (!shouldTrigger && !dismissed) setIsOpen(true);
-  }, [shouldTrigger]);
+  }, [shouldTrigger, dismissed]);
 
   async function handleClose() {
     if (!storageKey) return;
@@ -85,15 +88,33 @@ export function useDocumentUploadAlert() {
     setIsOpen(false);
   }
 
+  const handleOpenChange = (open: boolean) => {
+    if (open) setIsOpen(true);
+    else void handleClose();
+  };
+
   return {
-    documentAlertModal: <DocumentUploadDialogDemo />,
+    documentAlertModal: (
+      <DocumentUploadDialogDemo
+        isOpenDialog={isOpen}
+        onOpenDocumentDialog={handleOpenChange}
+      />
+    ),
     isOpenDialog: isOpen,
-    onOpenDocumentDialog: setIsOpen,
+    onOpenDocumentDialog: handleOpenChange,
   };
 }
 
-export function DocumentUploadDialogDemo() {
-  const { isOpenDialog, onOpenDocumentDialog } = useDocumentUploadAlert();
+type DocumentUploadDialogDemoProps = {
+  isOpenDialog: boolean;
+  onOpenDocumentDialog: (open: boolean) => void;
+};
+
+export function DocumentUploadDialogDemo({
+  isOpenDialog,
+  onOpenDocumentDialog,
+}: DocumentUploadDialogDemoProps) {
+  // const { isOpenDialog, onOpenDocumentDialog } = useDocumentUploadAlert();
 
   return (
     <Dialog open={isOpenDialog} onOpenChange={onOpenDocumentDialog}>

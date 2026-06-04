@@ -103,7 +103,13 @@ export default function DocumentUploadAlertDialog() {
       return;
     }
 
-    const base64 = await fileToBase64(files[0]);
+    let base64: string;
+    try {
+      base64 = await fileToBase64(files[0]);
+    } catch {
+      toast.error('Failed to read the selected file. Please try again.');
+      return;
+    }
 
     const document = {
       base64,
@@ -172,7 +178,8 @@ export default function DocumentUploadAlertDialog() {
 
   return (
     <AlertDialog
-      open={!isOpenDocumentDialog && !hasDocumentMessageFromCurrentUser}
+      // open={!isOpenDocumentDialog && !hasDocumentMessageFromCurrentUser}
+      open={isOpenDocumentDialog && !hasDocumentMessageFromCurrentUser}
       onOpenChange={onOpenDocumentDialog}>
       <AlertDialogContent>
         <AlertDialogHeader>

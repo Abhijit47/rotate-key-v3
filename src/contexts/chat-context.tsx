@@ -65,7 +65,7 @@ export function ChatCustomContextProvider(props: Props) {
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const openSidebar = useCallback(() => setSidebarOpen(true), []);
 
-  const [timeout, _] = useState(6000);
+  const timeout = 6000;
   // The useCreateChatClient hook accepts an options object forwarded to the StreamChat constructor. The client is not recreated when options changes. If you need to re-create it, set a key on the component that calls the hook:
   // const key = `timeout_${timeout}`;
 
@@ -74,7 +74,7 @@ export function ChatCustomContextProvider(props: Props) {
 
   const storageKey = userId ? `document-upload:${userId}` : null;
 
-  const shouldPrompt = user.isPropertyDocumentUploaded;
+  const shouldPrompt = !user.isPropertyDocumentUploaded;
 
   const [isOpenDocumentDialog, setIsOpenDocumentDialog] =
     useState(shouldPrompt);
@@ -117,13 +117,18 @@ export function ChatCustomContextProvider(props: Props) {
   }, [matchedUsers, router]);
 
   useEffect(() => {
-    if (shouldPrompt && !dismissed) {
-      console.log(
-        "triggering document upload dialog because user hasn't dismissed it yet",
-      );
-      // setIsOpenDocumentDialog(true);
+    // if (shouldPrompt && !dismissed) {
+    //   console.log(
+    //     "triggering document upload dialog because user hasn't dismissed it yet",
+    //   );
+    //   // setIsOpenDocumentDialog(true);
+    // }
+    if (dismissed) {
+      setIsOpenDocumentDialog(false);
+      return;
     }
-  }, [shouldPrompt]);
+    if (shouldPrompt) setIsOpenDocumentDialog(true);
+  }, [shouldPrompt, dismissed]);
 
   async function handleClose() {
     if (!storageKey) return;

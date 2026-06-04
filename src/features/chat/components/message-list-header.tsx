@@ -5,7 +5,7 @@ import { useChatContext } from 'stream-chat-react';
 export default function MessageListHeader() {
   const { client, channel } = useChatContext();
 
-  const { onOpenDocumentDialog, user } = useCustomChatContext();
+  const { user } = useCustomChatContext();
 
   const hasDocumentMessageFromCurrentUser = channel?.state.messages.some(
     (msg) => {
@@ -28,10 +28,10 @@ export default function MessageListHeader() {
       }>
       {/* TODO: Will implement later */}
       <Button size={'xs'} className={'text-sm!'} disabled={!shouldEnable}>
-        Do Somthing
+        Do Something
       </Button>
       <Button size={'xs'} className={'text-sm!'} disabled={!shouldEnable}>
-        Do Somthing
+        Do Something
       </Button>
     </div>
   );
