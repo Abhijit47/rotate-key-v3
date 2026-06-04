@@ -28,6 +28,8 @@ export default async function ChatPage() {
             streamToken: user.chatToken,
             expireTime: user.chatTokenExpireAt,
             issuedAt: user.chatTokenIssuedAt,
+            isPropertyDocumentUploaded: !!user.isPropertyDocumentUploaded,
+            propertyDocument: user.propertyDocument,
           }}>
           <Suspense fallback={<EmptyChatState />}>
             <ChatInterface />
