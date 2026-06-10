@@ -1,30 +1,35 @@
-import { and, eq, sql } from "drizzle-orm";
-import z from "zod";
-import { TRPCError } from "@trpc/server";
-import { DBQueryConfig } from "drizzle-orm/relations";
+import { TRPCError } from '@trpc/server';
+import { and, eq, sql } from 'drizzle-orm';
+import { DBQueryConfig } from 'drizzle-orm/relations';
+import z from 'zod';
 
-import { db } from "@/drizzle/db";
-import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { InsertSwap, SwapsTable } from "@/drizzle/schema/swap";
-import { bookings as BookingTable } from "@/drizzle/schema/booking";
-import { property as PropertyTable } from "@/drizzle/schema";
-import { like as LikeTable } from "@/drizzle/schema/like";
-import { match as MatchTable } from "@/drizzle/schema/match";
+import { db } from '@/drizzle/db';
+import { property as PropertyTable } from '@/drizzle/schema';
+import { bookings as BookingTable } from '@/drizzle/schema/booking';
+import { like as LikeTable } from '@/drizzle/schema/like';
+import { match as MatchTable } from '@/drizzle/schema/match';
+import { InsertSwap, SwapsTable } from '@/drizzle/schema/swap';
+import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
 
-const createSwapSchema = z.object({
-  bookingId: z.string().nonempty("Booking ID is required"),
-  startDate: z.date(),
-  endDate: z.date(),
-  guestCount: z.string(),
-  partnerId: z.string().nonempty("Partner ID is required"),
-  partnerPropertyId: z.string().nonempty("Property ID is required"),
-});
+const createSwapSchema = z
+  .object({
+    bookingId: z.string().nonempty('Booking ID is required'),
+    startDate: z.date(),
+    endDate: z.date(),
+    guestCount: z.string(),
+    partnerId: z.string().nonempty('Partner ID is required'),
+    partnerPropertyId: z.string().nonempty('Property ID is required'),
+  })
+  .refine(({ startDate, endDate }) => endDate > startDate, {
+    path: ['endDate'],
+    message: 'End date must be after start date',
+  });
 
 const swapablePropertiesSchema = z.object({ id: z.string() });
 
 const acceptSwapSchema = z.object({
   swapId: z.string(),
-  bookingId: z.string().nonempty("Booking ID is required"),
+  bookingId: z.string().nonempty('Booking ID is required'),
 });
 
 const rejectSwapSchema = z.object({ swapId: z.string() });
@@ -41,8 +46,8 @@ export const swapRouter = createTRPCRouter({
       // Step 0 — Guard
       if (initiatorId === oppositeUserId) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "You cannot swap with yourself",
+          code: 'BAD_REQUEST',
+          message: 'You cannot swap with yourself',
         });
       }
 
@@ -53,17 +58,25 @@ export const swapRouter = createTRPCRouter({
         if (user2Id < user1Id) [user1Id, user2Id] = [user2Id, user1Id];
 
         const preparedFindExistingMatch = trx.query.match
+          // .findFirst({
+          //   where: (matchTable, { eq, and, or }) =>
+          //     and(
+          //       eq(matchTable.isActive, sql.placeholder('isActive')),
+          //       or(
+          //         eq(matchTable.user1Id, sql.placeholder('user1Id')),
+          //         eq(matchTable.user2Id, sql.placeholder('user2Id')),
+          //       ),
+          //     ),
+          // })
           .findFirst({
-            where: (matchTable, { eq, and, or }) =>
+            where: (matchTable, { eq, and }) =>
               and(
-                eq(matchTable.isActive, sql.placeholder("isActive")),
-                or(
-                  eq(matchTable.user1Id, sql.placeholder("user1Id")),
-                  eq(matchTable.user2Id, sql.placeholder("user2Id")),
-                ),
+                eq(matchTable.isActive, sql.placeholder('isActive')),
+                eq(matchTable.user1Id, sql.placeholder('user1Id')),
+                eq(matchTable.user2Id, sql.placeholder('user2Id')),
               ),
           })
-          .prepare("findExistingMatch");
+          .prepare('findExistingMatch');
 
         const existingMatch = await preparedFindExistingMatch.execute({
           isActive: true,
@@ -73,8 +86,8 @@ export const swapRouter = createTRPCRouter({
 
         if (!existingMatch) {
           throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "No active match with this user",
+            code: 'FORBIDDEN',
+            message: 'No active match with this user',
           });
         }
 
@@ -87,12 +100,12 @@ export const swapRouter = createTRPCRouter({
           .innerJoin(PropertyTable, eq(LikeTable.propertyId, PropertyTable.id))
           .where(
             and(
-              eq(LikeTable.fromUserId, sql.placeholder("initiatorId")),
-              eq(PropertyTable.authorId, sql.placeholder("oppositeUserId")),
+              eq(LikeTable.fromUserId, sql.placeholder('initiatorId')),
+              eq(PropertyTable.authorId, sql.placeholder('oppositeUserId')),
             ),
           )
           .limit(1)
-          .prepare("findMyLikesOnTheirProperty");
+          .prepare('findMyLikesOnTheirProperty');
         const myLikeOnOppositeProperty =
           await preparedFindMyLikesStatement.execute({
             initiatorId,
@@ -101,7 +114,7 @@ export const swapRouter = createTRPCRouter({
 
         if (!myLikeOnOppositeProperty.length) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
+            code: 'BAD_REQUEST',
             message: `You have not liked any property of this user ${oppositeUserId}`,
           });
         }
@@ -113,12 +126,12 @@ export const swapRouter = createTRPCRouter({
           .innerJoin(PropertyTable, eq(LikeTable.propertyId, PropertyTable.id))
           .where(
             and(
-              eq(LikeTable.fromUserId, sql.placeholder("oppositeUserId")),
-              eq(PropertyTable.authorId, sql.placeholder("initiatorId")),
+              eq(LikeTable.fromUserId, sql.placeholder('oppositeUserId')),
+              eq(PropertyTable.authorId, sql.placeholder('initiatorId')),
             ),
           )
           .limit(1)
-          .prepare("findTheirLikesOnMyProperty");
+          .prepare('findTheirLikesOnMyProperty');
         const theirLikeOnInitiatorProperty =
           await preparedFindTheirLikesStatement.execute({
             oppositeUserId,
@@ -127,7 +140,7 @@ export const swapRouter = createTRPCRouter({
 
         if (!theirLikeOnInitiatorProperty.length) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
+            code: 'BAD_REQUEST',
             message: `This user ${oppositeUserId} has not liked any property of you`,
           });
         }
@@ -137,8 +150,8 @@ export const swapRouter = createTRPCRouter({
           .findMany({
             where(bookingTable, { and, or, eq, ne }) {
               return and(
-                eq(bookingTable.userId, sql.placeholder("initiatorId")),
-                eq(bookingTable.status, sql.placeholder("status")),
+                eq(bookingTable.userId, sql.placeholder('initiatorId')),
+                eq(bookingTable.status, sql.placeholder('status')),
               );
             },
             columns: {
@@ -169,16 +182,16 @@ export const swapRouter = createTRPCRouter({
             //     trx.$count(table, eq(table.userId, initiatorId)),
             // },
           })
-          .prepare("findMyBookingsOnPropertyByMe");
+          .prepare('findMyBookingsOnPropertyByMe');
         const myBookingsOnOppositeProperty =
           await preparedFindMyBookingsStatement.execute({
             initiatorId,
-            status: "pending",
+            status: 'pending',
           });
 
         if (!myBookingsOnOppositeProperty.length) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
+            code: 'BAD_REQUEST',
             message: `You have not booked any property of this user ${oppositeUserId}`,
           });
         }
@@ -206,8 +219,8 @@ export const swapRouter = createTRPCRouter({
 
       if (initiatorId === oppositeUserId) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "You cannot swap with yourself",
+          code: 'BAD_REQUEST',
+          message: 'You cannot swap with yourself',
         });
       }
 
@@ -220,7 +233,7 @@ export const swapRouter = createTRPCRouter({
             and(
               eq(table.id, bookingId),
               eq(table.userId, initiatorId),
-              eq(table.status, "pending"),
+              eq(table.status, 'pending'),
             ),
           with: {
             property: true,
@@ -231,15 +244,15 @@ export const swapRouter = createTRPCRouter({
 
         if (!initiatorBooking) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Invalid or not found booking",
+            code: 'BAD_REQUEST',
+            message: 'Invalid or not found booking',
           });
         }
 
         if (!initiatorBooking.match || !initiatorBooking.match.isActive) {
           throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "No active match for this booking",
+            code: 'FORBIDDEN',
+            message: 'No active match for this booking',
           });
         }
 
@@ -252,8 +265,8 @@ export const swapRouter = createTRPCRouter({
 
         if (!isOppositeInMatch) {
           throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "This user is not part of your active match",
+            code: 'FORBIDDEN',
+            message: 'This user is not part of your active match',
           });
         }
 
@@ -271,7 +284,7 @@ export const swapRouter = createTRPCRouter({
 
         if (!oppositeProperty) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
+            code: 'BAD_REQUEST',
             message: "Opposite user's property not available",
           });
         }
@@ -290,8 +303,8 @@ export const swapRouter = createTRPCRouter({
           .limit(1);
         if (!myLikeOnOppositeProperty.length) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "You have not liked any property of this user",
+            code: 'BAD_REQUEST',
+            message: 'You have not liked any property of this user',
           });
         }
         // console.log({ myLikeOnOppositeProperty });
@@ -309,8 +322,8 @@ export const swapRouter = createTRPCRouter({
           .limit(1);
         if (!theirLikeOnMyProperty.length) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "This user has not liked any of your properties",
+            code: 'BAD_REQUEST',
+            message: 'This user has not liked any of your properties',
           });
         }
         // console.log({ theirLikeOnMyProperty });
@@ -320,15 +333,15 @@ export const swapRouter = createTRPCRouter({
           where: and(
             eq(BookingTable.userId, oppositeUserId),
             eq(BookingTable.matchId, activeMatch.id),
-            eq(BookingTable.status, "pending"),
+            eq(BookingTable.status, 'pending'),
           ),
         });
         // console.log({ oppositeBooking });
 
         if (!oppositeBooking) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Opposite user must have a pending booking on this match",
+            code: 'BAD_REQUEST',
+            message: 'Opposite user must have a pending booking on this match',
           });
         }
 
@@ -344,8 +357,8 @@ export const swapRouter = createTRPCRouter({
         // Validate that the provided partnerPropertyId matches the partner's property from the match
         if (partnerPropertyId !== partnerPropertyIdFromMatch) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Invalid partner property ID for this match",
+            code: 'BAD_REQUEST',
+            message: 'Invalid partner property ID for this match',
           });
         }
 
@@ -378,13 +391,13 @@ export const swapRouter = createTRPCRouter({
         });
         // console.log({ existingSwap });
 
-        console.log("2nd user trap");
+        console.log('2nd user trap');
         if (existingSwap) {
           // If swap exists and is pending, check if current user is the other user to complete it
-          if (existingSwap.status !== "pending") {
+          if (existingSwap.status !== 'pending') {
             throw new TRPCError({
-              code: "CONFLICT",
-              message: "A swap already exists and is not pending",
+              code: 'CONFLICT',
+              message: 'A swap already exists and is not pending',
             });
           }
 
@@ -396,8 +409,8 @@ export const swapRouter = createTRPCRouter({
             (isUser2 && existingSwap.user2Accepted)
           ) {
             throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: "You have already initiated this swap",
+              code: 'BAD_REQUEST',
+              message: 'You have already initiated this swap',
             });
           }
 
@@ -429,11 +442,11 @@ export const swapRouter = createTRPCRouter({
           return {
             swap: updatedSwap,
             isNew: false,
-            message: "Swap completed successfully!",
+            message: 'Swap completed successfully!',
           };
         }
 
-        console.log("No Trap");
+        console.log('No Trap');
         // Step 7 — Insert the swap with initial status pending since it's the first user
         const [newSwap] = await trx
           .insert(SwapsTable)
@@ -460,14 +473,14 @@ export const swapRouter = createTRPCRouter({
                   // user2Accepted: true,
                   // user1Accepted: false,
                 }),
-            status: "pending",
+            status: 'pending',
           })
           .returning();
 
         return {
           swap: newSwap,
           isNew: true,
-          message: "Swap initiated successfully! Waiting for the other user.",
+          message: 'Swap initiated successfully! Waiting for the other user.',
         };
       });
 
@@ -479,15 +492,16 @@ export const swapRouter = createTRPCRouter({
 
     const currentUserId = user.id;
 
-    const whereStatement: DBQueryConfig<"many">["where"] = (
+    const whereStatement: DBQueryConfig<'many'>['where'] = (
       table,
       { eq, and, or },
     ) =>
       and(
         or(
-          eq(table.user1Id, sql.placeholder("currentUserId")),
-          eq(table.user2Id, sql.placeholder("currentUserId")),
+          eq(table.user1Id, sql.placeholder('currentUserId')),
+          eq(table.user2Id, sql.placeholder('currentUserId')),
         ),
+        eq(table.status, 'pending'),
       );
 
     const preparedExistingSwapDetailsStatement = db.query.SwapsTable.findFirst({
@@ -496,7 +510,7 @@ export const swapRouter = createTRPCRouter({
         user1: true,
         user2: true,
       },
-    }).prepare("FindExistingSwapDetails");
+    }).prepare('FindExistingSwapDetails');
 
     const existingSwapDetails =
       await preparedExistingSwapDetailsStatement.execute({
@@ -504,7 +518,7 @@ export const swapRouter = createTRPCRouter({
       });
 
     if (!existingSwapDetails) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Swap not found" });
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Swap not found' });
     }
 
     // find the booking ID of current user
@@ -515,22 +529,22 @@ export const swapRouter = createTRPCRouter({
 
     if (!foundBookingId) {
       throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Booking ID not found",
+        code: 'NOT_FOUND',
+        message: 'Booking ID not found',
       });
     }
 
     if (!existingSwapDetails.user1 || !existingSwapDetails.user2) {
       throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "User Record not found",
+        code: 'NOT_FOUND',
+        message: 'User Record not found',
       });
     }
 
     if (existingSwapDetails.status == null) {
       throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Swap status is null",
+        code: 'BAD_REQUEST',
+        message: 'Swap status is null',
       });
     }
 
@@ -554,7 +568,7 @@ export const swapRouter = createTRPCRouter({
         });
 
         if (!existingSwap) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Swap not found" });
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Swap not found' });
         }
 
         // Ensure user is part of the swap
@@ -562,15 +576,15 @@ export const swapRouter = createTRPCRouter({
           existingSwap.user1Id === user.id || existingSwap.user2Id === user.id;
         if (!isUserInSwap) {
           throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "You are not part of this swap",
+            code: 'FORBIDDEN',
+            message: 'You are not part of this swap',
           });
         }
 
-        if (existingSwap.status !== "pending") {
+        if (existingSwap.status !== 'pending') {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Swap is not pending",
+            code: 'BAD_REQUEST',
+            message: 'Swap is not pending',
           });
         }
 
@@ -584,15 +598,15 @@ export const swapRouter = createTRPCRouter({
             and(
               eq(table.id, input.bookingId),
               eq(table.userId, user.id),
-              eq(table.status, "pending"),
+              eq(table.status, 'pending'),
               eq(table.matchId, existingSwap.matchId!),
             ),
         });
 
         if (!userBooking) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Invalid or not found booking",
+            code: 'BAD_REQUEST',
+            message: 'Invalid or not found booking',
           });
         }
 
@@ -601,8 +615,8 @@ export const swapRouter = createTRPCRouter({
         if (isUser1) {
           if (existingSwap.user1Accepted) {
             throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: "You have already accepted this swap",
+              code: 'BAD_REQUEST',
+              message: 'You have already accepted this swap',
             });
           }
           updateData.user1BookingId = input.bookingId;
@@ -610,8 +624,8 @@ export const swapRouter = createTRPCRouter({
         } else if (isUser2) {
           if (existingSwap.user2Accepted) {
             throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: "You have already accepted this swap",
+              code: 'BAD_REQUEST',
+              message: 'You have already accepted this swap',
             });
           }
           updateData.user2BookingId = input.bookingId;
@@ -624,7 +638,7 @@ export const swapRouter = createTRPCRouter({
           : existingSwap.user1Accepted;
 
         if (willBeBothAccepted) {
-          updateData.status = "completed";
+          updateData.status = 'completed';
         }
 
         const [updated] = await trx
@@ -633,37 +647,38 @@ export const swapRouter = createTRPCRouter({
           .where(eq(SwapsTable.id, input.swapId))
           .returning();
 
-        if (willBeBothAccepted && updateData.status === "completed") {
+        if (willBeBothAccepted && updateData.status === 'completed') {
+          const user1BookingId =
+            updated.user1BookingId ?? existingSwap.user1BookingId;
+          const user2BookingId =
+            updated.user2BookingId ?? existingSwap.user2BookingId;
+
           const updatePropertyStatement = trx
             .update(PropertyTable)
             .set({ isAvailable: false })
-            .where(eq(PropertyTable.id, sql.placeholder("id")));
+            .where(eq(PropertyTable.id, sql.placeholder('id')));
 
           const updateUser1BookingStatement = trx
             .update(BookingTable)
-            .set({ status: "confirmed" })
-            .where(eq(BookingTable.id, sql.placeholder("id")));
+            .set({ status: 'confirmed' })
+            .where(eq(BookingTable.id, sql.placeholder('id')));
 
           const updateUser2BookingStatement = trx
             .update(BookingTable)
-            .set({ status: "confirmed" })
-            .where(eq(BookingTable.id, sql.placeholder("id")));
+            .set({ status: 'confirmed' })
+            .where(eq(BookingTable.id, sql.placeholder('id')));
 
           const updateMatchStatement = trx
             .update(MatchTable)
             .set({ isActive: false })
-            .where(eq(MatchTable.id, sql.placeholder("id")));
+            .where(eq(MatchTable.id, sql.placeholder('id')));
 
           // parrallel updates
           await Promise.all([
             updatePropertyStatement.execute({ id: existingSwap.property1Id }),
             updatePropertyStatement.execute({ id: existingSwap.property2Id }),
-            updateUser1BookingStatement.execute({
-              id: existingSwap.user1BookingId,
-            }),
-            updateUser2BookingStatement.execute({
-              id: existingSwap.user2BookingId,
-            }),
+            updateUser1BookingStatement.execute({ id: user1BookingId }),
+            updateUser2BookingStatement.execute({ id: user2BookingId }),
             updateMatchStatement.execute({
               id: existingSwap.matchId,
             }),
@@ -693,40 +708,40 @@ export const swapRouter = createTRPCRouter({
         });
 
         if (!existingSwap) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Swap not found" });
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Swap not found' });
         }
 
         // Ensure user is user2 (the one who can reject)
         if (existingSwap.user2Id !== user.id) {
           throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "You cannot reject this swap",
+            code: 'FORBIDDEN',
+            message: 'You cannot reject this swap',
           });
         }
 
-        if (existingSwap.status !== "pending") {
+        if (existingSwap.status !== 'pending') {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Swap is not pending",
+            code: 'BAD_REQUEST',
+            message: 'Swap is not pending',
           });
         }
         if (!existingSwap.user1BookingId || !existingSwap.user2BookingId) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
+            code: 'BAD_REQUEST',
             message: "User1 or User2 Booking ID's not found in swap",
           });
         }
 
         if (!existingSwap.property1Id || !existingSwap.property2Id) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
+            code: 'BAD_REQUEST',
             message: "Property ID's not found in swap",
           });
         }
 
         if (!existingSwap.user1BookingId || !existingSwap.user2BookingId) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
+            code: 'BAD_REQUEST',
             message: "User1 or User2 Booking ID's not found in swap",
           });
         }
@@ -739,7 +754,7 @@ export const swapRouter = createTRPCRouter({
         // 1. Swap Table row update
         const [updated] = await trx
           .update(SwapsTable)
-          .set({ status: "rejected" })
+          .set({ status: 'rejected' })
           .where(eq(SwapsTable.id, input.swapId))
           .returning();
 
@@ -751,13 +766,13 @@ export const swapRouter = createTRPCRouter({
 
         const updateUser1BookingStatement = trx
           .update(BookingTable)
-          .set({ status: "cancelled" })
-          .where(eq(BookingTable.id, sql.placeholder("id")));
+          .set({ status: 'cancelled' })
+          .where(eq(BookingTable.id, sql.placeholder('id')));
 
         const updateUser2BookingStatement = trx
           .update(BookingTable)
-          .set({ status: "cancelled" })
-          .where(eq(BookingTable.id, sql.placeholder("id")));
+          .set({ status: 'cancelled' })
+          .where(eq(BookingTable.id, sql.placeholder('id')));
 
         // parrallel updates
         await Promise.all([
@@ -791,8 +806,8 @@ const testSwapRouter = createTRPCRouter({
       // Step 0 — Guard
       if (initiatorId === oppositeUserId) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "You cannot swap with yourself",
+          code: 'BAD_REQUEST',
+          message: 'You cannot swap with yourself',
         });
       }
 
@@ -817,8 +832,8 @@ const testSwapRouter = createTRPCRouter({
 
         if (!activeMatch) {
           throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "No active match with this user",
+            code: 'FORBIDDEN',
+            message: 'No active match with this user',
           });
         }
 
@@ -838,8 +853,8 @@ const testSwapRouter = createTRPCRouter({
 
         if (!myLikeOnOppositeProperty.length) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "You have not liked any property of this user",
+            code: 'BAD_REQUEST',
+            message: 'You have not liked any property of this user',
           });
         }
 
@@ -857,8 +872,8 @@ const testSwapRouter = createTRPCRouter({
           .limit(1);
         if (!theirLikeOnMyProperty.length) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "This user has not liked any of your properties",
+            code: 'BAD_REQUEST',
+            message: 'This user has not liked any of your properties',
           });
         }
 
@@ -872,7 +887,7 @@ const testSwapRouter = createTRPCRouter({
             and(
               eq(bookingTable.userId, initiatorId),
               eq(bookingTable.matchId, activeMatch.id),
-              eq(bookingTable.status, "pending"),
+              eq(bookingTable.status, 'pending'),
             ),
           with: {
             property: true,
@@ -922,8 +937,8 @@ const testSwapRouter = createTRPCRouter({
         // Step 0 — Guard
         if (initiatorId === oppositeUserId) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "You cannot swap with yourself",
+            code: 'BAD_REQUEST',
+            message: 'You cannot swap with yourself',
           });
         }
         // Step 1 — Find active match
@@ -942,14 +957,14 @@ const testSwapRouter = createTRPCRouter({
                 ),
               ),
           })
-          .prepare("activeMatchStatement");
+          .prepare('activeMatchStatement');
 
         const activeMatch = await statement1.execute();
 
         if (!activeMatch) {
           throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "No active match with this user",
+            code: 'FORBIDDEN',
+            message: 'No active match with this user',
           });
         }
 
@@ -966,12 +981,12 @@ const testSwapRouter = createTRPCRouter({
             ),
           )
           .limit(1)
-          .prepare("findMyLikesStatement");
+          .prepare('findMyLikesStatement');
         const myLikeOnOppositeProperty = await statement2.execute();
         if (!myLikeOnOppositeProperty.length) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "You have not liked any property of this user",
+            code: 'BAD_REQUEST',
+            message: 'You have not liked any property of this user',
           });
         }
 
@@ -987,12 +1002,12 @@ const testSwapRouter = createTRPCRouter({
             ),
           )
           .limit(1)
-          .prepare("findTheirLikesOnMyProperty");
+          .prepare('findTheirLikesOnMyProperty');
         const theirLikeOnMyProperty = await statement3.execute();
         if (!theirLikeOnMyProperty.length) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "This user has not liked any of your properties",
+            code: 'BAD_REQUEST',
+            message: 'This user has not liked any of your properties',
           });
         }
 
@@ -1002,7 +1017,7 @@ const testSwapRouter = createTRPCRouter({
             where(bookingTable, { and, or, eq, ne }) {
               return and(
                 eq(bookingTable.userId, initiatorId),
-                eq(bookingTable.status, "pending"),
+                eq(bookingTable.status, 'pending'),
               );
             },
             columns: {
@@ -1038,7 +1053,7 @@ const testSwapRouter = createTRPCRouter({
             //     trx.$count(table, eq(table.userId, initiatorId)),
             // },
           })
-          .prepare("findBookingsByMe");
+          .prepare('findBookingsByMe');
 
         // Step 4: Last return the oposite user property/ies
         // Now match check likes check both sided, bookings also checked

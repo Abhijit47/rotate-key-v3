@@ -1,25 +1,25 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { format } from 'date-fns';
 import {
-  RotateCcwKey,
-  RefreshCcw,
   PartyPopperIcon,
+  RefreshCcw,
+  RotateCcwKey,
   XCircleIcon,
-} from "lucide-react";
-import { useChatContext } from "stream-chat-react";
-import { useState } from "react";
+} from 'lucide-react';
+import { useState } from 'react';
 import {
   Controller,
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
   useWatch,
-} from "react-hook-form";
-import z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format, differenceInMonths } from "date-fns";
-import { toast } from "sonner";
+} from 'react-hook-form';
+import { toast } from 'sonner';
+import { useChatContext } from 'stream-chat-react';
+import z from 'zod';
 
-import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Dialog,
   DialogClose,
@@ -29,7 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Field,
   FieldDescription,
@@ -38,8 +38,15 @@ import {
   FieldLabel,
   FieldLegend,
   FieldSet,
-} from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/field';
+import { Label } from '@/components/ui/label';
+import {
+  Popover,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -48,22 +55,16 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+} from '@/components/ui/select';
 
-import { useCustomChatContext } from "@/contexts/chat-context";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { useCreateSwap } from "../hooks/use-swap";
-import { Spinner } from "@/components/ui/spinner";
-import { TRPCClientError } from "@trpc/client";
-import { useRouter } from "next/navigation";
+import { Badge } from '@/components/ui/badge';
+import { Spinner } from '@/components/ui/spinner';
+import { useCustomChatContext } from '@/contexts/chat-context';
+import { isPropertyDocumentAttachment } from '@/features/chat/utils/chat';
+import { cn } from '@/lib/utils';
+import { TRPCClientError } from '@trpc/client';
+import { useRouter } from 'next/navigation';
+import { useCreateSwap } from '../hooks/use-swap';
 
 function toDate(value?: string | null) {
   if (!value) return undefined;
@@ -74,35 +75,35 @@ function toDate(value?: string | null) {
 export const swapSchema = z
   .object({
     // which property select from dropdown by user
-    choosenPropertyId: z.string().nonempty("Please select a property"),
+    choosenPropertyId: z.string().nonempty('Please select a property'),
     startDate: z.date(),
     endDate: z.date(),
     guestCount: z
       .string()
-      .regex(/^[1-9]\d*$/, "Please select at least 1 guest"),
+      .regex(/^[1-9]\d*$/, 'Please select at least 1 guest'),
   })
   .superRefine((value, ctx) => {
-    if (value.choosenPropertyId === "none") {
+    if (value.choosenPropertyId === 'none') {
       ctx.addIssue({
-        code: "custom",
-        path: ["choosenPropertyId"],
-        message: "Please select a property",
+        code: 'custom',
+        path: ['choosenPropertyId'],
+        message: 'Please select a property',
       });
       return;
     }
     const now = new Date();
     if (value.startDate < now) {
       ctx.addIssue({
-        code: "custom",
-        path: ["startDate"],
-        message: "Start date must be in the future",
+        code: 'custom',
+        path: ['startDate'],
+        message: 'Start date must be in the future',
       });
     }
     if (value.endDate <= value.startDate) {
       ctx.addIssue({
-        code: "custom",
-        path: ["endDate"],
-        message: "End date must be after start date",
+        code: 'custom',
+        path: ['endDate'],
+        message: 'End date must be after start date',
       });
     }
 
@@ -143,17 +144,17 @@ export function SwapDialog() {
   const form = useForm<SwapValues>({
     resolver: zodResolver(swapSchema),
     defaultValues: {
-      choosenPropertyId: "",
+      choosenPropertyId: '',
       startDate: undefined,
       endDate: undefined,
-      guestCount: "0",
+      guestCount: '0',
     },
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const watchedValues = useWatch({
     control: form.control,
-    name: ["startDate", "endDate", "guestCount", "choosenPropertyId"],
+    name: ['startDate', 'endDate', 'guestCount', 'choosenPropertyId'],
   });
 
   const gettingIn = watchedValues[0];
@@ -164,16 +165,13 @@ export function SwapDialog() {
     (item) => item.property.id === watchedValues[3],
   );
 
-  console.log("choosenPropertyDetails", choosenPropertyDetails);
+  console.log('choosenPropertyDetails', choosenPropertyDetails);
 
   const hasDocumentMessageFromCurrentUser = channel?.state.messages.some(
     (msg) => {
       const sentByCurrentUser = msg?.user?.id === client.userID;
       const hasDocumentAttachment = msg.attachments?.some(
-        (att) =>
-          att.type === "file" &&
-          !!att.asset_url &&
-          att.title === "Property Document",
+        (att) => isPropertyDocumentAttachment(att), // Use the helper function to check if the attachment is a property document
       );
 
       return sentByCurrentUser && hasDocumentAttachment;
@@ -202,7 +200,7 @@ export function SwapDialog() {
     // console.log('Form submitted with data:', values);
 
     if (!choosenPropertyDetails) {
-      toast.error("Please select a property");
+      toast.error('Please select a property');
       return;
     }
     const sentToApi = {
@@ -215,22 +213,22 @@ export function SwapDialog() {
     };
 
     toast.promise(mutateAsync(sentToApi), {
-      loading: "Please wait...",
+      loading: 'Please wait...',
       success: () => {
         form.reset();
         onSwapModal(false);
-        router.push("/my-profile");
-        return "Swap request sent successfully";
+        router.push('/my-profile');
+        return 'Swap request sent successfully';
       },
       error: (err) => {
         console.error(err);
         if (err instanceof TRPCClientError) {
           return err.message;
         }
-        return "Swapping failed, please try again later";
+        return 'Swapping failed, please try again later';
       },
       description: `Swapping your property with ${choosenPropertyDetails?.property.authorId}`,
-      descriptionClassName: "text-[10px]",
+      descriptionClassName: 'text-[10px]',
     });
 
     // toast.success("You submitted the following values:", {
@@ -259,19 +257,17 @@ export function SwapDialog() {
         if (!isSwapping) {
           onSwapModal(open);
         }
-      }}
-    >
+      }}>
       <DialogTrigger asChild>
         <Button
-          variant={"default"}
-          size={"sm"}
-          className={"text-sm!"}
-          disabled={!shouldEnable}
-        >
-          <RotateCcwKey className={"size-4"} /> Swap
+          variant={'default'}
+          size={'sm'}
+          className={'text-sm!'}
+          disabled={!shouldEnable}>
+          <RotateCcwKey className={'size-4'} /> Swap
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-105">
+      <DialogContent className='max-w-105'>
         <DialogHeader>
           <DialogTitle>Want to swap your current property?</DialogTitle>
           <DialogDescription>
@@ -282,79 +278,73 @@ export function SwapDialog() {
         </DialogHeader>
         <form
           onSubmit={form.handleSubmit(onSubmit, onError)}
-          className="space-y-4"
-        >
+          className='space-y-4'>
           <FieldSet disabled={isSwapping}>
-            <FieldLegend className={"sr-only"}>Swap Form</FieldLegend>
-            <FieldDescription className={"sr-only"}>
+            <FieldLegend className={'sr-only'}>Swap Form</FieldLegend>
+            <FieldDescription className={'sr-only'}>
               Choose a property to swap with.
             </FieldDescription>
 
             <Button
-              size="icon-xs"
-              variant={"destructive"}
-              type="button"
+              size='icon-xs'
+              variant={'destructive'}
+              type='button'
               onClick={() => {
                 form.reset();
-              }}
-            >
-              <RefreshCcw className="size-4" />
+              }}>
+              <RefreshCcw className='size-4' />
             </Button>
 
-            <FieldGroup className={"gap-3"}>
+            <FieldGroup className={'gap-3'}>
               <Controller
-                name="choosenPropertyId"
+                name='choosenPropertyId'
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field
                     data-invalid={fieldState.invalid}
-                    aria-invalid={fieldState.invalid}
-                  >
-                    <Label htmlFor="choose-property">Choose a Property</Label>
+                    aria-invalid={fieldState.invalid}>
+                    <Label htmlFor='choose-property'>Choose a Property</Label>
                     <Select
                       name={field.name}
                       value={field.value}
                       onValueChange={(val) => {
                         field.onChange(val);
                         form.setValue(
-                          "startDate",
+                          'startDate',
                           toDate(choosenPropertyDetails?.startDate!) ??
                             new Date(),
                           opts,
                         );
                         form.setValue(
-                          "endDate",
+                          'endDate',
                           toDate(choosenPropertyDetails?.endDate!) ??
                             new Date(),
                           opts,
                         );
                         form.setValue(
-                          "guestCount",
-                          choosenPropertyDetails?.guestCount ?? "0",
+                          'guestCount',
+                          choosenPropertyDetails?.guestCount ?? '0',
                           opts,
                         );
-                      }}
-                    >
+                      }}>
                       <SelectTrigger
-                        id="choose-property"
-                        className="w-full max-w-full"
-                        aria-invalid={fieldState.invalid}
-                      >
-                        <SelectValue placeholder="Select a property" />
+                        id='choose-property'
+                        className='w-full max-w-full'
+                        aria-invalid={fieldState.invalid}>
+                        <SelectValue placeholder='Select a property' />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Properties</SelectLabel>
-                          <SelectItem value="none">
+                          <SelectItem value='none'>
                             Select a property
                           </SelectItem>
                           {oppositeUserProperties?.map((item) => (
                             <SelectItem
                               key={item.id}
                               value={item.property.id}
-                              className="flex items-center justify-between flex-wrap w-full"
-                            >
-                              <span className="flex items-center justify-start flex-wrap gap-1">
+                              className='flex items-center justify-between flex-wrap w-full'>
+                              <span className='flex items-center justify-start flex-wrap gap-1'>
                                 {item.property.streetAddress},
                                 {item.property.city},{item.property.state},
                                 {item.property.zipCode},
@@ -363,13 +353,12 @@ export function SwapDialog() {
                               <Badge
                                 variant={
                                   item.property.isAvailable
-                                    ? "default"
-                                    : "destructive"
-                                }
-                              >
+                                    ? 'default'
+                                    : 'destructive'
+                                }>
                                 {item.property.isAvailable
-                                  ? "(Available)"
-                                  : "(Not Available)"}
+                                  ? '(Available)'
+                                  : '(Not Available)'}
                               </Badge>
                             </SelectItem>
                           ))}
@@ -382,60 +371,56 @@ export function SwapDialog() {
 
               {Object.keys(choosenPropertyDetails || {}).length > 0 ? (
                 <div>
-                  <div className={"grid grid-cols-1 md:grid-cols-2"}>
+                  <div className={'grid grid-cols-1 md:grid-cols-2'}>
                     <Controller
-                      name="startDate"
+                      name='startDate'
                       control={form.control}
                       render={({ field, fieldState }) => {
                         return (
                           <Field
                             data-invalid={fieldState.invalid}
-                            aria-invalid={fieldState.invalid}
-                          >
+                            aria-invalid={fieldState.invalid}>
                             <FieldLabel
                               htmlFor={field.name}
-                              className={"sr-only"}
-                            >
+                              className={'sr-only'}>
                               Getting-In
                             </FieldLabel>
                             <Popover
                               open={isGettingInOpen}
-                              onOpenChange={setIsGettingInOpen}
-                            >
+                              onOpenChange={setIsGettingInOpen}>
                               <PopoverTrigger asChild>
                                 <Button
-                                  type="button"
-                                  size={"sm"}
-                                  variant="outline"
+                                  type='button'
+                                  size={'sm'}
+                                  variant='outline'
                                   // disabled={property.isBookedByMe}
                                   className={cn(
-                                    "flex-col h-10 w-full border-r-0 rounded-r-none border-b-0 rounded-b-none gap-0 bg-transparent",
-                                    fieldState.invalid && "border-red-500",
-                                    fieldState.error && "border-red-500",
+                                    'flex-col h-10 w-full border-r-0 rounded-r-none border-b-0 rounded-b-none gap-0 bg-transparent',
+                                    fieldState.invalid && 'border-red-500',
+                                    fieldState.error && 'border-red-500',
                                     !fieldState.isValidating &&
-                                      "border-red-500",
-                                  )}
-                                >
+                                      'border-red-500',
+                                  )}>
                                   <span>GETTING-IN</span>
-                                  <span className={"text-xs"}>
+                                  <span className={'text-xs'}>
                                     {gettingIn
-                                      ? format(gettingIn, "dd/MM/yyyy")
-                                      : "DD/MM/YYYY"}
+                                      ? format(gettingIn, 'dd/MM/yyyy')
+                                      : 'DD/MM/YYYY'}
                                   </span>
                                 </Button>
                               </PopoverTrigger>
-                              <PopoverContent align="start">
+                              <PopoverContent align='start'>
                                 <PopoverHeader>
                                   <PopoverTitle>GETTING-IN</PopoverTitle>
 
                                   <Calendar
-                                    mode="single"
-                                    className="w-full"
+                                    mode='single'
+                                    className='w-full'
                                     onSelect={(date) => {
                                       if (!date) {
-                                        form.setError("startDate", {
-                                          type: "manual",
-                                          message: "Please select a valid date",
+                                        form.setError('startDate', {
+                                          type: 'manual',
+                                          message: 'Please select a valid date',
                                         });
                                         return;
                                       }
@@ -459,53 +444,49 @@ export function SwapDialog() {
                     />
 
                     <Controller
-                      name="endDate"
+                      name='endDate'
                       control={form.control}
                       render={({ field, fieldState }) => (
                         <Field
                           data-invalid={fieldState.invalid}
-                          aria-invalid={fieldState.invalid}
-                        >
+                          aria-invalid={fieldState.invalid}>
                           <FieldLabel
                             htmlFor={field.name}
-                            className={"sr-only"}
-                          >
+                            className={'sr-only'}>
                             Getting-Out
                           </FieldLabel>
                           <Popover
                             open={isGettingOutOpen}
-                            onOpenChange={setIsGettingOutOpen}
-                          >
+                            onOpenChange={setIsGettingOutOpen}>
                             <PopoverTrigger asChild>
                               <Button
-                                type="button"
-                                size={"sm"}
-                                variant="outline"
+                                type='button'
+                                size={'sm'}
+                                variant='outline'
                                 // disabled={property.isBookedByMe}
                                 className={
-                                  "flex-col h-10 border-l-0 rounded-l-none w-full border-b-0 rounded-b-none gap-0 bg-transparent"
-                                }
-                              >
+                                  'flex-col h-10 border-l-0 rounded-l-none w-full border-b-0 rounded-b-none gap-0 bg-transparent'
+                                }>
                                 <span>GETTING-OUT</span>
-                                <span className={"text-xs"}>
+                                <span className={'text-xs'}>
                                   {gettingOut
-                                    ? format(gettingOut, "dd/MM/yyyy")
-                                    : "DD/MM/YYYY"}
+                                    ? format(gettingOut, 'dd/MM/yyyy')
+                                    : 'DD/MM/YYYY'}
                                 </span>
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent align="end">
+                            <PopoverContent align='end'>
                               <PopoverHeader>
                                 <PopoverTitle>GETTING-OUT</PopoverTitle>
 
                                 <Calendar
-                                  mode="single"
-                                  className="w-full"
+                                  mode='single'
+                                  className='w-full'
                                   onSelect={(date) => {
                                     if (!date) {
-                                      form.setError("endDate", {
-                                        type: "manual",
-                                        message: "Please select a valid date",
+                                      form.setError('endDate', {
+                                        type: 'manual',
+                                        message: 'Please select a valid date',
                                       });
                                       return;
                                     }
@@ -532,53 +513,48 @@ export function SwapDialog() {
                   </div>
 
                   <Controller
-                    name="guestCount"
+                    name='guestCount'
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field
-                        className="w-full"
+                        className='w-full'
                         aria-invalid={fieldState.invalid}
-                        data-invalid={fieldState.invalid}
-                      >
-                        <FieldLabel className={"sr-only"}>Guest</FieldLabel>
+                        data-invalid={fieldState.invalid}>
+                        <FieldLabel className={'sr-only'}>Guest</FieldLabel>
                         <Select
                           data-invalid={fieldState.invalid}
                           aria-invalid={fieldState.invalid}
                           // disabled={property.isBookedByMe}
                           onValueChange={(value) => {
-                            if (value === "0") {
-                              form.setError("guestCount", {
-                                type: "manual",
-                                message: "Please select at least 1 guest",
+                            if (value === '0') {
+                              form.setError('guestCount', {
+                                type: 'manual',
+                                message: 'Please select at least 1 guest',
                               });
                               return;
                             }
                             field.onChange(value);
                           }}
-                          value={field.value}
-                        >
+                          value={field.value}>
                           <SelectTrigger
                             data-invalid={fieldState.invalid}
                             aria-invalid={fieldState.invalid}
-                            className={"border-t-0 rounded-t-none"}
-                          >
+                            className={'border-t-0 rounded-t-none'}>
                             <SelectValue
-                              className={"w-full"}
-                              placeholder="Select number of guests"
-                            >
-                              {guestCount === "1"
+                              className={'w-full'}
+                              placeholder='Select number of guests'>
+                              {guestCount === '1'
                                 ? `${guestCount} Guest`
                                 : `${guestCount} Guest(s)`}
                             </SelectValue>
                           </SelectTrigger>
-                          <SelectContent className={"w-full"} align="start">
+                          <SelectContent className={'w-full'} align='start'>
                             <SelectGroup>
                               {Array.from({ length: 10 }, (_, i) => (
                                 <SelectItem
                                   key={i + 1}
-                                  value={(i + 1).toString()}
-                                >
-                                  {i + 1} Guest{i + 1 > 1 ? "s" : ""}
+                                  value={(i + 1).toString()}>
+                                  {i + 1} Guest{i + 1 > 1 ? 's' : ''}
                                 </SelectItem>
                               ))}
                             </SelectGroup>
@@ -597,28 +573,28 @@ export function SwapDialog() {
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline" type="button" disabled={isSwapping}>
+              <Button variant='outline' type='button' disabled={isSwapping}>
                 {isSwapping ? (
-                  <span className="inline-flex items-center gap-2">
+                  <span className='inline-flex items-center gap-2'>
                     Cancel
                     <Spinner />
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-2">
-                    Cancel <XCircleIcon className="size-4" />
+                  <span className='inline-flex items-center gap-2'>
+                    Cancel <XCircleIcon className='size-4' />
                   </span>
                 )}
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isSwapping}>
+            <Button type='submit' disabled={isSwapping}>
               {isSwapping ? (
-                <span className="inline-flex items-center gap-2">
+                <span className='inline-flex items-center gap-2'>
                   Swapping...
                   <Spinner />
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-2">
-                  Swap <PartyPopperIcon className="size-4" />
+                <span className='inline-flex items-center gap-2'>
+                  Swap <PartyPopperIcon className='size-4' />
                 </span>
               )}
             </Button>
