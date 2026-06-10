@@ -2,6 +2,7 @@ CREATE TYPE "public"."plan_slug" AS ENUM('free', 'basic', 'pro');--> statement-b
 CREATE TYPE "public"."role" AS ENUM('admin', 'moderator', 'user');--> statement-breakpoint
 CREATE TYPE "public"."social_provider" AS ENUM('facebook', 'google');--> statement-breakpoint
 CREATE TYPE "public"."booking_status" AS ENUM('pending', 'confirmed', 'cancelled');--> statement-breakpoint
+CREATE TYPE "public"."status" AS ENUM('pending', 'completed', 'rejected', 'approved', 'declined');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
 	"account_id" text NOT NULL,
@@ -71,8 +72,12 @@ CREATE TABLE "user" (
 	"about_me" varchar(500),
 	"year_of_birth" varchar,
 	"contact_number" varchar,
-	"is_contact_number_verified" boolean DEFAULT false,
+	"is_contact_number_verified" boolean DEFAULT false NOT NULL,
 	"profile_verification_document" varchar,
+	"is_profile_document_verified" boolean DEFAULT false NOT NULL,
+	"property_document" text,
+	"is_property_document_uploaded" boolean DEFAULT false NOT NULL,
+	"is_property_document_verified" boolean DEFAULT false NOT NULL,
 	CONSTRAINT "user_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
@@ -122,6 +127,18 @@ CREATE TABLE "matches" (
 	CONSTRAINT "matches_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
+CREATE TABLE "matches-test-env" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user1_id" uuid NOT NULL,
+	"user2_id" uuid NOT NULL,
+	"is_active" boolean DEFAULT false NOT NULL,
+	"channel_id" varchar,
+	"channel_type" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "matches-test-env_id_unique" UNIQUE("id")
+);
+--> statement-breakpoint
 CREATE TABLE "property" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"type" varchar NOT NULL,
@@ -138,6 +155,29 @@ CREATE TABLE "property" (
 	CONSTRAINT "property_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
+CREATE TABLE "swaps" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user1_id" uuid,
+	"user2_id" uuid,
+	"match_id" uuid,
+	"property1_id" uuid,
+	"property2_id" uuid,
+	"user1_booking_id" uuid,
+	"user1_start_date" timestamp with time zone,
+	"user1_end_date" timestamp with time zone,
+	"user1_guest_count" varchar,
+	"user2_booking_id" uuid,
+	"user2_start_date" timestamp with time zone,
+	"user2_end_date" timestamp with time zone,
+	"user2_guest_count" varchar,
+	"user1_accepted" boolean DEFAULT false,
+	"user2_accepted" boolean DEFAULT false,
+	"status" "status",
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "swaps_id_unique" UNIQUE("id")
+);
+--> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_property_id_property_id_fk" FOREIGN KEY ("property_id") REFERENCES "public"."property"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -149,7 +189,16 @@ ALTER TABLE "matches" ADD CONSTRAINT "matches_user1_id_user_id_fk" FOREIGN KEY (
 ALTER TABLE "matches" ADD CONSTRAINT "matches_user2_id_user_id_fk" FOREIGN KEY ("user2_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "matches" ADD CONSTRAINT "matches_property1_id_property_id_fk" FOREIGN KEY ("property1_id") REFERENCES "public"."property"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "matches" ADD CONSTRAINT "matches_property2_id_property_id_fk" FOREIGN KEY ("property2_id") REFERENCES "public"."property"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "matches-test-env" ADD CONSTRAINT "matches-test-env_user1_id_user_id_fk" FOREIGN KEY ("user1_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "matches-test-env" ADD CONSTRAINT "matches-test-env_user2_id_user_id_fk" FOREIGN KEY ("user2_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "property" ADD CONSTRAINT "property_author_id_user_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "swaps" ADD CONSTRAINT "swaps_user1_id_user_id_fk" FOREIGN KEY ("user1_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "swaps" ADD CONSTRAINT "swaps_user2_id_user_id_fk" FOREIGN KEY ("user2_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "swaps" ADD CONSTRAINT "swaps_match_id_matches_id_fk" FOREIGN KEY ("match_id") REFERENCES "public"."matches"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "swaps" ADD CONSTRAINT "swaps_property1_id_property_id_fk" FOREIGN KEY ("property1_id") REFERENCES "public"."property"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "swaps" ADD CONSTRAINT "swaps_property2_id_property_id_fk" FOREIGN KEY ("property2_id") REFERENCES "public"."property"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "swaps" ADD CONSTRAINT "swaps_user1_booking_id_bookings_id_fk" FOREIGN KEY ("user1_booking_id") REFERENCES "public"."bookings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "swaps" ADD CONSTRAINT "swaps_user2_booking_id_bookings_id_fk" FOREIGN KEY ("user2_booking_id") REFERENCES "public"."bookings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "account_userId_idx" ON "account" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "session_userId_idx" ON "session" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "verification_identifier_idx" ON "verification" USING btree ("identifier");--> statement-breakpoint
@@ -161,6 +210,20 @@ CREATE INDEX "idx_likes_from_user" ON "likes" USING btree ("from_user_id");--> s
 CREATE INDEX "idx_likes_property" ON "likes" USING btree ("property_id");--> statement-breakpoint
 CREATE INDEX "idx_likes_created_at" ON "likes" USING btree ("created_at");--> statement-breakpoint
 CREATE UNIQUE INDEX "matches_unique" ON "matches" USING btree (LEAST("user1_id", "user2_id"),GREATEST("user1_id", "user2_id"));--> statement-breakpoint
+CREATE INDEX "idx_matches_property_pair" ON "matches" USING btree (LEAST("property1_id", "property2_id"),GREATEST("property1_id", "property2_id"));--> statement-breakpoint
 CREATE INDEX "idx_matches_user1" ON "matches" USING btree ("user1_id");--> statement-breakpoint
 CREATE INDEX "idx_matches_user2" ON "matches" USING btree ("user2_id");--> statement-breakpoint
-CREATE INDEX "idx_matches_created_at" ON "matches" USING btree ("created_at");
+CREATE INDEX "idx_matches_created_at" ON "matches" USING btree ("created_at");--> statement-breakpoint
+CREATE UNIQUE INDEX "matches_test_unique" ON "matches-test-env" USING btree (LEAST("user1_id", "user2_id"),GREATEST("user1_id", "user2_id"));--> statement-breakpoint
+CREATE INDEX "idx_matches_test_user1" ON "matches-test-env" USING btree ("user1_id");--> statement-breakpoint
+CREATE INDEX "idx_matches_test_user2" ON "matches-test-env" USING btree ("user2_id");--> statement-breakpoint
+CREATE INDEX "idx_matches_test_created_at" ON "matches-test-env" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_swaps_property1" ON "swaps" USING btree ("property1_id");--> statement-breakpoint
+CREATE INDEX "idx_swaps_property2" ON "swaps" USING btree ("property2_id");--> statement-breakpoint
+CREATE INDEX "idx_swaps_user1" ON "swaps" USING btree ("user1_id");--> statement-breakpoint
+CREATE INDEX "idx_swaps_user2" ON "swaps" USING btree ("user2_id");--> statement-breakpoint
+CREATE INDEX "idx_swaps_match" ON "swaps" USING btree ("match_id");--> statement-breakpoint
+CREATE INDEX "idx_swaps_status" ON "swaps" USING btree ("status");--> statement-breakpoint
+CREATE UNIQUE INDEX "uniq_swap" ON "swaps" USING btree ("match_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "uniq_swap_per_match_properties" ON "swaps" USING btree (LEAST("property1_id", "property2_id"),GREATEST("property1_id", "property2_id"),"match_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "uniq_swap_per_match_users" ON "swaps" USING btree (LEAST("user1_id", "user2_id"),GREATEST("user1_id", "user2_id"),"match_id");

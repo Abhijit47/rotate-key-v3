@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1779268352525,
-      "tag": "0000_young_maximus",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1779294449538,
-      "tag": "0001_serious_the_twelve",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1779342318475,
-      "tag": "0002_happy_amazoness",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1779978329621,
-      "tag": "0003_sweet_harpoon",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1779984151278,
-      "tag": "0004_complex_valkyrie",
+      "when": 1780975835105,
+      "tag": "0000_gifted_cerise",
       "breakpoints": true
     }
   ]

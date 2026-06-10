@@ -97,6 +97,7 @@ export default function DocumentUploadAlertDialog() {
     e.preventDefault();
     e.stopPropagation();
 
+    console.log('files:', files);
     if (files.length === 0) {
       toast.warning('No file was there to upload!');
       onOpenDocumentDialog(true);
@@ -110,6 +111,8 @@ export default function DocumentUploadAlertDialog() {
       toast.error('Failed to read the selected file. Please try again.');
       return;
     }
+
+    // const base64 = await fileToBase64(files[0]);
 
     const document = {
       base64,
@@ -149,7 +152,7 @@ export default function DocumentUploadAlertDialog() {
           {
             type: 'file',
             asset_url: url,
-            title: 'Uploaded Document',
+            title: 'Property Document',
             thumb_url: url,
           },
         ],
@@ -169,7 +172,10 @@ export default function DocumentUploadAlertDialog() {
     (msg) => {
       const sentByCurrentUser = msg?.user?.id === client.userID;
       const hasDocumentAttachment = msg.attachments?.some(
-        (att) => att.type === 'file' && !!att.asset_url,
+        (att) =>
+          att.type === 'file' &&
+          !!att.asset_url &&
+          att.title === 'Property Document',
       );
 
       return sentByCurrentUser && hasDocumentAttachment;
@@ -212,7 +218,10 @@ export default function DocumentUploadAlertDialog() {
         <form className={'space-y-4'} onSubmit={handleUpload}>
           <FileUpload
             value={files}
-            onValueChange={setFiles}
+            onValueChange={(e: File[]) => {
+              // console.log("e:", e);
+              setFiles(e);
+            }}
             onFileValidate={onFileValidate}
             onFileReject={onFileReject}
             accept={ACCEPT_FILE_TYPE}
@@ -262,6 +271,12 @@ export default function DocumentUploadAlertDialog() {
                 </AlertDialogAction>
               </>
             )}
+            <AlertDialogCancel type='button' disabled={isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction type='submit' disabled={isPending}>
+              {isPending ? 'Uploading...' : 'Upload Document'}
+            </AlertDialogAction>
 
             {/* {url !== undefined && url?.length > 0 ? <></>:null} */}
 

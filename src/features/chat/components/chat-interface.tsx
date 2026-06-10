@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import './custom.css';
+import "./custom.css";
 
-import data from '@emoji-mart/data';
-import { TRPCClientError } from '@trpc/client';
-import { init, SearchIndex } from 'emoji-mart';
-import { ArrowLeftCircle, MousePointerClickIcon } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import Link from 'next/link';
-import { KeyboardEvent, useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import type { Event as StreamEvent } from 'stream-chat';
+import data from "@emoji-mart/data";
+import { TRPCClientError } from "@trpc/client";
+import { init, SearchIndex } from "emoji-mart";
+import { ArrowLeftCircle, MousePointerClickIcon } from "lucide-react";
+import { useTheme } from "next-themes";
+import Link from "next/link";
+import { KeyboardEvent, useEffect, useState } from "react";
+import { toast } from "sonner";
+import type { Event as StreamEvent } from "stream-chat";
 import {
   Channel,
   ChannelHeader,
@@ -29,31 +29,31 @@ import {
   Window,
   WithComponents,
   type ChannelListUIProps,
-} from 'stream-chat-react';
+} from "stream-chat-react";
 
-import { EmojiPicker } from 'stream-chat-react/emojis';
+import { EmojiPicker } from "stream-chat-react/emojis";
 
-import { useUpgradeModal } from '@/features/common/hooks/use-upgrade-modal';
-import { useMyCheck } from '../hooks/use-chat';
+import { useUpgradeModal } from "@/features/common/hooks/use-upgrade-modal";
+import { useMyCheck } from "../hooks/use-chat";
 
-import { Button } from '@/components/ui/button';
-import { useCustomChatContext } from '@/contexts/chat-context';
-import { useChatSessionStorage } from '../hooks/useChatSessionStorage';
-import DocumentUploadAlertDialog from './document-upload-dialog';
-import EmptyChatState from './empty-chat-state';
-import LoadingChatState from './loading-chat-state';
-import MessageListHeader from './message-list-header';
-import SidebarToggle from './sidebar-toggle';
+import { Button } from "@/components/ui/button";
+import { useCustomChatContext } from "@/contexts/chat-context";
+import { useChatSessionStorage } from "../hooks/useChatSessionStorage";
+import DocumentUploadAlertDialog from "./document-upload-dialog";
+import EmptyChatState from "./empty-chat-state";
+import LoadingChatState from "./loading-chat-state";
+import MessageListHeader from "./message-list-header";
+import SidebarToggle from "./sidebar-toggle";
 
-export const DEFAULT_CHANNEL_ID = 'general';
-export const DEFAULT_CHANNEL_TYPE = 'messaging';
+export const DEFAULT_CHANNEL_ID = "general";
+export const DEFAULT_CHANNEL_TYPE = "messaging";
 
 init({ data });
 export default function ChatInterface() {
   const [isReady, setIsReady] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const { resolvedTheme } = useTheme();
-  const currentTheme = resolvedTheme ?? 'dark';
+  const currentTheme = resolvedTheme ?? "dark";
 
   // const params = useParams<{ channelId?: string }>();
 
@@ -70,8 +70,8 @@ export default function ChatInterface() {
 
   // const { documentAlertModal } = useDocumentUploadAlert(user);
 
-  const [storedValue] = useChatSessionStorage('chat-session', {
-    channelId: 'general',
+  const [storedValue] = useChatSessionStorage("chat-session", {
+    channelId: "general",
   });
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function ChatInterface() {
       // Simulate a short delay before initializing the channel
       await new Promise((resolve) => setTimeout(resolve, 100));
       initChannel().catch((error) => {
-        console.error('Failed to initialize channel', error);
+        console.error("Failed to initialize channel", error);
       });
     }, 300);
 
@@ -125,24 +125,27 @@ export default function ChatInterface() {
       <WithComponents
         overrides={{
           HeaderStartContent: () => (
-            <div className={'flex items-center gap-2'}>
-              <Link href='/test-users'>
-                <ArrowLeftCircle className={'size-4'} />
+            <div className={"flex items-center gap-2"}>
+              <Link href="/">
+                <ArrowLeftCircle className={"size-4"} />
               </Link>
               <SidebarToggle />
             </div>
           ),
           HeaderEndContent: SidebarToggle,
-        }}>
+        }}
+      >
         <div
-          className={`chat-layout ${!sidebarOpen ? 'chat-layout--sidebar-collapsed' : ''}`}>
+          className={`chat-layout ${!sidebarOpen ? "chat-layout--sidebar-collapsed" : ""}`}
+        >
           <Chat theme={`str-chat__theme-${currentTheme}`} client={chatClient}>
-            <div className='chat-sidebar'>
+            <div className="chat-sidebar">
               <WithComponents
                 overrides={{
                   ChannelListUI: OverrideChannelListUI,
                   Search: OverrideSidebarSearch,
-                }}>
+                }}
+              >
                 <ChannelList
                   showChannelSearch={true}
                   filters={filters}
@@ -153,8 +156,8 @@ export default function ChatInterface() {
               </WithComponents>
             </div>
 
-            <div className='chat-main'>
-              {storedValue.channelId === 'general' ? (
+            <div className="chat-main">
+              {storedValue.channelId === "general" ? (
                 <EmptyChatState />
               ) : (
                 <>
@@ -163,7 +166,8 @@ export default function ChatInterface() {
                       EmojiPicker,
                       // HeaderStartContent: SidebarToggle,
                       // HeaderEndContent: SidebarToggle,
-                    }}>
+                    }}
+                  >
                     <Channel channel={chatChannel}>
                       <Window>
                         <ChannelHeader />
@@ -197,7 +201,7 @@ const AutoCloseSidebar = () => {
   useEffect(() => {
     if (
       channel &&
-      typeof window !== 'undefined' &&
+      typeof window !== "undefined" &&
       window.innerWidth < MOBILE_BREAKPOINT
     ) {
       closeSidebar();
@@ -214,11 +218,11 @@ function OverrideThread() {
 
   const { onOpenDocumentDialog, user } = useCustomChatContext();
 
-  const overrideSubmitHandler2: MessageComposerProps['overrideSubmitHandler'] =
+  const overrideSubmitHandler2: MessageComposerProps["overrideSubmitHandler"] =
     async ({ cid, localMessage, message, sendOptions }) => {
       if (!messageComposer?.channel) {
         toast.error(
-          'No channel available to send message. Please try again later.',
+          "No channel available to send message. Please try again later.",
         );
         return;
       }
@@ -226,19 +230,19 @@ function OverrideThread() {
         const res = await checkLimit();
         if (res.isMessageLimitReached) {
           handleError(
-            'You have reached the free tier message limit. Please upgrade to continue chatting.',
+            "You have reached the free tier message limit. Please upgrade to continue chatting.",
           );
           return;
         }
         await messageComposer.channel.sendMessage(message, sendOptions);
         messageComposer.clear();
       } catch (err) {
-        console.error('Error in overrideSubmitHandler:', err);
+        console.error("Error in overrideSubmitHandler:", err);
         if (err instanceof TRPCClientError) {
-          toast.error(err.message || 'An error occurred. Please try again.');
+          toast.error(err.message || "An error occurred. Please try again.");
           return;
         } else {
-          toast.error('Failed to send message. Please try again.');
+          toast.error("Failed to send message. Please try again.");
           return;
         }
       }
@@ -248,7 +252,7 @@ function OverrideThread() {
     (msg) => {
       const sentByCurrentUser = msg?.user?.id === client.userID;
       const hasDocumentAttachment = msg.attachments?.some(
-        (att) => att.type === 'file' && !!att.asset_url,
+        (att) => att.type === "file" && !!att.asset_url,
       );
 
       return sentByCurrentUser && hasDocumentAttachment;
@@ -278,11 +282,11 @@ function OverrideComposer() {
   const { onOpenDocumentDialog, user } = useCustomChatContext();
   const { client, channel } = useChatContext();
 
-  const overrideSubmitHandler2: MessageComposerProps['overrideSubmitHandler'] =
+  const overrideSubmitHandler2: MessageComposerProps["overrideSubmitHandler"] =
     async ({ cid, localMessage, message, sendOptions }) => {
       if (!messageComposer?.channel) {
         toast.error(
-          'No channel available to send message. Please try again later.',
+          "No channel available to send message. Please try again later.",
         );
         return;
       }
@@ -290,7 +294,7 @@ function OverrideComposer() {
         const res = await checkLimit();
         if (res.isMessageLimitReached) {
           handleError(
-            'You have reached the free tier message limit. Please upgrade to continue chatting.',
+            "You have reached the free tier message limit. Please upgrade to continue chatting.",
           );
           return;
         }
@@ -298,23 +302,23 @@ function OverrideComposer() {
         await messageComposer.channel.sendMessage(message, sendOptions);
         messageComposer.clear();
       } catch (err) {
-        console.error('Error in overrideSubmitHandler:', err);
+        console.error("Error in overrideSubmitHandler:", err);
         if (err instanceof TRPCClientError) {
           handleError(err);
         } else {
-          toast.error('Failed to send message. Please try again.');
+          toast.error("Failed to send message. Please try again.");
         }
       }
     };
 
   const defaultShouldSubmit = (event: KeyboardEvent) =>
-    event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing;
+    event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing;
 
   const hasDocumentMessageFromCurrentUser = channel?.state.messages.some(
     (msg) => {
       const sentByCurrentUser = msg?.user?.id === client.userID;
       const hasDocumentAttachment = msg.attachments?.some(
-        (att) => att.type === 'file' && !!att.asset_url,
+        (att) => att.type === "file" && !!att.asset_url,
       );
 
       return sentByCurrentUser && hasDocumentAttachment;
@@ -328,12 +332,13 @@ function OverrideComposer() {
     <>
       {modal}
       {!showComposer ? (
-        <div className={'h-16 border border-t border-border'}>
+        <div className={"h-16 border border-t border-border"}>
           <Button
-            variant='outline'
-            className='w-full h-full rounded-none'
-            onClick={() => onOpenDocumentDialog(true)}>
-            <MousePointerClickIcon className='size-4' />
+            variant="outline"
+            className="w-full h-full rounded-none"
+            onClick={() => onOpenDocumentDialog(true)}
+          >
+            <MousePointerClickIcon className="size-4" />
             Click here to upload your property document to start chatting
           </Button>
         </div>
@@ -355,7 +360,7 @@ function OverrideSidebarSearch() {
   return (
     <Search
       exitSearchOnInputBlur
-      placeholder='Search channels, messages, and users...'
+      placeholder="Search channels, messages, and users..."
     />
   );
 }
@@ -364,9 +369,16 @@ function OverrideChannelListUI(props: ChannelListUIProps) {
   // const { channelId } = useParams<{ channelId: string }>();
   // const router = useRouter();
 
-  const { onOpenDocumentDialog, user } = useCustomChatContext();
+  // const [oppositeUserId, setOppositeUserId] = useState<string>('');
 
-  const [storedValue, setValue] = useChatSessionStorage('chat-session', {
+  const {
+    onOpenDocumentDialog,
+    user,
+    onChangeOppositeUserId,
+    onChangeChatMembers,
+  } = useCustomChatContext();
+
+  const [storedValue, setValue] = useChatSessionStorage("chat-session", {
     channelId: DEFAULT_CHANNEL_ID,
   });
 
@@ -388,12 +400,12 @@ function OverrideChannelListUI(props: ChannelListUIProps) {
     // BUG: 768px or below this channel is undefined on mount, so in sidebar mobile or medium not showing channel list "undefined"
     // console.log('Channel data on ChannelListUI mount:', channel?.id);
     if (!channel?.id || channel?.id !== channelId) {
-      subscription = client.on('channels.queried', (event: StreamEvent) => {
+      subscription = client.on("channels.queried", (event: StreamEvent) => {
         const loadedChannelData = event.queriedChannels?.channels.find(
           (response) => response.channel.id === channelId,
         );
 
-        if (loadedChannelData?.channel.id !== 'general') {
+        if (loadedChannelData?.channel.id !== "general") {
           setActiveChannel(client.channel(DEFAULT_CHANNEL_TYPE, channelId));
           subscription?.unsubscribe();
           return;
@@ -434,14 +446,17 @@ function OverrideChannelListUI(props: ChannelListUIProps) {
     const oppositeUser = members.find(
       (member) => member.user?.id && member.user.id !== currentUserId,
     );
-
-    console.log('members of loaded channel:', members);
-    console.log('current user id:', currentUserId);
-    console.log('opposite user:', oppositeUser);
+    onChangeChatMembers(channel.state.members);
+    // console.log("members of loaded channel:", members);
+    // console.log("current user id:", currentUserId);
+    // console.log("opposite user:", oppositeUser);
+    if (oppositeUser?.user?.id) {
+      onChangeOppositeUserId(oppositeUser.user.id);
+    }
     toast.info(
-      <pre className={'font-sans text-xs'}>
+      <pre className={"font-sans text-xs"}>
         {JSON.stringify(
-          oppositeUser?.user || { id: 'unknown user', name: 'unknown user' },
+          oppositeUser?.user || { id: "unknown user", name: "unknown user" },
           null,
           2,
         )}
@@ -461,17 +476,12 @@ function OverrideChannelListUI(props: ChannelListUIProps) {
 
     const hasDocumentMessageFromCurrentUser = channel.state.messages.some(
       (msg) => {
-        // console.log(
-        //   'msg?.user?.id',
-        //   msg?.user?.id,
-        //   'client.userID',
-        //   client.userID,
-        //   'msg.user_id',
-        //   msg.user_id, // this was undefined
-        // );
-        const sentByCurrentUser = msg?.user?.id === client.userID;
+        const sentByCurrentUser = msg?.user?.id === client?.user?.id;
         const hasDocumentAttachment = msg.attachments?.some(
-          (att) => att.type === 'file' && !!att.asset_url,
+          (att) =>
+            att.type === "file" &&
+            !!att.asset_url &&
+            att.title === "Property Document",
         );
 
         return sentByCurrentUser && hasDocumentAttachment;
@@ -480,13 +490,12 @@ function OverrideChannelListUI(props: ChannelListUIProps) {
     // console.log('channel:', channel.cid);
     // console.log('isUploadedFromDB:', isUploadedFromDB);
     // console.log(
-    //   'hasDocumentMessageFromCurrentUser:',
+    //   "hasDocumentMessageFromCurrentUser:",
     //   hasDocumentMessageFromCurrentUser,
     // );
 
     // If you want the modal to open only when both are missing instead of either one, change the condition to if (!isUploadedFromDB && !hasSystemMessage).
     if (!isUploadedFromDB && !hasDocumentMessageFromCurrentUser) {
-      console.log('Opening document upload dialog for channel:', channel.id);
       onOpenDocumentDialog(true);
     } else {
       onOpenDocumentDialog(false);

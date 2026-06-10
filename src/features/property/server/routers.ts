@@ -1,29 +1,29 @@
-import * as Sentry from '@sentry/nextjs';
-import { TRPCError } from '@trpc/server';
-import { and, eq } from 'drizzle-orm';
-import { StepError } from 'inngest';
-import { revalidatePath } from 'next/cache';
+import * as Sentry from "@sentry/nextjs";
+import { TRPCError } from "@trpc/server";
+import { and, eq } from "drizzle-orm";
+import { StepError } from "inngest";
+import { revalidatePath } from "next/cache";
 
-import { db } from '@/drizzle/db';
-import { property as PropertyTable } from '@/drizzle/schema';
-import { like as LikeTable } from '@/drizzle/schema/like';
-import { match as MatchTable } from '@/drizzle/schema/match';
-import { inngest } from '@/inngest/client';
-import { auth } from '@/lib/auth';
-import { paymentPolicyCheckProcedure } from '@/lib/property-actions';
+import { db } from "@/drizzle/db";
+import { property as PropertyTable } from "@/drizzle/schema";
+import { like as LikeTable } from "@/drizzle/schema/like";
+import { match as MatchTable } from "@/drizzle/schema/match";
+import { inngest } from "@/inngest/client";
+import { auth } from "@/lib/auth";
+import { paymentPolicyCheckProcedure } from "@/lib/property-actions";
 import {
   addLikeToPropertySchema,
   deletePropertySchema,
   propertyIdSchema,
   propertySchema,
   updatePropertySchema,
-} from '@/lib/validators/property-schema';
+} from "@/lib/validators/property-schema";
 import {
   // baseProcedure,
   createTRPCRouter,
   premiumProcedure,
   protectedProcedure,
-} from '@/trpc/init';
+} from "@/trpc/init";
 
 export const propertyRouter = createTRPCRouter({
   createProperty: premiumProcedure
@@ -35,14 +35,14 @@ export const propertyRouter = createTRPCRouter({
           body: {
             userId: user.id,
             permissions: {
-              property: ['create'], // This must match the structure in your access control
+              property: ["create"], // This must match the structure in your access control
             },
           },
         });
 
         if (!result.success) {
           throw new TRPCError({
-            code: 'FORBIDDEN',
+            code: "FORBIDDEN",
             message: `You do not have permission to perform this action!`,
           });
         }
@@ -59,10 +59,10 @@ export const propertyRouter = createTRPCRouter({
 
         return newProperty;
       } catch (error) {
-        console.error('Error creating property:', error);
+        console.error("Error creating property:", error);
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'An error occurred while creating the property.',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An error occurred while creating the property.",
         });
       }
     }),
@@ -76,14 +76,14 @@ export const propertyRouter = createTRPCRouter({
           body: {
             userId: user.id,
             permissions: {
-              property: ['update'], // This must match the structure in your access control
+              property: ["update"], // This must match the structure in your access control
             },
           },
         });
 
         if (!result.success) {
           throw new TRPCError({
-            code: 'FORBIDDEN',
+            code: "FORBIDDEN",
             message: `You do not have permission to perform this action!`,
           });
         }
@@ -99,8 +99,8 @@ export const propertyRouter = createTRPCRouter({
 
         if (!existingProperty) {
           throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Property not found',
+            code: "NOT_FOUND",
+            message: "Property not found",
           });
         }
 
@@ -124,10 +124,10 @@ export const propertyRouter = createTRPCRouter({
         if (error instanceof TRPCError) {
           throw error;
         }
-        console.error('Error updating property:', error);
+        console.error("Error updating property:", error);
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'An error occurred while updating the property.',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An error occurred while updating the property.",
         });
       }
     }),
@@ -142,14 +142,14 @@ export const propertyRouter = createTRPCRouter({
           body: {
             userId: user.id,
             permissions: {
-              property: ['delete'], // This must match the structure in your access control
+              property: ["delete"], // This must match the structure in your access control
             },
           },
         });
 
         if (!result.success) {
           throw new TRPCError({
-            code: 'FORBIDDEN',
+            code: "FORBIDDEN",
             message: `You do not have permission to perform this action!`,
           });
         }
@@ -166,8 +166,8 @@ export const propertyRouter = createTRPCRouter({
 
         if (!existingProperty) {
           throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Property not found',
+            code: "NOT_FOUND",
+            message: "Property not found",
           });
         }
 
@@ -182,10 +182,10 @@ export const propertyRouter = createTRPCRouter({
         if (error instanceof TRPCError) {
           throw error;
         }
-        console.error('Error deleting property:', error);
+        console.error("Error deleting property:", error);
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'An error occurred while deleting the property.',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An error occurred while deleting the property.",
         });
       }
     }),
@@ -220,8 +220,8 @@ export const propertyRouter = createTRPCRouter({
 
       if (!existingProperty) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Property not found',
+          code: "NOT_FOUND",
+          message: "Property not found",
         });
       }
 
@@ -232,7 +232,7 @@ export const propertyRouter = createTRPCRouter({
           return and(
             eq(fields.propertyId, existingProperty.id),
             eq(fields.userId, user.id),
-            eq(fields.status, 'pending'),
+            eq(fields.status, "pending"),
           );
         },
         columns: {
@@ -265,8 +265,8 @@ export const propertyRouter = createTRPCRouter({
 
       if (!removeProperty) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Property not found',
+          code: "NOT_FOUND",
+          message: "Property not found",
         });
       }
 
@@ -337,10 +337,11 @@ export const propertyRouter = createTRPCRouter({
   // TODO: this is just for testing, will remove later, we can use this to gate any premium features in the future
   testPremium: premiumProcedure.mutation(async () => {
     return {
-      message: 'You have access to premium features!',
+      message: "You have access to premium features!",
     };
   }),
 
+  // TODO: Will remove later.
   addLikeToProperty: protectedProcedure
     .input(addLikeToPropertySchema)
     .mutation(async ({ input, ctx }) => {
@@ -351,7 +352,7 @@ export const propertyRouter = createTRPCRouter({
       const fromUserId = user.id;
 
       const checkEngagementLimit = await paymentPolicyCheckProcedure({
-        type: 'propertyEngagement',
+        type: "propertyEngagement",
       });
       // console.log('Engagement limit check result:', checkEngagementLimit);
       if (checkEngagementLimit.success) {
@@ -368,7 +369,7 @@ export const propertyRouter = createTRPCRouter({
               return {
                 success: false,
                 isMatch: false,
-                message: 'You already liked this property.',
+                message: "You already liked this property.",
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -386,7 +387,7 @@ export const propertyRouter = createTRPCRouter({
               return {
                 success: false,
                 isMatch: false,
-                message: 'Property not available.',
+                message: "Property not available.",
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -400,7 +401,7 @@ export const propertyRouter = createTRPCRouter({
               return {
                 success: true,
                 isMatch: false,
-                message: 'Like recorded (self-like, no match possible).',
+                message: "Like recorded (self-like, no match possible).",
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -428,7 +429,7 @@ export const propertyRouter = createTRPCRouter({
                 success: true,
                 isMatch: false,
                 message:
-                  'Like recorded, already matched with this user before.',
+                  "Like recorded, already matched with this user before.",
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -468,7 +469,7 @@ export const propertyRouter = createTRPCRouter({
                     property1Id,
                     property2Id,
                     isActive: true,
-                    channelType: 'messaging',
+                    channelType: "messaging",
                   })
                   .returning({ id: MatchTable.id });
 
@@ -487,7 +488,7 @@ export const propertyRouter = createTRPCRouter({
             return {
               success: true,
               isMatch: false,
-              message: 'Like recorded, no match yet.',
+              message: "Like recorded, no match yet.",
               user1Id: undefined,
               user2Id: undefined,
               newMatchId: undefined,
@@ -504,7 +505,7 @@ export const propertyRouter = createTRPCRouter({
             try {
               // heavy lifting take over by inngest
               await inngest.send({
-                name: 'matched/create-channel',
+                name: "matched/create-channel",
                 data: {
                   user1Id: commited.user1Id,
                   user2Id: commited.user2Id,
@@ -529,11 +530,11 @@ export const propertyRouter = createTRPCRouter({
             message: commited.message,
           };
         } catch (error) {
-          console.error('Error in likePropertyAndMaybeMatch:', error);
+          console.error("Error in likePropertyAndMaybeMatch:", error);
           return {
             success: false,
             isMatch: false,
-            message: 'Internal server error',
+            message: "Internal server error",
             user1Id: undefined,
             user2Id: undefined,
             newMatchId: undefined,
@@ -541,14 +542,14 @@ export const propertyRouter = createTRPCRouter({
         } finally {
           if (path) {
             const finalPath = `/(root)/${path}`;
-            revalidatePath(finalPath, 'page');
+            revalidatePath(finalPath, "page");
           } else {
-            revalidatePath('/(root)/swappings', 'page');
+            revalidatePath("/(root)/swappings", "page");
           }
         }
       } else {
         throw new TRPCError({
-          code: 'FORBIDDEN',
+          code: "FORBIDDEN",
           message: checkEngagementLimit.message,
         });
       }

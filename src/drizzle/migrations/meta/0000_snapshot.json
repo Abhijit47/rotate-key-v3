@@ -1,5 +1,5 @@
 {
-  "id": "ed13460f-e011-4e77-988d-703969f5cf54",
+  "id": "ce08a600-f013-4be2-acab-70050cd0b9e7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -487,7 +487,7 @@
           "name": "is_contact_number_verified",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": false
         },
         "profile_verification_document": {
@@ -495,6 +495,33 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "is_profile_document_verified": {
+          "name": "is_profile_document_verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "property_document": {
+          "name": "property_document",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_property_document_uploaded": {
+          "name": "is_property_document_uploaded",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_property_document_verified": {
+          "name": "is_property_document_verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -992,6 +1019,27 @@
           "method": "btree",
           "with": {}
         },
+        "idx_matches_property_pair": {
+          "name": "idx_matches_property_pair",
+          "columns": [
+            {
+              "expression": "LEAST(\"property1_id\", \"property2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "GREATEST(\"property1_id\", \"property2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "idx_matches_user1": {
           "name": "idx_matches_user1",
           "columns": [
@@ -1096,6 +1144,173 @@
       "uniqueConstraints": {
         "matches_id_unique": {
           "name": "matches_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.matches-test-env": {
+      "name": "matches-test-env",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user1_id": {
+          "name": "user1_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user2_id": {
+          "name": "user2_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "channel_id": {
+          "name": "channel_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "channel_type": {
+          "name": "channel_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "matches_test_unique": {
+          "name": "matches_test_unique",
+          "columns": [
+            {
+              "expression": "LEAST(\"user1_id\", \"user2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "GREATEST(\"user1_id\", \"user2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_matches_test_user1": {
+          "name": "idx_matches_test_user1",
+          "columns": [
+            {
+              "expression": "user1_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_matches_test_user2": {
+          "name": "idx_matches_test_user2",
+          "columns": [
+            {
+              "expression": "user2_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_matches_test_created_at": {
+          "name": "idx_matches_test_created_at",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "matches-test-env_user1_id_user_id_fk": {
+          "name": "matches-test-env_user1_id_user_id_fk",
+          "tableFrom": "matches-test-env",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user1_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "matches-test-env_user2_id_user_id_fk": {
+          "name": "matches-test-env_user2_id_user_id_fk",
+          "tableFrom": "matches-test-env",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user2_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "matches-test-env_id_unique": {
+          "name": "matches-test-env_id_unique",
           "nullsNotDistinct": false,
           "columns": [
             "id"
@@ -1216,6 +1431,399 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.swaps": {
+      "name": "swaps",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user1_id": {
+          "name": "user1_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user2_id": {
+          "name": "user2_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "match_id": {
+          "name": "match_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "property1_id": {
+          "name": "property1_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "property2_id": {
+          "name": "property2_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user1_booking_id": {
+          "name": "user1_booking_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user1_start_date": {
+          "name": "user1_start_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user1_end_date": {
+          "name": "user1_end_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user1_guest_count": {
+          "name": "user1_guest_count",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user2_booking_id": {
+          "name": "user2_booking_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user2_start_date": {
+          "name": "user2_start_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user2_end_date": {
+          "name": "user2_end_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user2_guest_count": {
+          "name": "user2_guest_count",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user1_accepted": {
+          "name": "user1_accepted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "user2_accepted": {
+          "name": "user2_accepted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "status": {
+          "name": "status",
+          "type": "status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_swaps_property1": {
+          "name": "idx_swaps_property1",
+          "columns": [
+            {
+              "expression": "property1_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_swaps_property2": {
+          "name": "idx_swaps_property2",
+          "columns": [
+            {
+              "expression": "property2_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_swaps_user1": {
+          "name": "idx_swaps_user1",
+          "columns": [
+            {
+              "expression": "user1_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_swaps_user2": {
+          "name": "idx_swaps_user2",
+          "columns": [
+            {
+              "expression": "user2_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_swaps_match": {
+          "name": "idx_swaps_match",
+          "columns": [
+            {
+              "expression": "match_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_swaps_status": {
+          "name": "idx_swaps_status",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "uniq_swap": {
+          "name": "uniq_swap",
+          "columns": [
+            {
+              "expression": "match_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "uniq_swap_per_match_properties": {
+          "name": "uniq_swap_per_match_properties",
+          "columns": [
+            {
+              "expression": "LEAST(\"property1_id\", \"property2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "GREATEST(\"property1_id\", \"property2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "match_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "uniq_swap_per_match_users": {
+          "name": "uniq_swap_per_match_users",
+          "columns": [
+            {
+              "expression": "LEAST(\"user1_id\", \"user2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "GREATEST(\"user1_id\", \"user2_id\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "match_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "swaps_user1_id_user_id_fk": {
+          "name": "swaps_user1_id_user_id_fk",
+          "tableFrom": "swaps",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user1_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "swaps_user2_id_user_id_fk": {
+          "name": "swaps_user2_id_user_id_fk",
+          "tableFrom": "swaps",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user2_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "swaps_match_id_matches_id_fk": {
+          "name": "swaps_match_id_matches_id_fk",
+          "tableFrom": "swaps",
+          "tableTo": "matches",
+          "columnsFrom": [
+            "match_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "swaps_property1_id_property_id_fk": {
+          "name": "swaps_property1_id_property_id_fk",
+          "tableFrom": "swaps",
+          "tableTo": "property",
+          "columnsFrom": [
+            "property1_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "swaps_property2_id_property_id_fk": {
+          "name": "swaps_property2_id_property_id_fk",
+          "tableFrom": "swaps",
+          "tableTo": "property",
+          "columnsFrom": [
+            "property2_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "swaps_user1_booking_id_bookings_id_fk": {
+          "name": "swaps_user1_booking_id_bookings_id_fk",
+          "tableFrom": "swaps",
+          "tableTo": "bookings",
+          "columnsFrom": [
+            "user1_booking_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "swaps_user2_booking_id_bookings_id_fk": {
+          "name": "swaps_user2_booking_id_bookings_id_fk",
+          "tableFrom": "swaps",
+          "tableTo": "bookings",
+          "columnsFrom": [
+            "user2_booking_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "swaps_id_unique": {
+          "name": "swaps_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -1252,6 +1860,17 @@
         "pending",
         "confirmed",
         "cancelled"
+      ]
+    },
+    "public.status": {
+      "name": "status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "completed",
+        "rejected",
+        "approved",
+        "declined"
       ]
     }
   },
