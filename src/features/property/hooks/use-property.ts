@@ -1,10 +1,11 @@
-import { useTRPC } from '@/trpc/client';
+import { useTRPC } from "@/trpc/client";
 import {
   useMutation,
+  useQuery,
   useQueryClient,
   useSuspenseQuery,
-} from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+} from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 //=== Public Hooks for properties ===//
 /**
@@ -38,7 +39,7 @@ export function useCreateProperty() {
         await queryClient.invalidateQueries(
           trpc.property.getPublicProperties.queryOptions(),
         );
-        router.push('/swapings');
+        router.push("/swapings");
       },
       onError: (err) => {
         console.error({ err });
@@ -65,7 +66,7 @@ export function useUpdateProperty() {
         await queryClient.invalidateQueries(
           trpc.property.getPublicProperties.queryOptions(),
         );
-        router.push('/swapings');
+        router.push("/swapings");
       },
       onError: (err) => {
         console.error({ err });
@@ -127,7 +128,7 @@ export function useTestPremium() {
   return useMutation(
     trpc.property.testPremium.mutationOptions({
       onSuccess: async () => {
-        console.log('Premium feature test successful');
+        console.log("Premium feature test successful");
       },
       onError: (err) => {
         console.error({ err });

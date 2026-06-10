@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import {
   createContext,
   Dispatch,
@@ -11,17 +11,23 @@ import {
   useEffect,
   useMemo,
   useState,
-} from 'react';
-import { ChannelFilters, ChannelOptions, ChannelSort } from 'stream-chat';
-import { useCreateChatClient } from 'stream-chat-react';
+} from "react";
+import {
+  ChannelFilters,
+  ChannelMemberResponse,
+  ChannelOptions,
+  ChannelSort,
+} from "stream-chat";
+import { useCreateChatClient } from "stream-chat-react";
 
-import { env } from '@/env';
+import { env } from "@/env";
 import {
   useMatchedUsers,
   useRefreshChatToken,
-} from '@/features/chat/hooks/use-chat';
-import { useSession } from '@/lib/auth-client';
-import { toast } from 'sonner';
+} from "@/features/chat/hooks/use-chat";
+import { useSession } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useFindSwapableProperties } from "@/features/swap/hooks/use-swap";
 
 type User = {
   id: string;
@@ -48,6 +54,18 @@ type ChatContextType = {
   onOpenDocumentDialog: Dispatch<SetStateAction<boolean>>;
   onClose: () => void;
   user: User;
+  isSwapModalOpen: boolean;
+  onSwapModal: Dispatch<SetStateAction<boolean>>;
+  isUnSwapModalOpen: boolean;
+  onUnSwapModal: Dispatch<SetStateAction<boolean>>;
+  oppositeUserId: string;
+  onChangeOppositeUserId: Dispatch<SetStateAction<string>>;
+  chatMembers: Record<string, ChannelMemberResponse>;
+  onChangeChatMembers: Dispatch<
+    SetStateAction<Record<string, ChannelMemberResponse>>
+  >;
+  isOppositeUserDataPending: boolean;
+  oppositeUserProperties: ReturnType<typeof useFindSwapableProperties>["data"];
 };
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -65,6 +83,13 @@ export function ChatCustomContextProvider(props: Props) {
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const openSidebar = useCallback(() => setSidebarOpen(true), []);
 
+  const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
+  const [isUnSwapModalOpen, setIsUnSwapModalOpen] = useState(false);
+  const [chatMembers, setChatMembers] = useState<
+    Record<string, ChannelMemberResponse>
+  >({});
+  const [oppositeUserId, setOppositeUserId] = useState<string>("");
+
   const timeout = 6000;
   // The useCreateChatClient hook accepts an options object forwarded to the StreamChat constructor. The client is not recreated when options changes. If you need to re-create it, set a key on the component that calls the hook:
   // const key = `timeout_${timeout}`;
@@ -80,14 +105,18 @@ export function ChatCustomContextProvider(props: Props) {
     useState(shouldPrompt);
   const dismissed = useMemo(() => {
     if (!storageKey) return false;
-    if (typeof window === 'undefined') return false;
-    return window.localStorage.getItem(storageKey) === 'dismissed';
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(storageKey) === "dismissed";
   }, [storageKey]);
 
   const router = useRouter();
 
   const { mutateAsync, isPending: isTokenPending } = useRefreshChatToken();
   const { data: matchedUsers, isLoading: isMatchedUsers } = useMatchedUsers();
+  const { data: oppositeUserProperties, isLoading: isOppositeUserDataPending } =
+    useFindSwapableProperties(oppositeUserId);
+
+  // console.log("oppositeUserProperties", oppositeUserProperties);
 
   const chatClient = useCreateChatClient({
     apiKey: env.NEXT_PUBLIC_STREAM_API_KEY,
@@ -108,9 +137,9 @@ export function ChatCustomContextProvider(props: Props) {
 
   useEffect(() => {
     if (matchedUsers?.length === 0) {
-      router.push('/');
+      router.push("/");
       toast.error(
-        'You have no matches yet. Please match with someone to start chatting.',
+        "You have no matches yet. Please match with someone to start chatting.",
       );
       return;
     }
@@ -132,7 +161,7 @@ export function ChatCustomContextProvider(props: Props) {
 
   async function handleClose() {
     if (!storageKey) return;
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     await refetch({
       query: {
@@ -140,7 +169,7 @@ export function ChatCustomContextProvider(props: Props) {
       },
     });
 
-    window.localStorage.setItem(storageKey, 'dismissed');
+    window.localStorage.setItem(storageKey, "dismissed");
     router.refresh();
     setIsOpenDocumentDialog(false);
   }
@@ -159,6 +188,16 @@ export function ChatCustomContextProvider(props: Props) {
     onOpenDocumentDialog: setIsOpenDocumentDialog,
     onClose: handleClose,
     user,
+    isSwapModalOpen,
+    onSwapModal: setIsSwapModalOpen,
+    isUnSwapModalOpen,
+    onUnSwapModal: setIsUnSwapModalOpen,
+    oppositeUserId,
+    onChangeOppositeUserId: setOppositeUserId,
+    chatMembers,
+    onChangeChatMembers: setChatMembers,
+    isOppositeUserDataPending,
+    oppositeUserProperties,
   };
 
   return <ChatContext.Provider value={values}>{children}</ChatContext.Provider>;
@@ -168,7 +207,7 @@ export function useCustomChatContext() {
   const context = useContext(ChatContext);
   if (!context) {
     throw new Error(
-      'useCustomChatContext must be used within a ChatContextProvider',
+      "useCustomChatContext must be used within a ChatContextProvider",
     );
   }
   return context;

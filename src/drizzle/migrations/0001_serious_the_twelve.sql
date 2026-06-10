@@ -1,2 +1,0 @@
-DROP INDEX "matches_unique";--> statement-breakpoint
-CREATE UNIQUE INDEX "matches_unique" ON "matches" USING btree (LEAST("user1_id", "user2_id"),GREATEST("user1_id", "user2_id"),LEAST("property1_id", "property2_id"),GREATEST("property1_id", "property2_id"));
