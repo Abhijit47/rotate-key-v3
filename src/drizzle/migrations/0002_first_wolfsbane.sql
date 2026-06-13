@@ -12,7 +12,7 @@ CREATE TABLE "private_schema"."matches-test-env" (
 	CONSTRAINT "matches-test-env_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
-DROP TABLE "matches-test-env" CASCADE;--> statement-breakpoint
+DROP TABLE IF EXISTS "public"."matches-test-env" CASCADE;--> statement-breakpoint
 ALTER TABLE "private_schema"."matches-test-env" ADD CONSTRAINT "matches-test-env_user1_id_user_id_fk" FOREIGN KEY ("user1_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "private_schema"."matches-test-env" ADD CONSTRAINT "matches-test-env_user2_id_user_id_fk" FOREIGN KEY ("user2_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "matches_test_unique" ON "private_schema"."matches-test-env" USING btree (LEAST("user1_id", "user2_id"),GREATEST("user1_id", "user2_id"));--> statement-breakpoint

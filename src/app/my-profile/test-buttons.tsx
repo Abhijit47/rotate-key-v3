@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   useAcceptSwap,
-  useRejectSwap,
   useGetSwap,
-} from "@/features/swap/hooks/use-swap";
-import { TRPCClientError } from "@trpc/client";
-import { toast } from "sonner";
+  useRejectSwap,
+} from '@/features/swap/hooks/use-swap';
+import { TRPCClientError } from '@trpc/client';
+import { toast } from 'sonner';
 
 export default function TestButtons({ userId }: { userId: string }) {
   const { mutateAsync: acceptSwapAsync, isPending: isAcceptPending } =
@@ -18,7 +18,7 @@ export default function TestButtons({ userId }: { userId: string }) {
 
   const hasSwapRequestForMe =
     (swapRequest.user1Id === userId || swapRequest.user2Id === userId) &&
-    swapRequest.status === "pending";
+    swapRequest.status === 'pending';
 
   function handleAcceptSwap() {
     toast.promise(
@@ -27,16 +27,16 @@ export default function TestButtons({ userId }: { userId: string }) {
         bookingId: swapRequest.bookingId,
       }),
       {
-        loading: "Processing Swap Request",
-        success: "Swap Request Accepted",
+        loading: 'Processing Swap Request',
+        success: 'Swap Request Accepted',
         error: (err) => {
           if (err instanceof TRPCClientError) {
             return err.message;
           }
-          return err.message || "Failed to accept swap request";
+          return err.message || 'Failed to accept swap request';
         },
-        description: "Please wait for the swap request to be processed",
-        descriptionClassName: "text-[10px]",
+        description: 'Please wait for the swap request to be processed',
+        descriptionClassName: 'text-[10px]',
       },
     );
   }
@@ -47,16 +47,16 @@ export default function TestButtons({ userId }: { userId: string }) {
         swapId: swapRequest.swapId,
       }),
       {
-        loading: "Processing Swap Reject Request",
-        success: "Swap Request Rejected",
+        loading: 'Processing Swap Reject Request',
+        success: 'Swap Request Rejected',
         error: (err) => {
           if (err instanceof TRPCClientError) {
             return err.message;
           }
-          return err.message || "Failed to reject swap request";
+          return err.message || 'Failed to reject swap request';
         },
-        description: "Please wait for the swap request to be processed",
-        descriptionClassName: "text-[10px]",
+        description: 'Please wait for the swap request to be processed',
+        descriptionClassName: 'text-[10px]',
       },
     );
   }
@@ -66,22 +66,20 @@ export default function TestButtons({ userId }: { userId: string }) {
       {hasSwapRequestForMe ? (
         <>
           <Button
-            type="submit"
+            type='button'
             disabled={isAcceptPending}
-            onClick={handleAcceptSwap}
-          >
-            Test Accpet Swap Request
+            onClick={handleAcceptSwap}>
+            Test Accept Swap Request
           </Button>
           <Button
-            type="submit"
+            type='button'
             disabled={isRejectPending}
-            onClick={handleRejectSwap}
-          >
+            onClick={handleRejectSwap}>
             Test Reject Swap Request
           </Button>
         </>
       ) : (
-        <Button type="button">No Swap Request Found</Button>
+        <Button type='button'>No Swap Request Found</Button>
       )}
     </div>
   );
