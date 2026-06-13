@@ -14,4 +14,5 @@ export default defineConfig({
   dbCredentials: {
     url: databaseUrl,
   },
+  schemaFilter: ['public', 'private_schema'],
 });

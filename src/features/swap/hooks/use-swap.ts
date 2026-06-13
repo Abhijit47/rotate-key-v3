@@ -1,10 +1,10 @@
-import { useTRPC } from '@/trpc/client';
+import { useTRPC } from "@/trpc/client";
 import {
   useMutation,
   useQuery,
   useQueryClient,
   useSuspenseQuery,
-} from '@tanstack/react-query';
+} from "@tanstack/react-query";
 
 /**
  * Hook for find swapable properties for a given opposite user Id
@@ -40,7 +40,7 @@ export function useCreateSwap() {
         await queryClient.invalidateQueries(trpc.swap.getSwap.queryOptions());
       },
       onError: (err) => {
-        console.error('hook useCreateSwap error', err);
+        console.error("hook useCreateSwap error", err);
       },
     }),
   );

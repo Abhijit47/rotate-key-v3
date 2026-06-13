@@ -29,24 +29,35 @@ export const SwapsTable = pgTable(
   {
     id: uuid("id").primaryKey().unique().defaultRandom().notNull(),
     // who was the first user to request the swap
-    user1Id: uuid("user1_id").references(() => user.id, {
-      onDelete: "cascade",
-    }),
+    user1Id: uuid("user1_id")
+      .notNull()
+      .references(() => user.id, {
+        onDelete: "cascade",
+      }),
     // who was the second user to request the swap
-    user2Id: uuid("user2_id").references(() => user.id, {
-      onDelete: "cascade",
-    }),
+    user2Id: uuid("user2_id")
+      .notNull()
+      .references(() => user.id, {
+        onDelete: "cascade",
+      }),
     // matchId related two this two users
-    matchId: uuid("match_id").references(() => match.id, {
-      onDelete: "cascade",
-    }),
-    property1Id: uuid("property1_id").references(() => property.id, {
-      onDelete: "cascade",
-    }), // offered by user1
-    property2Id: uuid("property2_id").references(() => property.id, {
-      onDelete: "cascade",
-    }), // offered by user2
+    matchId: uuid("match_id")
+      .notNull()
+      .references(() => match.id, {
+        onDelete: "cascade",
+      }),
+    property1Id: uuid("property1_id")
+      .notNull()
+      .references(() => property.id, {
+        onDelete: "cascade",
+      }), // offered by user1
+    property2Id: uuid("property2_id")
+      .notNull()
+      .references(() => property.id, {
+        onDelete: "cascade",
+      }), // offered by user2
 
+    // can be null, until fills the details
     // Store the original booking details that user1 wants to swap
     user1BookingId: uuid("user1_booking_id").references(() => bookings.id, {
       onDelete: "cascade",
@@ -61,6 +72,7 @@ export const SwapsTable = pgTable(
     }),
     user1GuestCount: varchar("user1_guest_count"),
 
+    // can be null, until fills the details
     // Store the original booking details that user2 wants to swap
     user2BookingId: uuid("user2_booking_id").references(() => bookings.id, {
       onDelete: "cascade",
@@ -75,10 +87,10 @@ export const SwapsTable = pgTable(
     }),
     user2GuestCount: varchar("user2_guest_count"),
 
-    user1Accepted: boolean("user1_accepted").default(false),
-    user2Accepted: boolean("user2_accepted").default(false),
+    user1Accepted: boolean("user1_accepted").notNull().default(false),
+    user2Accepted: boolean("user2_accepted").notNull().default(false),
 
-    status: swapStatusEnum(),
+    status: swapStatusEnum().notNull().default("pending"),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")

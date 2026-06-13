@@ -8,7 +8,7 @@ import { property as PropertyTable } from '@/drizzle/schema';
 import { bookings as BookingTable } from '@/drizzle/schema/booking';
 import { like as LikeTable } from '@/drizzle/schema/like';
 import { match as MatchTable } from '@/drizzle/schema/match';
-import { InsertSwap, SwapsTable } from '@/drizzle/schema/swap';
+import { type InsertSwap, SwapsTable } from '@/drizzle/schema/swap';
 import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
 
 const createSwapSchema = z
@@ -33,6 +33,28 @@ const acceptSwapSchema = z.object({
 });
 
 const rejectSwapSchema = z.object({ swapId: z.string() });
+
+type UpdateSwapValues = Pick<
+  InsertSwap,
+  | 'user1BookingId'
+  | 'user1StartDate'
+  | 'user1EndDate'
+  | 'user1GuestCount'
+  | 'user2BookingId'
+  | 'user2StartDate'
+  | 'user2EndDate'
+  | 'user2GuestCount'
+  | 'status'
+>;
+
+type UpdateAcceptValues = Pick<
+  InsertSwap,
+  | 'user1BookingId'
+  | 'user2BookingId'
+  | 'user1Accepted'
+  | 'user2Accepted'
+  | 'status'
+>;
 
 export const swapRouter = createTRPCRouter({
   getSwapableProperties: protectedProcedure
@@ -415,7 +437,7 @@ export const swapRouter = createTRPCRouter({
           }
 
           // Update the swap with current user's details and mark as completed
-          const updateData: InsertSwap = {};
+          const updateData: UpdateSwapValues = {};
           if (isUser1) {
             updateData.user1BookingId = bookingId;
             updateData.user1StartDate = startDate.toISOString();
@@ -501,11 +523,13 @@ export const swapRouter = createTRPCRouter({
           eq(table.user1Id, sql.placeholder('currentUserId')),
           eq(table.user2Id, sql.placeholder('currentUserId')),
         ),
-        eq(table.status, 'pending'),
+        // eq(table.status, sql.placeholder('status')),
+        // eq(table.status, "completed"), // need to check return data
       );
 
     const preparedExistingSwapDetailsStatement = db.query.SwapsTable.findFirst({
       where: whereStatement,
+      orderBy: (table, { desc }) => [desc(table.updatedAt)],
       with: {
         user1: true,
         user2: true,
@@ -515,17 +539,17 @@ export const swapRouter = createTRPCRouter({
     const existingSwapDetails =
       await preparedExistingSwapDetailsStatement.execute({
         currentUserId,
+        // status: 'pending',
       });
-
     if (!existingSwapDetails) {
       throw new TRPCError({ code: 'NOT_FOUND', message: 'Swap not found' });
     }
 
     // find the booking ID of current user
     const foundBookingId =
-      currentUserId === existingSwapDetails.user1Id
-        ? existingSwapDetails.user1BookingId
-        : existingSwapDetails.user2BookingId;
+      currentUserId === existingSwapDetails?.user1Id
+        ? existingSwapDetails?.user1BookingId
+        : existingSwapDetails?.user2BookingId;
 
     if (!foundBookingId) {
       throw new TRPCError({
@@ -534,17 +558,10 @@ export const swapRouter = createTRPCRouter({
       });
     }
 
-    if (!existingSwapDetails.user1 || !existingSwapDetails.user2) {
+    if (!existingSwapDetails?.user1 || !existingSwapDetails?.user2) {
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: 'User Record not found',
-      });
-    }
-
-    if (existingSwapDetails.status == null) {
-      throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: 'Swap status is null',
       });
     }
 
@@ -611,7 +628,7 @@ export const swapRouter = createTRPCRouter({
         }
 
         // Update existingSwap with user's booking details and accepted flag
-        const updateData: InsertSwap = {};
+        const updateData: UpdateAcceptValues = {};
         if (isUser1) {
           if (existingSwap.user1Accepted) {
             throw new TRPCError({
@@ -790,278 +807,5 @@ export const swapRouter = createTRPCRouter({
       });
 
       return updatedSwap;
-    }),
-});
-
-// for testing purpose use, dont scan or analyze the below functions
-const testSwapRouter = createTRPCRouter({
-  getSwapablePropertiesv2: protectedProcedure
-    .input(swapablePropertiesSchema)
-    .query(async ({ input, ctx }) => {
-      const { user } = ctx.auth;
-
-      const initiatorId = user.id; // who want to swap
-      const oppositeUserId = input.id; // which user i want to swap with,
-
-      // Step 0 — Guard
-      if (initiatorId === oppositeUserId) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'You cannot swap with yourself',
-        });
-      }
-
-      const result = await db.transaction(async (trx) => {
-        // Step 1 — Find active match
-        let user1Id = initiatorId;
-        let user2Id = oppositeUserId;
-        if (user2Id < user1Id) [user1Id, user2Id] = [user2Id, user1Id];
-
-        const activeMatch = await trx.query.match.findFirst({
-          where: (matchTable, { eq, and }) =>
-            and(
-              eq(matchTable.isActive, true),
-              eq(matchTable.user1Id, user1Id),
-              eq(matchTable.user2Id, user2Id),
-            ),
-          with: {
-            property1: true,
-            property2: true,
-          },
-        });
-
-        if (!activeMatch) {
-          throw new TRPCError({
-            code: 'FORBIDDEN',
-            message: 'No active match with this user',
-          });
-        }
-
-        // Step 2 — Validate mutual likes
-        // Initiator liked at least one property owned by opposite
-        const myLikeOnOppositeProperty = await trx
-          .select({ id: LikeTable.id })
-          .from(LikeTable)
-          .innerJoin(PropertyTable, eq(LikeTable.propertyId, PropertyTable.id))
-          .where(
-            and(
-              eq(LikeTable.fromUserId, initiatorId),
-              eq(PropertyTable.authorId, oppositeUserId),
-            ),
-          )
-          .limit(1);
-
-        if (!myLikeOnOppositeProperty.length) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'You have not liked any property of this user',
-          });
-        }
-
-        // Opposite liked at least one property owned by initiator
-        const theirLikeOnMyProperty = await trx
-          .select({ id: LikeTable.id })
-          .from(LikeTable)
-          .innerJoin(PropertyTable, eq(LikeTable.propertyId, PropertyTable.id))
-          .where(
-            and(
-              eq(LikeTable.fromUserId, oppositeUserId),
-              eq(PropertyTable.authorId, initiatorId),
-            ),
-          )
-          .limit(1);
-        if (!theirLikeOnMyProperty.length) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'This user has not liked any of your properties',
-          });
-        }
-
-        // find the bookings done by me on oppo. user property/ies and return those data
-        // Step 4: Last return the oposite user property/ies
-        // Now match check likes check both sided, bookings also checked
-        // return the bookings data
-
-        const myBookings = await trx.query.bookings.findMany({
-          where: (bookingTable, { and, eq }) =>
-            and(
-              eq(bookingTable.userId, initiatorId),
-              eq(bookingTable.matchId, activeMatch.id),
-              eq(bookingTable.status, 'pending'),
-            ),
-          with: {
-            property: true,
-          },
-        });
-
-        // Step 4 — Get opposite user's available properties (that we've liked)
-        const oppositeProperties = await trx.query.property.findMany({
-          where: (propertyTable, { eq, and }) =>
-            and(
-              eq(propertyTable.authorId, oppositeUserId),
-              eq(propertyTable.isAvailable, true),
-            ),
-          with: {
-            receivedLikes: {
-              where: (likeTable, { eq }) =>
-                eq(likeTable.fromUserId, initiatorId),
-              limit: 1,
-            },
-          },
-        });
-
-        // Filter to only properties we've liked
-        const likedOppositeProperties = oppositeProperties.filter(
-          (p) => p.receivedLikes.length > 0,
-        );
-
-        return {
-          activeMatch,
-          myBookings,
-          oppositeProperties: likedOppositeProperties,
-        };
-      });
-
-      return result;
-    }),
-
-  getSwapableProperties_v1: protectedProcedure
-    .input(swapablePropertiesSchema)
-    .query(async ({ input, ctx }) => {
-      const commited = await db.transaction(async (trx) => {
-        const { user } = ctx.auth;
-
-        const initiatorId = user.id; // who want to swap
-        const oppositeUserId = input.id; // whose user i want to swap with,
-
-        // Step 0 — Guard
-        if (initiatorId === oppositeUserId) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'You cannot swap with yourself',
-          });
-        }
-        // Step 1 — Find active match
-        let user1Id = initiatorId;
-        let user2Id = oppositeUserId;
-        if (user2Id < user1Id) [user1Id, user2Id] = [user2Id, user1Id];
-
-        const statement1 = trx.query.match
-          .findFirst({
-            where: (matchTable, { eq, and, or }) =>
-              and(
-                eq(matchTable.isActive, true),
-                or(
-                  eq(matchTable.user1Id, user.id),
-                  eq(matchTable.user2Id, user.id),
-                ),
-              ),
-          })
-          .prepare('activeMatchStatement');
-
-        const activeMatch = await statement1.execute();
-
-        if (!activeMatch) {
-          throw new TRPCError({
-            code: 'FORBIDDEN',
-            message: 'No active match with this user',
-          });
-        }
-
-        // Step 2 — Validate mutual likes
-        // Initiator liked at least one property owned by opposite
-        const statement2 = trx
-          .select({ id: LikeTable.id })
-          .from(LikeTable)
-          .innerJoin(PropertyTable, eq(LikeTable.propertyId, PropertyTable.id))
-          .where(
-            and(
-              eq(LikeTable.fromUserId, initiatorId),
-              eq(PropertyTable.authorId, oppositeUserId),
-            ),
-          )
-          .limit(1)
-          .prepare('findMyLikesStatement');
-        const myLikeOnOppositeProperty = await statement2.execute();
-        if (!myLikeOnOppositeProperty.length) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'You have not liked any property of this user',
-          });
-        }
-
-        // Opposite liked at least one property owned by initiator
-        const statement3 = trx
-          .select({ id: LikeTable.id })
-          .from(LikeTable)
-          .innerJoin(PropertyTable, eq(LikeTable.propertyId, PropertyTable.id))
-          .where(
-            and(
-              eq(LikeTable.fromUserId, oppositeUserId),
-              eq(PropertyTable.authorId, initiatorId),
-            ),
-          )
-          .limit(1)
-          .prepare('findTheirLikesOnMyProperty');
-        const theirLikeOnMyProperty = await statement3.execute();
-        if (!theirLikeOnMyProperty.length) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'This user has not liked any of your properties',
-          });
-        }
-
-        // find the bookings done by me on oppo. user property/ies and return those data
-        const statement4 = trx.query.bookings
-          .findMany({
-            where(bookingTable, { and, or, eq, ne }) {
-              return and(
-                eq(bookingTable.userId, initiatorId),
-                eq(bookingTable.status, 'pending'),
-              );
-            },
-            columns: {
-              id: true,
-              propertyId: true,
-              userId: true,
-              startDate: true,
-              endDate: true,
-              guestCount: true,
-              status: true,
-            },
-            with: {
-              property: {
-                // where:{
-                //   isAvailable: {
-                //     eq: true,
-                //   },
-                // },
-                columns: {
-                  id: true,
-                  type: true,
-                  isAvailable: true,
-                  authorId: true,
-                  streetAddress: true,
-                  city: true,
-                  state: true,
-                  zipCode: true,
-                },
-              },
-            },
-            // extras: {
-            //   totalBookingsCount: (table) =>
-            //     trx.$count(table, eq(table.userId, initiatorId)),
-            // },
-          })
-          .prepare('findBookingsByMe');
-
-        // Step 4: Last return the oposite user property/ies
-        // Now match check likes check both sided, bookings also checked
-        // return the bookings data
-
-        const bookingsByMe = await statement4.execute();
-
-        return bookingsByMe;
-      });
     }),
 });
