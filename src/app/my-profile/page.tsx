@@ -1,3 +1,6 @@
+import Link from "next/link";
+import Image from "next/image";
+
 import {
   Card,
   CardContent,
@@ -6,10 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ProfileRadialChart from "@/features/my-profile/components/profile-radial-chart";
-
-import Image from "next/image";
-
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Item,
   ItemContent,
@@ -19,11 +19,9 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import PersonalInformationForm from "@/features/my-profile/components/personal-information-form";
-import Link from "next/link";
-import { caller } from "@/trpc/server";
 import { requireAuth } from "@/lib/requireAuth";
-import { notFound } from "next/navigation";
 import TestButtons from "./test-buttons";
+import { Suspense } from "react";
 
 const music = [
   {
@@ -82,17 +80,6 @@ export function ItemImage() {
 
 export default async function MyProfilePage() {
   const { user } = await requireAuth();
-  const data = await caller.swap.getSwap();
-
-  if (!data) {
-    return notFound();
-  }
-
-  // lets find the currentUser id is included in data
-  const hasSwapRequestForMe =
-    (data.user1Id === user.id || data.user2Id === user.id) &&
-    data.status === "pending";
-  // console.log({ hasSwapRequestForMe });
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -147,11 +134,10 @@ export default async function MyProfilePage() {
               >
                 Goto chat
               </Link>
-              {hasSwapRequestForMe ? (
-                <TestButtons />
-              ) : (
-                <Button type="button">No Swap Request Found</Button>
-              )}
+
+              <Suspense fallback={<div>Loading...</div>}>
+                <TestButtons userId={user.id} />
+              </Suspense>
             </div>
           </div>
         </div>

@@ -9,12 +9,16 @@ import {
 import { TRPCClientError } from "@trpc/client";
 import { toast } from "sonner";
 
-export default function TestButtons() {
+export default function TestButtons({ userId }: { userId: string }) {
   const { mutateAsync: acceptSwapAsync, isPending: isAcceptPending } =
     useAcceptSwap();
   const { mutateAsync: rejectSwapAsync, isPending: isRejectPending } =
     useRejectSwap();
   const { data: swapRequest } = useGetSwap();
+
+  const hasSwapRequestForMe =
+    (swapRequest.user1Id === userId || swapRequest.user2Id === userId) &&
+    swapRequest.status === "pending";
 
   function handleAcceptSwap() {
     toast.promise(
@@ -59,20 +63,26 @@ export default function TestButtons() {
 
   return (
     <div>
-      <Button
-        type="submit"
-        disabled={isAcceptPending}
-        onClick={handleAcceptSwap}
-      >
-        Test Accpet Swap Request
-      </Button>
-      <Button
-        type="submit"
-        disabled={isRejectPending}
-        onClick={handleRejectSwap}
-      >
-        Test Reject Swap Request
-      </Button>
+      {hasSwapRequestForMe ? (
+        <>
+          <Button
+            type="submit"
+            disabled={isAcceptPending}
+            onClick={handleAcceptSwap}
+          >
+            Test Accpet Swap Request
+          </Button>
+          <Button
+            type="submit"
+            disabled={isRejectPending}
+            onClick={handleRejectSwap}
+          >
+            Test Reject Swap Request
+          </Button>
+        </>
+      ) : (
+        <Button type="button">No Swap Request Found</Button>
+      )}
     </div>
   );
 }
