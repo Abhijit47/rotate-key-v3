@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RotateCcwKey } from 'lucide-react';
-import { useState } from 'react';
 import {
   Controller,
   SubmitErrorHandler,
@@ -9,7 +8,6 @@ import {
 } from 'react-hook-form';
 import { toast } from 'sonner';
 import { useChatContext } from 'stream-chat-react';
-import z from 'zod';
 
 import { Rating, RatingButton } from '@/components/extends/rating';
 import { Button } from '@/components/ui/button';
@@ -35,46 +33,22 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useCustomChatContext } from '@/contexts/chat-context';
 import { isPropertyDocumentAttachment } from '@/features/chat/utils/chat';
+import { useCreateReview } from '@/features/reviews/hooks/use-review';
 import { cn } from '@/lib/utils';
-
-const reviewFormSchema = z.object({
-  fullName: z
-    .string()
-    .min(2, { message: 'Full name must be at least 2 characters.' }),
-  email: z.email({ message: 'Invalid email address.' }),
-  propertyCondition: z
-    .number()
-    .min(1, 'Property condition must be at least 1')
-    .max(10, 'Property condition must be at most 10'),
-  communicationWithOwner: z
-    .number()
-    .min(1, 'Communication with owner must be at least 1')
-    .max(10, 'Communication with owner must be at most 10'),
-  locationAccessibility: z
-    .number()
-    .min(1, 'Location accessibility must be at least 1')
-    .max(10, 'Location accessibility must be at most 10'),
-  amenitiesFacilities: z
-    .number()
-    .min(1, 'Amenities facilities must be at least 1')
-    .max(10, 'Amenities facilities must be at most 10'),
-  overallExperience: z
-    .number()
-    .min(1, 'Overall experience must be at least 1')
-    .max(10, 'Overall experience must be at most 10'),
-  reason: z
-    .string()
-    .min(10, { message: 'Reason must be at least 10 characters.' })
-    .max(500, { message: 'Reason must be at most 500 characters.' }),
-});
-
-type ReviewFormData = z.infer<typeof reviewFormSchema>;
+import {
+  ReviewFormValues,
+  reviewFormSchema,
+} from '@/lib/validators/reviews-schema';
+import { TRPCClientError } from '@trpc/client';
 
 export function UnSwapDialog() {
   const { client, channel } = useChatContext();
 
-  const { user } = useCustomChatContext();
-  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const { user, isUnSwapModalOpen, onUnSwapModal } = useCustomChatContext();
+  // const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+
+  const reviewMutation = useCreateReview();
+  const { isPending } = reviewMutation;
 
   // const hasDocumentMessageFromCurrentUser = channel?.state.messages.some(
   //   (msg) => {
@@ -98,10 +72,19 @@ export function UnSwapDialog() {
   );
 
   const shouldEnable =
-    user.isPropertyDocumentUploaded && hasDocumentMessageFromCurrentUser;
+    user.isPropertyDocumentUploaded &&
+    hasDocumentMessageFromCurrentUser &&
+    !isPending;
 
   return (
-    <Dialog open={isFeedbackModalOpen} onOpenChange={setIsFeedbackModalOpen}>
+    <Dialog
+      open={isUnSwapModalOpen}
+      onOpenChange={(open) => {
+        // Prevent close during pending state
+        if (!isPending) {
+          onUnSwapModal(open);
+        }
+      }}>
       <DialogTrigger asChild>
         <Button
           variant={'destructive'}
@@ -119,57 +102,81 @@ export function UnSwapDialog() {
             We will review your request and take appropriate action.
           </DialogDescription>
         </DialogHeader>
-
-        <ReviewForm />
+        <ReviewForm reviewMutation={reviewMutation} />
       </DialogContent>
     </Dialog>
   );
 }
 
-function ReviewForm() {
-  const form = useForm<ReviewFormData>({
+const isDev = process.env.NODE_ENV === 'development';
+
+function ReviewForm({
+  reviewMutation,
+}: {
+  reviewMutation: ReturnType<typeof useCreateReview>;
+}) {
+  const { mutateAsync, isPending } = reviewMutation;
+  const { onUnSwapModal } = useCustomChatContext();
+
+  const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewFormSchema),
     defaultValues: {
-      fullName: 'Alan Turing',
-      email: 'alanturing@gmail.com',
+      fullName: isDev ? 'Alan Turing' : '',
+      email: isDev ? 'alanturing@gmail.com' : '',
       propertyCondition: 0,
       communicationWithOwner: 0,
       locationAccessibility: 0,
       amenitiesFacilities: 0,
       overallExperience: 0,
-      reason: 'your reason here',
+      reason: isDev ? 'your reason here' : '',
     },
     mode: 'onChange',
   });
 
-  const onError: SubmitErrorHandler<ReviewFormData> = (errors) => {
+  const onError: SubmitErrorHandler<ReviewFormValues> = (errors) => {
     Object.entries(errors).forEach(([key, value]) => {
       toast.error(`${key}: ${value.message}`);
     });
   };
 
-  const onSubmit: SubmitHandler<ReviewFormData> = (values) => {
-    toast.success('Implement Soon:', {
-      description: (
-        <pre className='mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 font-mono! text-code-foreground'>
-          <code className='font-mono'>{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      ),
-      position: 'bottom-right',
-      classNames: {
-        content: 'flex flex-col gap-2 font-mono!',
+  const onSubmit: SubmitHandler<ReviewFormValues> = (values) => {
+    toast.promise(mutateAsync(values), {
+      loading: 'Processing...',
+      success: () => {
+        onUnSwapModal(false);
+        return `Submitted!`;
       },
-      style: {
-        '--border-radius': 'calc(var(--radius)  + 4px)',
-      } as React.CSSProperties,
+      error: (err) => {
+        if (err instanceof TRPCClientError) {
+          return err.message;
+        }
+        return err.message ?? 'Please try again later.';
+      },
+      description: 'We will review your request and take appropriate action.',
+      descriptionClassName: 'text-[10px]',
     });
+
+    // toast.success('Implement Soon:', {
+    //   description: (
+    //     <pre className='mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 font-mono! text-code-foreground'>
+    //       <code className='font-mono'>{JSON.stringify(values, null, 2)}</code>
+    //     </pre>
+    //   ),
+    //   position: 'bottom-right',
+    //   classNames: {
+    //     content: 'flex flex-col gap-2 font-mono!',
+    //   },
+    //   style: {
+    //     '--border-radius': 'calc(var(--radius)  + 4px)',
+    //   } as React.CSSProperties,
+    // });
   };
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit, onError)} className='space-y-4'>
       <ScrollArea className='max-h-96 h-full pr-4'>
         <FieldGroup className='gap-3'>
-          <FieldSet className='gap-3'>
+          <FieldSet className='gap-3' disabled={isPending}>
             <Controller
               name='fullName'
               control={form.control}
@@ -393,12 +400,12 @@ function ReviewForm() {
 
       <DialogFooter>
         <DialogClose asChild>
-          <Button variant='outline' type='button'>
+          <Button variant='outline' type='button' disabled={isPending}>
             Cancel
           </Button>
         </DialogClose>
-        <Button type='submit' variant={'destructive'}>
-          Un Swap
+        <Button type='submit' variant={'destructive'} disabled={isPending}>
+          UnSwap
         </Button>
       </DialogFooter>
     </form>

@@ -1,14 +1,15 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-import { adminRouter } from "@/features/admin/server/routers";
-import { authRouter } from "@/features/auth/server/routers";
-import { bookingRouter } from "@/features/booking/server/routers";
-import { chatRouter } from "@/features/chat/server/routers";
-import { propertyRouter } from "@/features/property/server/routers";
-import { testPurposeRouter } from "@/features/test-purpose/server/routers";
-import { baseProcedure, createTRPCRouter } from "../init";
-import { swapRouter } from "@/features/swap/server/routers";
-import { engagementRouter } from "@/features/engagement/server/routers";
+import { adminRouter } from '@/features/admin/server/routers';
+import { authRouter } from '@/features/auth/server/routers';
+import { bookingRouter } from '@/features/booking/server/routers';
+import { chatRouter } from '@/features/chat/server/routers';
+import { propertyRouter } from '@/features/property/server/routers';
+import { testPurposeRouter } from '@/features/test-purpose/server/routers';
+import { baseProcedure, createTRPCRouter } from '../init';
+import { swapRouter } from '@/features/swap/server/routers';
+import { engagementRouter } from '@/features/engagement/server/routers';
+import { reviewRouter } from '@/features/reviews/server/routers';
 
 export const appRouter = createTRPCRouter({
   hello: baseProcedure
@@ -26,14 +27,14 @@ export const appRouter = createTRPCRouter({
   // Public endpoint
   health: baseProcedure
     .meta({
-      name: "Health Check",
+      name: 'Health Check',
       docs: {
-        description: "Check if the API is running",
-        tags: ["System"],
+        description: 'Check if the API is running',
+        tags: ['System'],
       },
     })
-    .output(z.object({ status: z.literal("ok") }))
-    .query(() => ({ status: "ok" as const })),
+    .output(z.object({ status: z.literal('ok') }))
+    .query(() => ({ status: 'ok' as const })),
 
   auth: authRouter,
   admin: adminRouter,
@@ -41,7 +42,8 @@ export const appRouter = createTRPCRouter({
   chat: chatRouter,
   booking: bookingRouter,
   swap: swapRouter,
-  engagement:engagementRouter,
+  engagement: engagementRouter,
+  review: reviewRouter,
   testPurpose: testPurposeRouter,
 });
 

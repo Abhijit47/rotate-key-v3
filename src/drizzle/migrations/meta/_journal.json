@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1780975835105,
-      "tag": "0000_gifted_cerise",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1781255599711,
-      "tag": "0001_simple_shinobi_shaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1781260107048,
-      "tag": "0002_first_wolfsbane",
+      "when": 1781358724221,
+      "tag": "0000_workable_true_believers",
       "breakpoints": true
     }
   ]

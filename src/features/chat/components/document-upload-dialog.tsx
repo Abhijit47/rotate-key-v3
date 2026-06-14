@@ -31,6 +31,7 @@ import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useCustomChatContext } from '@/contexts/chat-context';
 import { useUserPropertyDocumentUpload } from '@/features/auth/hooks/use-auth';
+import { isPropertyDocumentAttachment } from '../utils/chat';
 
 const ACCEPT_FILE_TYPE = 'application/pdf';
 
@@ -97,7 +98,7 @@ export default function DocumentUploadAlertDialog() {
     e.preventDefault();
     e.stopPropagation();
 
-    console.log('files:', files);
+    // console.log('files:', files);
     if (files.length === 0) {
       toast.warning('No file was there to upload!');
       onOpenDocumentDialog(true);
@@ -146,6 +147,7 @@ export default function DocumentUploadAlertDialog() {
     e.stopPropagation();
 
     if (url) {
+      // TODO: will do something with res in future
       const res = await channel?.sendMessage({
         text: `${user.fullName ?? 'User'} uploaded a document: ${url}`,
         attachments: [
@@ -159,7 +161,8 @@ export default function DocumentUploadAlertDialog() {
         mentioned_channel: true,
         // mentioned_users: [], // oposite user_ID need to be mention here.
       });
-      console.log('Message sent with document link:', res);
+
+      // console.log('Message sent with document link:', res);
       setFiles([]);
       setUrl(undefined);
       onClose();
@@ -172,20 +175,21 @@ export default function DocumentUploadAlertDialog() {
     (msg) => {
       const sentByCurrentUser = msg?.user?.id === client.userID;
       const hasDocumentAttachment = msg.attachments?.some(
-        (att) =>
-          att.type === 'file' &&
-          !!att.asset_url &&
-          att.title === 'Property Document',
+        (att) => isPropertyDocumentAttachment(att), // Use the helper function to check if the attachment is a property document
       );
 
       return sentByCurrentUser && hasDocumentAttachment;
     },
   );
 
+  // TODO: will check later.
+  // const storageKey = `document-upload-prompt-dismissed-${user.id}`;
+  // const dismissed = typeof window !== 'undefined' ? localStorage.getItem(storageKey) === 'dismissed' : false;
+  // const shouldTrigger = user.isPropertyDocumentUploaded !==false && !hasDocumentMessageFromCurrentUser && !dismissed;
+
   return (
     <AlertDialog
-      open={!isOpenDocumentDialog && !hasDocumentMessageFromCurrentUser}
-      // open={isOpenDocumentDialog && !hasDocumentMessageFromCurrentUser}
+      open={isOpenDocumentDialog && !hasDocumentMessageFromCurrentUser}
       onOpenChange={onOpenDocumentDialog}>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -260,8 +264,9 @@ export default function DocumentUploadAlertDialog() {
               ))}
             </FileUploadList>
           </FileUpload>
+
           <AlertDialogFooter>
-            {url === undefined && (
+            {url === undefined ? (
               <>
                 <AlertDialogCancel type='button' disabled={isPending}>
                   Cancel
@@ -270,27 +275,10 @@ export default function DocumentUploadAlertDialog() {
                   {isPending ? 'Uploading...' : 'Upload Document'}
                 </AlertDialogAction>
               </>
-            )}
-            <AlertDialogCancel type='button' disabled={isPending}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction type='submit' disabled={isPending}>
-              {isPending ? 'Uploading...' : 'Upload Document'}
-            </AlertDialogAction>
-
-            {/* {url !== undefined && url?.length > 0 ? <></>:null} */}
-
-            {url !== undefined && (
+            ) : (
               <AlertDialogAction
                 type='button'
-                onClick={(ev) => {
-                  if (url) {
-                    toast.success('Document upload complete! Thank you.');
-                    handleContinue(ev);
-                  } else {
-                    toast.error('Please upload a document before continuing.');
-                  }
-                }}>
+                onClick={(ev) => handleContinue(ev)}>
                 Continue
               </AlertDialogAction>
             )}

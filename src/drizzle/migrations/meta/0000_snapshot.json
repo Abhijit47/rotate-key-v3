@@ -1,5 +1,5 @@
 {
-  "id": "ce08a600-f013-4be2-acab-70050cd0b9e7",
+  "id": "602ef811-d1f8-4b62-995c-8854efe6c419",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1154,9 +1154,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.matches-test-env": {
+    "private_schema.matches-test-env": {
       "name": "matches-test-env",
-      "schema": "",
+      "schema": "private_schema",
       "columns": {
         "id": {
           "name": "id",
@@ -1447,31 +1447,31 @@
           "name": "user1_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "user2_id": {
           "name": "user2_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "match_id": {
           "name": "match_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "property1_id": {
           "name": "property1_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "property2_id": {
           "name": "property2_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "user1_booking_id": {
           "name": "user1_booking_id",
@@ -1525,14 +1525,14 @@
           "name": "user1_accepted",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": false
         },
         "user2_accepted": {
           "name": "user2_accepted",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": false
         },
         "status": {
@@ -1540,7 +1540,8 @@
           "type": "status",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'pending'"
         },
         "created_at": {
           "name": "created_at",
@@ -1824,6 +1825,169 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.reviews": {
+      "name": "reviews",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "full_name": {
+          "name": "full_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_condition": {
+          "name": "property_condition",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "communication_with_owner": {
+          "name": "communication_with_owner",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_accessibility": {
+          "name": "location_accessibility",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amenities_facilities": {
+          "name": "amenities_facilities",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "overall_experience": {
+          "name": "overall_experience",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_public": {
+          "name": "is_public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_reviews_user_id": {
+          "name": "idx_reviews_user_id",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_reviews_full_name": {
+          "name": "idx_reviews_full_name",
+          "columns": [
+            {
+              "expression": "full_name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_reviews_email": {
+          "name": "idx_reviews_email",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "reviews_user_id_user_id_fk": {
+          "name": "reviews_user_id_user_id_fk",
+          "tableFrom": "reviews",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "reviews_id_unique": {
+          "name": "reviews_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -1874,7 +2038,9 @@
       ]
     }
   },
-  "schemas": {},
+  "schemas": {
+    "private_schema": "private_schema"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},
