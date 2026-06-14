@@ -8,8 +8,8 @@ import { bookings } from './booking';
 import { like } from './like';
 import { match } from './match';
 import { property } from './property';
+import { ReviewTable } from './reviews';
 import { SwapsTable } from './swap';
-import { ReviewTable } from '.';
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),

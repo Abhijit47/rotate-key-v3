@@ -1,14 +1,14 @@
-import { TRPCError } from "@trpc/server";
-import z from "zod";
+import { TRPCError } from '@trpc/server';
+import z from 'zod';
 
-import { db } from "@/drizzle/db";
-import { ReviewTable } from "@/drizzle/schema";
-import { reviewFormSchema } from "@/lib/validators/reviews-schema";
+import { db } from '@/drizzle/db';
+import { ReviewTable } from '@/drizzle/schema';
+import { reviewFormSchema } from '@/lib/validators/reviews-schema';
 import {
   baseProcedure,
   createTRPCRouter,
   protectedProcedure,
-} from "@/trpc/init";
+} from '@/trpc/init';
 
 export const reviewRouter = createTRPCRouter({
   createReview: protectedProcedure
@@ -52,22 +52,26 @@ export const reviewRouter = createTRPCRouter({
 
         if (!newReview) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Review not created",
+            code: 'BAD_REQUEST',
+            message: 'Review not created',
           });
         }
 
         return newReview;
       } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error creating review",
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Error creating review',
         });
       }
     }),
 
   getReviews: baseProcedure.input(z.void()).query(async () => {
     const reviews = await db.query.ReviewTable.findMany({
+      where: (table, { eq }) => eq(table.isPublic, true),
       orderBy: (table, { desc }) => [desc(table.updatedAt)],
       limit: 20,
       columns: {
@@ -92,7 +96,7 @@ export const reviewRouter = createTRPCRouter({
         // ),
         averageRating:
           sql<number>`(select avg(x) from unnest(array[${fields.propertyCondition}, ${fields.communicationWithOwner}, ${fields.locationAccessibility}, ${fields.amenitiesFacilities}, ${fields.overallExperience}]) as x)`.as(
-            "averageRating",
+            'averageRating',
           ),
       }),
     });
