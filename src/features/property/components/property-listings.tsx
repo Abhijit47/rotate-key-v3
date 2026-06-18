@@ -36,7 +36,7 @@ import { Separator } from '@/components/ui/separator';
 
 import {
   useDeleteProperty,
-  useLikeProperty,
+  // useLikeProperty,
   useProperty,
   usePublicProperties,
   useUserProperties,
@@ -58,6 +58,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useUpgradeModal } from '@/features/common/hooks/use-upgrade-modal';
 import { useSession } from '@/lib/auth-client';
+import { useLikeProperty } from '@/features/engagement/hooks/use-engagements';
 
 function prettifyText(text: string) {
   return text
@@ -91,7 +92,8 @@ export function EmptyPropertiesState() {
         variant='link'
         asChild
         className='text-muted-foreground'
-        size='sm'>
+        size='sm'
+      >
         <Link href='#'>
           Learn More <ArrowUpRightIcon />
         </Link>
@@ -179,7 +181,8 @@ export function PropertyListings() {
                       size={'icon-sm'}
                       disabled
                       aria-label={'Save property (currently unavailable)'}
-                      title={'Save property (currently unavailable)'}>
+                      title={'Save property (currently unavailable)'}
+                    >
                       <HeartIcon className={'size-4'} />
                     </Button>
 
@@ -199,7 +202,8 @@ export function PropertyListings() {
                             isLikedByMe
                               ? undefined
                               : () => handleLikeProperty(property.id)
-                          }>
+                          }
+                        >
                           {isLikedByMe ? (
                             <ThumbsDownIcon className={'size-4 text-white'} />
                           ) : (
@@ -235,7 +239,8 @@ export function PropertyListings() {
                     className={buttonVariants({
                       variant: 'outline',
                       size: 'sm',
-                    })}>
+                    })}
+                  >
                     View Details{' '}
                     <ArrowUpRightFromSquareIcon className={'size-4'} />
                   </Link>
@@ -331,7 +336,8 @@ export function MyPropertyListings() {
                           variant: 'outline',
                           size: 'sm',
                           className: 'mr-4',
-                        })}>
+                        })}
+                      >
                         Edit Details <PenLineIcon className={'size-4'} />
                       </Link>
 
@@ -340,7 +346,8 @@ export function MyPropertyListings() {
                         size={'sm'}
                         className={'mr-4'}
                         onClick={() => handleDeleteProperty(property.id)}
-                        disabled={isPending}>
+                        disabled={isPending}
+                      >
                         {isPending ? 'Deleting...' : 'Delete'}
                       </Button>
                     </>
@@ -351,7 +358,8 @@ export function MyPropertyListings() {
                     className={buttonVariants({
                       variant: 'outline',
                       size: 'sm',
-                    })}>
+                    })}
+                  >
                     View Details{' '}
                     <ArrowUpRightFromSquareIcon className={'size-4'} />
                   </Link>

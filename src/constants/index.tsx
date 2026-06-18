@@ -23,6 +23,10 @@ export const navlinks: Navlink[] = [
     href: '/swapings',
   },
   {
+    name: 'Notifications',
+    href: '/notifications',
+  },
+  {
     name: 'Contact',
     href: '#',
   },

@@ -10,6 +10,7 @@ import { like as LikeTable } from '@/drizzle/schema/like';
 import { match as MatchTable } from '@/drizzle/schema/match';
 import { type InsertSwap, SwapsTable } from '@/drizzle/schema/swap';
 import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
+import { sendInAppNotification } from '@/novu/functions';
 
 const createSwapSchema = z
   .object({
@@ -246,8 +247,24 @@ export const swapRouter = createTRPCRouter({
         });
       }
 
+      // statement for faster execution
+      const findOppositeUser = db.query.user
+        .findFirst({
+          where: (userTable, { eq }) => eq(userTable.id, oppositeUserId),
+          columns: { name: true, firstName: true, lastName: true },
+        })
+        .prepare('findOppositeUser');
+      const oppositeUser = await findOppositeUser.execute();
+
+      if (!oppositeUser) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Opposite user not found',
+        });
+      }
       // console.log(input);
 
+      // start transaction
       const committed = await db.transaction(async (trx) => {
         // Step 1 — Get the initiator's booking and validate
         const initiatorBooking = await trx.query.bookings.findFirst({
@@ -464,6 +481,7 @@ export const swapRouter = createTRPCRouter({
           return {
             swap: updatedSwap,
             isNew: false,
+            oppositeUser: oppositeUser,
             message: 'Swap completed successfully!',
           };
         }
@@ -502,9 +520,52 @@ export const swapRouter = createTRPCRouter({
         return {
           swap: newSwap,
           isNew: true,
+          oppositeUser: oppositeUser,
           message: 'Swap initiated successfully! Waiting for the other user.',
         };
-      });
+      }); // end transaction
+
+      // execute the notification
+      const WORKFLOW_ID: WorkflowTypes = 'incoming-swap-request';
+      if (committed.isNew === true) {
+        // send the notification to the first user, who is first trigger this fn
+        // who is initiate first that data is available here
+        const firstName = user.firstName || user.name.split(' ')[0];
+        const lastName = user.lastName || user.name.split(' ')[1] || '';
+        const novuPayload = {
+          workflowType: WORKFLOW_ID,
+          swapRequest: {
+            initiatorId: initiatorId,
+            userFirstName: firstName,
+            userLastName: lastName,
+            userEmail: user.email,
+            userContactNumber: user.contactNumber,
+            oppositeUserName: committed.oppositeUser.name,
+            swapId: committed.swap.id,
+            initiatorBookingId: bookingId,
+          },
+        };
+        await sendInAppNotification({ payload: novuPayload });
+      } else {
+        // when isNew is "FALSE" then we can assume opposite side user also trigger this fn,
+        // so we can send the notification to him/her
+        const firstName = user.firstName || user.name.split(' ')[0];
+        const lastName = user.lastName || user.name.split(' ')[1] || '';
+        const novuPayload = {
+          workflowType: WORKFLOW_ID,
+          swapRequest: {
+            initiatorId: initiatorId,
+            userFirstName: firstName,
+            userLastName: lastName,
+            userEmail: user.email,
+            userContactNumber: user.contactNumber,
+            oppositeUserName: committed.oppositeUser.name,
+            swapId: committed.swap.id,
+            initiatorBookingId: bookingId,
+          },
+        };
+        await sendInAppNotification({ payload: novuPayload });
+      }
 
       return committed;
     }),
@@ -776,10 +837,10 @@ export const swapRouter = createTRPCRouter({
           .returning();
 
         // make statements for faster query
-        // const updatePropertyStatement = trx
-        //   .update(PropertyTable)
-        //   .set({ isAvailable: true })
-        //   .where(eq(PropertyTable.id, sql.placeholder("id")));
+        const updatePropertyStatement = trx
+          .update(PropertyTable)
+          .set({ isAvailable: true })
+          .where(eq(PropertyTable.id, sql.placeholder('id')));
 
         const updateUser1BookingStatement = trx
           .update(BookingTable)
@@ -793,8 +854,8 @@ export const swapRouter = createTRPCRouter({
 
         // parrallel updates
         await Promise.all([
-          // updatePropertyStatement.execute({ id: existingSwap.property1Id }),
-          // updatePropertyStatement.execute({ id: existingSwap.property2Id }),
+          updatePropertyStatement.execute({ id: existingSwap.property1Id }),
+          updatePropertyStatement.execute({ id: existingSwap.property2Id }),
           updateUser1BookingStatement.execute({
             id: existingSwap.user1BookingId,
           }),

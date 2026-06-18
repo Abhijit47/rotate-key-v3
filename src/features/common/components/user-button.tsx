@@ -46,7 +46,8 @@ export default function UserButton() {
               className={buttonVariants({
                 variant: 'outline',
                 className: 'rounded-full!',
-              })}>
+              })}
+            >
               Continue to Login
             </Link>
           </li>
@@ -55,7 +56,8 @@ export default function UserButton() {
               href={'/sign-up'}
               className={buttonVariants({
                 className: 'rounded-full!',
-              })}>
+              })}
+            >
               Get Started
             </Link>
           </li>
@@ -63,7 +65,10 @@ export default function UserButton() {
       ) : (
         <>
           <li>
-            <NotificationInbox userId={data.user.id} />
+            <NotificationInbox
+              subscriberHash={data.user.notificationHash}
+              userId={data.user.id}
+            />
           </li>
           <li>
             <DropdownMenu>
@@ -72,7 +77,8 @@ export default function UserButton() {
                   variant={'ghost'}
                   size={'icon-sm'}
                   className={'rounded-full h-full mt-1.5'}
-                  aria-label={`${data.user.name} account menu`}>
+                  aria-label={`${data.user.name} account menu`}
+                >
                   <Avatar className={'size-8'}>
                     <AvatarImage
                       src={data.user.image ?? undefined}
@@ -123,7 +129,8 @@ export default function UserButton() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => authClient.customer.portal()}>
+                    onClick={() => authClient.customer.portal()}
+                  >
                     Billing
                     <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
                   </DropdownMenuItem>
@@ -189,7 +196,8 @@ export default function UserButton() {
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     variant='destructive'
-                    onSelect={() => signOut()}>
+                    onSelect={() => signOut()}
+                  >
                     Log out
                     <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
                   </DropdownMenuItem>

@@ -1,25 +1,21 @@
-import * as Sentry from "@sentry/nextjs";
-import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
-import { StepError } from "inngest";
-import { revalidatePath } from "next/cache";
+import * as Sentry from '@sentry/nextjs';
+import { TRPCError } from '@trpc/server';
+import { and, eq } from 'drizzle-orm';
+import { StepError } from 'inngest';
+import { inngest as inngestFn } from '@/inngest/client';
+import { revalidatePath } from 'next/cache';
 
-import { db } from "@/drizzle/db";
-import { property as PropertyTable } from "@/drizzle/schema";
-import { like as LikeTable } from "@/drizzle/schema/like";
-import { match as MatchTable } from "@/drizzle/schema/match";
-import { inngest } from "@/inngest/client";
-import { paymentPolicyCheckProcedure } from "@/lib/property-actions";
-import {
-  addLikeToPropertySchema,
-} from "@/lib/validators/property-schema";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "@/trpc/init";
+import { db } from '@/drizzle/db';
+import { property as PropertyTable } from '@/drizzle/schema';
+import { like as LikeTable } from '@/drizzle/schema/like';
+import { match as MatchTable } from '@/drizzle/schema/match';
+import { paymentPolicyCheckProcedure } from '@/lib/property-actions';
+import { addLikeToPropertySchema } from '@/lib/validators/property-schema';
+import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
+import { sendInAppNotification } from '@/novu/functions';
 
 export const engagementRouter = createTRPCRouter({
-    addLikeToProperty: protectedProcedure
+  addLikeToProperty: protectedProcedure
     .input(addLikeToPropertySchema)
     .mutation(async ({ input, ctx }) => {
       const { user } = ctx.auth;
@@ -29,7 +25,7 @@ export const engagementRouter = createTRPCRouter({
       const fromUserId = user.id;
 
       const checkEngagementLimit = await paymentPolicyCheckProcedure({
-        type: "propertyEngagement",
+        type: 'propertyEngagement',
       });
       // console.log('Engagement limit check result:', checkEngagementLimit);
       if (checkEngagementLimit.success) {
@@ -46,7 +42,7 @@ export const engagementRouter = createTRPCRouter({
               return {
                 success: false,
                 isMatch: false,
-                message: "You already liked this property.",
+                message: 'You already liked this property.',
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -64,7 +60,7 @@ export const engagementRouter = createTRPCRouter({
               return {
                 success: false,
                 isMatch: false,
-                message: "Property not available.",
+                message: 'Property not available.',
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -78,7 +74,7 @@ export const engagementRouter = createTRPCRouter({
               return {
                 success: true,
                 isMatch: false,
-                message: "Like recorded (self-like, no match possible).",
+                message: 'Like recorded (self-like, no match possible).',
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -86,7 +82,22 @@ export const engagementRouter = createTRPCRouter({
             }
 
             // 4. Insert the like
-            await trx.insert(LikeTable).values({ fromUserId, propertyId });
+            const [newLike] = await trx
+              .insert(LikeTable)
+              .values({ fromUserId, propertyId })
+              .returning();
+            if (newLike) {
+              // Only sent notification to the owner, currentUser hit the like button, no heavy calculation required.
+              const address = `${ownerProperty.streetAddress}, ${ownerProperty.city}, ${ownerProperty.state}, ${ownerProperty.zipCode}`;
+              const novuPayload = {
+                workflowType: 'liked-property' as WorkflowTypes,
+                user: user,
+                propertyOwnerId: ownerId,
+                propertyType: ownerProperty.type,
+                propertyAddress: address,
+              };
+              await sendInAppNotification({ payload: novuPayload });
+            }
 
             // 5. Prevent duplicate match for the same user-pair (regardless of property)
             let user1Id = fromUserId,
@@ -106,7 +117,7 @@ export const engagementRouter = createTRPCRouter({
                 success: true,
                 isMatch: false,
                 message:
-                  "Like recorded, already matched with this user before.",
+                  'Like recorded, already matched with this user before.',
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -130,13 +141,6 @@ export const engagementRouter = createTRPCRouter({
                   user1Id === fromUserId
                     ? [myProp.id, propertyId]
                     : [propertyId, myProp.id];
-                // No previous match, so first match: pick this property-pair
-                // let property1Id = myProp.id,
-                //   property2Id = propertyId;
-                // Ensure property1 and property2 ordering matches user1/user2 ordering
-                // if (user2Id < user1Id) {
-                //   [property1Id, property2Id] = [property2Id, property1Id];
-                // }
 
                 const [newMatch] = await trx
                   .insert(MatchTable)
@@ -146,7 +150,7 @@ export const engagementRouter = createTRPCRouter({
                     property1Id,
                     property2Id,
                     isActive: true,
-                    channelType: "messaging",
+                    channelType: 'messaging',
                   })
                   .returning({ id: MatchTable.id });
 
@@ -165,12 +169,13 @@ export const engagementRouter = createTRPCRouter({
             return {
               success: true,
               isMatch: false,
-              message: "Like recorded, no match yet.",
+              message: 'Like recorded, no match yet.',
               user1Id: undefined,
               user2Id: undefined,
               newMatchId: undefined,
             };
           });
+          // transaction end here
 
           // do other stuff if needed on match, e.g. send notifications, etc.
           if (
@@ -181,8 +186,8 @@ export const engagementRouter = createTRPCRouter({
           ) {
             try {
               // heavy lifting take over by inngest
-              await inngest.send({
-                name: "matched/create-channel",
+              await inngestFn.send({
+                name: 'matched/create-channel',
                 data: {
                   user1Id: commited.user1Id,
                   user2Id: commited.user2Id,
@@ -207,11 +212,11 @@ export const engagementRouter = createTRPCRouter({
             message: commited.message,
           };
         } catch (error) {
-          console.error("Error in likePropertyAndMaybeMatch:", error);
+          console.error('Error in likePropertyAndMaybeMatch:', error);
           return {
             success: false,
             isMatch: false,
-            message: "Internal server error",
+            message: 'Internal server error',
             user1Id: undefined,
             user2Id: undefined,
             newMatchId: undefined,
@@ -219,16 +224,16 @@ export const engagementRouter = createTRPCRouter({
         } finally {
           if (path) {
             const finalPath = `/(root)/${path}`;
-            revalidatePath(finalPath, "page");
+            revalidatePath(finalPath, 'page');
           } else {
-            revalidatePath("/(root)/swappings", "page");
+            revalidatePath('/(root)/swapings', 'page');
           }
         }
       } else {
         throw new TRPCError({
-          code: "FORBIDDEN",
+          code: 'FORBIDDEN',
           message: checkEngagementLimit.message,
         });
       }
     }),
-})
+});

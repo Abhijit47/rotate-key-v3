@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { NonRetriableError } from 'inngest';
 import { StreamChat, UserResponse } from 'stream-chat';
+import { eq } from 'drizzle-orm';
 
 import { db } from '@/drizzle/db';
 import { user } from '@/drizzle/schema';
@@ -12,11 +13,10 @@ import { polarClient } from '@/lib/polar';
 import {
   createSubscriber,
   deleteSubscriber,
-  // deleteSubscriber,
-  sendWelcomeNotification,
+  sendInAppNotification,
 } from '@/novu/functions';
-import { eq } from 'drizzle-orm';
 import { inngest } from './client';
+import { generateSubscriberHash } from '@/lib/generate-hash';
 
 export const helloWorld = inngest.createFunction(
   { id: 'hello-world' },
@@ -90,14 +90,23 @@ export const userSignUpComplete = inngest.createFunction(
       return { token, expireTime, issuedAt };
     });
 
+    // Generate Subscriber hash
+    const subcriberHash = await step.run(
+      'generate-subscriber-hash',
+      async () => {
+        return await generateSubscriberHash(foundUser.id);
+      },
+    );
+
     // update the token,expiredAt,issuedAt for the user in the database
     await step.run('update-user-with-token', async () => {
       return db
         .update(user)
         .set({
+          notificationHash: subcriberHash,
           chatToken: streamResult.token,
-          chatTokenExpireAt: new Date(streamResult.expireTime * 1000),
-          chatTokenIssuedAt: new Date(streamResult.issuedAt * 1000),
+          chatTokenExpireAt: new Date(streamResult.expireTime! * 1000),
+          chatTokenIssuedAt: new Date(streamResult.issuedAt! * 1000),
         })
         .where(eq(user.id, foundUser.id))
         .returning();
@@ -169,8 +178,8 @@ export const oauthSignUpComplete = inngest.createFunction(
         .update(user)
         .set({
           chatToken: streamResult.token,
-          chatTokenExpireAt: new Date(streamResult.expireTime * 1000),
-          chatTokenIssuedAt: new Date(streamResult.issuedAt * 1000),
+          chatTokenExpireAt: new Date(streamResult.expireTime! * 1000),
+          chatTokenIssuedAt: new Date(streamResult.issuedAt! * 1000),
           isSocialSignInComplete: true,
         })
         .where(eq(user.id, foundUser.id))
@@ -190,18 +199,21 @@ export const userOnboardingComplete = inngest.createFunction(
         console.log('welcome email sending for:', event.data.email);
       });
       await step.run('welcome-notification-sending', async () => {
-        console.log('welcome notification sending for:', event.data.email);
+        const novuPayload = {
+          workflowType: 'welcome-user' as WorkflowTypes,
+          user: user,
+        };
         // send a welcome notification to the user
-        const welcomeNotification = await sendWelcomeNotification(user);
-        console.log(
-          'welcome notification sent for:',
-          event.data.email,
-          welcomeNotification?.result?.status,
-        );
+        await sendInAppNotification({ payload: novuPayload });
       });
     } else {
       console.log('User is not onboarded yet, skipping welcome notification');
       // notify to the team that a user has signed up but not onboarded yet, so they can reach out to them and help them onboard
+      const novuPayload = {
+        workflowType: 'skipped-onboarding' as WorkflowTypes,
+        user: user,
+      };
+      await sendInAppNotification({ payload: novuPayload });
     }
   },
 );
@@ -261,6 +273,81 @@ export const createChannelBetweenMatchedUsers = inngest.createFunction(
         `Match ${newMatchId} was not found; channel metadata was not persisted`,
       );
     }
+
+    await step.sleep('wait-for-find-the-match', '2s');
+    const matchedRow = await db.query.match.findFirst({
+      where(fields, { and, eq }) {
+        return and(
+          eq(fields.id, updatedMatches[0].id),
+          eq(fields.isActive, updatedMatches[0].isActive),
+        );
+      },
+      columns: { id: true, isActive: true },
+      with: {
+        user1: {
+          columns: {
+            id: true,
+            name: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            contactNumber: true,
+          },
+        },
+        user2: {
+          columns: {
+            id: true,
+            name: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            contactNumber: true,
+          },
+        },
+      },
+    });
+
+    if (!matchedRow) {
+      throw new NonRetriableError('No matched found for sending notification!');
+    }
+
+    await step.sleep('wait-for-sending-user-1', '2s');
+    // Send notification to user1
+    await step.run('send-match-notification-to-user1', async () => {
+      const novuPayload = {
+        workflowType: 'matched' as WorkflowTypes,
+        matched: {
+          userId: matchedRow.user1.id,
+          userName: matchedRow.user1.name,
+          userFirstName: matchedRow.user1.firstName,
+          userLastName: matchedRow.user1.lastName,
+          userEmail: matchedRow.user1.email,
+          userContactNumber: matchedRow.user1.contactNumber,
+          oppositeUserName: matchedRow.user2.name,
+        },
+      };
+
+      await sendInAppNotification({ payload: novuPayload });
+    });
+
+    await step.sleep('wait-for-sending-user-2', '2s');
+    // Send notification to user2
+    await step.run('send-match-notification-to-user2', async () => {
+      const novuPayload = {
+        workflowType: 'matched' as WorkflowTypes,
+        matched: {
+          userId: matchedRow.user2.id,
+          userName: matchedRow.user2.name,
+          userFirstName: matchedRow.user2.firstName,
+          userLastName: matchedRow.user2.lastName,
+          userEmail: matchedRow.user2.email,
+          userContactNumber: matchedRow.user2.contactNumber,
+          oppositeUserName: matchedRow.user1.name,
+        },
+      };
+
+      await sendInAppNotification({ payload: novuPayload });
+    });
 
     return {
       success: true,
@@ -336,8 +423,8 @@ export const userCreated = inngest.createFunction(
         .update(user)
         .set({
           chatToken: streamResult.token,
-          chatTokenExpireAt: new Date(streamResult.expireTime * 1000),
-          chatTokenIssuedAt: new Date(streamResult.issuedAt * 1000),
+          chatTokenExpireAt: new Date(streamResult.expireTime! * 1000),
+          chatTokenIssuedAt: new Date(streamResult.issuedAt! * 1000),
         })
         .where(eq(user.id, newUser.user.id));
     });

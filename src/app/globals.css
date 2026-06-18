@@ -270,3 +270,7 @@
   background-color: var(--background) !important;
   border-radius: 50px !important;
 }
+
+.nv-popoverContent > .nv-inboxContent > div:last-child{
+  display: none !important;
+}
