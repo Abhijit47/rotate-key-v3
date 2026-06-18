@@ -65,13 +65,14 @@ export default function NotificationInbox({
   const { mutateAsync: rejectSwapAsync } = useRejectSwap();
 
   // TODO: will handle check properly later
-  if (subscriberHash && subscriberHash == null) return null;
+  // if (subscriberHash && subscriberHash == null) return null;
+  if (!subscriberHash?.length) return null;
 
   return (
     <Inbox
       applicationIdentifier={env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER}
       subscriber={userId}
-      subscriberHash={subscriberHash!}
+      subscriberHash={subscriberHash}
       routerPush={(path: string) => router.push(path as Route)}
       onNotificationClick={(notification) => {
         // your logic to handle notification click

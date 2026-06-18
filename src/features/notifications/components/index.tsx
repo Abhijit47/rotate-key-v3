@@ -318,7 +318,9 @@ export function NotificationsList() {
     return () => observer.disconnect();
   }, [hasMore, isLoading, fetchMore]);
 
-  if (isLoading || !notifications)
+  if (error) return <div>Error: {error.message}</div>;
+
+  if (!notifications && isLoading)
     return (
       <>
         {Array.from({ length: 5 }).map((_, idx) => (
@@ -326,7 +328,8 @@ export function NotificationsList() {
         ))}
       </>
     );
-  if (error) return <div>Error: {error.message}</div>;
+
+  if (!notifications) return null;
 
   return (
     <>
@@ -528,7 +531,7 @@ export function NotificationItem({
 
         {/* Stay way these button from Link */}
         {/* Here is one problem check the sampleNotifications data above which notifications have no key "primaryAction", "secondaryAction" those time button print in UI but no text, maybe below checks are not working as expected*/}
-        {'primaryAction' && 'secondaryAction' in notification ? (
+        {notification.primaryAction && notification.secondaryAction ? (
           <CardAction className='justify-self-start space-x-2'>
             <Button
               size={'xs'}
@@ -547,7 +550,7 @@ export function NotificationItem({
               {notification.secondaryAction?.label}
             </Button>
           </CardAction>
-        ) : 'primaryAction' in notification ? (
+        ) : notification.primaryAction ? (
           <Button
             size={'xs'}
             variant={'default'}

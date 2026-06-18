@@ -12,8 +12,16 @@ export function sleep(ms: number) {
 export function formatMarkdownText(text?: string): string {
   if (!text) return '';
 
+  // Escaped Special Character
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&`#39`;');
+
   // Replace ***text*** with bold + italic
-  let formatted = text.replace(
+  let formatted = escaped.replace(
     /\*\*\*(.*?)\*\*\*/g,
     '<strong><em>$1</em></strong>',
   );
