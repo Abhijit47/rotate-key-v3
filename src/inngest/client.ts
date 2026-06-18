@@ -1,6 +1,7 @@
+import { EventSchemas, Inngest } from 'inngest';
+
 import { ServerSession } from '@/lib/auth';
 import { CreateUserValues } from '@/lib/validators/admin-schemas';
-import { EventSchemas, Inngest } from 'inngest';
 
 type UserSignup = {
   data: ServerSession['user'];

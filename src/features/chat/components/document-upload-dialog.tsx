@@ -130,7 +130,7 @@ export default function DocumentUploadAlertDialog() {
       descriptionClassName: 'text-[10px]',
       success: (data) => {
         setUrl(data?.url);
-        onOpenDocumentDialog(true);
+        // onOpenDocumentDialog(true);
         return 'Document uploaded successfully!';
       },
       error: (err) => {
@@ -190,7 +190,15 @@ export default function DocumentUploadAlertDialog() {
   return (
     <AlertDialog
       open={isOpenDocumentDialog && !hasDocumentMessageFromCurrentUser}
-      onOpenChange={onOpenDocumentDialog}>
+      onOpenChange={() => {
+        // preventing to close the dialog
+        if (isPending) {
+          onOpenDocumentDialog(false);
+        } else {
+          onOpenDocumentDialog(true);
+        }
+      }}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
@@ -231,7 +239,8 @@ export default function DocumentUploadAlertDialog() {
             accept={ACCEPT_FILE_TYPE}
             maxFiles={1}
             className='w-full max-w-md mx-auto'
-            multiple={false}>
+            multiple={false}
+          >
             <FileUploadDropzone>
               <div className='flex flex-col items-center gap-1 text-center'>
                 <div className='flex items-center justify-center rounded-full border p-2.5'>
@@ -266,7 +275,7 @@ export default function DocumentUploadAlertDialog() {
           </FileUpload>
 
           <AlertDialogFooter>
-            {url === undefined ? (
+            {!url ? (
               <>
                 <AlertDialogCancel type='button' disabled={isPending}>
                   Cancel
@@ -278,7 +287,8 @@ export default function DocumentUploadAlertDialog() {
             ) : (
               <AlertDialogAction
                 type='button'
-                onClick={(ev) => handleContinue(ev)}>
+                onClick={(ev) => handleContinue(ev)}
+              >
                 Continue
               </AlertDialogAction>
             )}
