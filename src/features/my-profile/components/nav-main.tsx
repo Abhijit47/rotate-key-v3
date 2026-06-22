@@ -2,6 +2,8 @@
 
 import { type Icon } from '@tabler/icons-react';
 import { Route } from 'next';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import { Separator } from '@/components/ui/separator';
 import {
@@ -12,8 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Hint from '@/components/shared/link-hint';
 
 export function NavMain({
   items,
@@ -54,10 +55,17 @@ export function NavMain({
               <SidebarMenuButton
                 tooltip={item.title}
                 asChild
-                isActive={pathname === item.url}>
-                <Link href={item.url as Route}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
+                isActive={pathname === item.url}
+              >
+                <Link
+                  href={item.url as Route}
+                  className='flex items-center justify-between'
+                >
+                  <span className='inline-flex items-center gap-1'>
+                    {item.icon && <item.icon className='size-4' />}
+                    <span>{item.title}</span>
+                  </span>
+                  <Hint />
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

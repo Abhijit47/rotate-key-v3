@@ -274,3 +274,52 @@
 .nv-popoverContent > .nv-inboxContent > div:last-child{
   display: none !important;
 }
+
+.react-pdf__Document > .react-pdf__Page > .react-pdf__Page__canvas {
+  @apply w-100! h-125! mx-auto! rounded-lg!
+}
+
+.react-pdf__Document >.react-pdf__Page > .react-pdf__Page__textContent{
+  @apply w-100! h-125! mx-auto! rounded-lg!
+}
+
+.react-pdf__Document > .react-pdf__Page > .react-pdf__Page__annotations{
+  @apply w-100! h-125! mx-auto! rounded-lg!
+}
+
+.link-hint {
+  display: inline-block;
+  width: 0.6em;
+  height: 0.6em;
+  margin-left: 0.25rem;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0;
+  visibility: hidden;
+  /* reserve space without showing the hint */
+}
+
+.link-hint.is-pending {
+  /* Animation 1: fade in after 100ms and keep final opacity */
+  /* Animation 2: subtle pulsing while pending */
+  visibility: visible;
+  animation-name: fadeIn, pulse;
+  animation-duration: 200ms, 1s;
+  /* Appear only if navigation actually takes time */
+  animation-delay: 100ms, 100ms;
+  animation-timing-function: ease, ease-in-out;
+  animation-iteration-count: 1, infinite;
+  animation-fill-mode: forwards, none;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 0.35;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.15;
+  }
+}

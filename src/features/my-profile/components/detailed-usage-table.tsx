@@ -16,7 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 export interface UsageResource {
   name: string;
@@ -39,21 +41,31 @@ export function DetailedUsageTable({
   description,
   resources,
 }: DetailedUsageTableProps) {
+  const [progress, setProgress] = useState(13);
+
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat().format(num);
   };
 
   const getPercentageBar = (percentage: number) => {
-    let bgColor = 'bg-emerald-500';
+    let bgColor = 'bg-lime-500';
     if (percentage >= 90) bgColor = 'bg-destructive';
     else if (percentage >= 75) bgColor = 'bg-orange-500';
 
     return (
       <div className='flex min-w-30 items-center gap-2'>
         <div className='bg-secondary h-2 flex-1 rounded-full'>
-          <div
+          {/* <div
             className={cn('h-2 rounded-full transition-all', bgColor)}
             style={{ width: `${Math.max(0, Math.min(percentage, 100))}%` }}
+          /> */}
+          <Progress
+            value={Math.max(0, Math.min(percentage, 100))}
+            className={cn(
+              `w-[${Math.max(0, Math.min(percentage, 100))}%`,
+              bgColor,
+              'h-2 rounded-full transition-all',
+            )}
           />
         </div>
         <span className='w-10 text-right text-xs font-medium tabular-nums'>
@@ -88,7 +100,8 @@ export function DetailedUsageTable({
                 <TableRow>
                   <TableCell
                     colSpan={4}
-                    className='text-muted-foreground h-24 text-center'>
+                    className='text-muted-foreground h-24 text-center'
+                  >
                     No resources found
                   </TableCell>
                 </TableRow>

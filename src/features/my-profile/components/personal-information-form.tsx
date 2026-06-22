@@ -1,6 +1,19 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { IconReload } from '@tabler/icons-react';
+import {
+  Controller,
+  FormProvider,
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
+import { toast } from 'sonner';
+import Image from 'next/image';
+import { TRPCClientError } from '@trpc/client';
+import { useRouter } from 'next/navigation';
+
 import { Button } from '@/components/ui/button';
 import {
   Field,
@@ -9,6 +22,7 @@ import {
   FieldLegend,
   FieldSeparator,
   FieldSet,
+  FieldError,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
@@ -18,165 +32,356 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectLabel,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { IconTrashX, IconUpload } from '@tabler/icons-react';
-import { SubmitErrorHandler, SubmitHandler, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import z from 'zod';
+import { useCountries } from '../hooks/use-countries';
+import {
+  personalInformationSchema,
+  type PersonalInformationClientValues,
+} from '@/lib/validators/profile-schemas';
+import { AvatarUpload } from './avatar-upload';
+import { ClientSession } from '@/lib/auth-client';
+import { useUpdatePersonalInformation } from '@/features/users/hooks/use-user';
 
-const personalInformationForm = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-  languagePreference: z
-    .array(z.string())
-    .min(1, 'Select at least one language'),
-  country: z.string().min(1, 'Country is required'),
-  about: z.string().max(500, 'About me must be less than 500 characters'),
-});
+const languages = {
+  'ar-SA': 'Arabic (Saudi Arabia)',
+  'bn-BD': 'Bangla (Bangladesh)',
+  'bn-IN': 'Bangla (India)',
+  'cs-CZ': 'Czech (Czech Republic)',
+  'da-DK': 'Danish (Denmark)',
+  'de-AT': 'Austrian German',
+  'de-CH': '"Swiss" German',
+  'de-DE': 'Standard German (as spoken in Germany)',
+  'el-GR': 'Modern Greek',
+  'en-AU': 'Australian English',
+  'en-CA': 'Canadian English',
+  'en-GB': 'British English',
+  'en-IE': 'Irish English',
+  'en-IN': 'Indian English',
+  'en-NZ': 'New Zealand English',
+  'en-US': 'US English',
+  'en-ZA': 'English (South Africa)',
+  'es-AR': 'Argentine Spanish',
+  'es-CL': 'Chilean Spanish',
+  'es-CO': 'Colombian Spanish',
+  'es-ES': 'Castilian Spanish (as spoken in Central-Northern Spain)',
+  'es-MX': 'Mexican Spanish',
+  'es-US': 'American Spanish',
+  'fi-FI': 'Finnish (Finland)',
+  'fr-BE': 'Belgian French',
+  'fr-CA': 'Canadian French',
+  'fr-CH': '"Swiss" French',
+  'fr-FR': 'Standard French (especially in France)',
+  'he-IL': 'Hebrew (Israel)',
+  'hi-IN': 'Hindi (India)',
+  'hu-HU': 'Hungarian (Hungary)',
+  'id-ID': 'Indonesian (Indonesia)',
+  'it-CH': '"Swiss" Italian',
+  'it-IT': 'Standard Italian (as spoken in Italy)',
+  'ja-JP': 'Japanese (Japan)',
+  'ko-KR': 'Korean (Republic of Korea)',
+  'nl-BE': 'Belgian Dutch',
+  'nl-NL': 'Standard Dutch (as spoken in The Netherlands)',
+  'no-NO': 'Norwegian (Norway)',
+  'pl-PL': 'Polish (Poland)',
+  'pt-BR': 'Brazilian Portuguese',
+  'pt-PT': 'European Portuguese (as written and spoken in Portugal)',
+  'ro-RO': 'Romanian (Romania)',
+  'ru-RU': 'Russian (Russian Federation)',
+  'sk-SK': 'Slovak (Slovakia)',
+  'sv-SE': 'Swedish (Sweden)',
+  'ta-IN': 'Indian Tamil',
+  'ta-LK': 'Sri Lankan Tamil',
+  'th-TH': 'Thai (Thailand)',
+  'tr-TR': 'Turkish (Turkey)',
+  'zh-CN': 'Mainland China, simplified characters',
+  'zh-HK': 'Hong Kong, traditional characters',
+  'zh-TW': 'Taiwan, traditional characters',
+};
 
-type PersonalInformationValues = z.infer<typeof personalInformationForm>;
+type PersonalInformationFormProps = {
+  personalInformation: Pick<
+    ClientSession['user'],
+    | 'name'
+    | 'firstName'
+    | 'lastName'
+    | 'image'
+    | 'spokenLanguages'
+    | 'country'
+    | 'aboutMe'
+  >;
+};
 
-export default function PersonalInformationForm() {
-  const form = useForm<PersonalInformationValues>({
-    resolver: zodResolver(personalInformationForm),
+export default function PersonalInformationForm(
+  props: PersonalInformationFormProps,
+) {
+  const { personalInformation } = props;
+  const router = useRouter();
+  const countries = useCountries();
+  const { mutateAsync, isPending } = useUpdatePersonalInformation();
+
+  const form = useForm<PersonalInformationClientValues>({
+    resolver: zodResolver(personalInformationSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      languagePreference: [],
-      country: '',
-      about: '',
+      firstName: personalInformation.firstName,
+      lastName: personalInformation.lastName,
+      spokenLanguages: personalInformation.spokenLanguages,
+      country: personalInformation.country,
+      about: personalInformation.aboutMe,
     },
+    mode: 'onChange',
   });
 
-  const onError: SubmitErrorHandler<PersonalInformationValues> = (errors) => {
+  const onError: SubmitErrorHandler<PersonalInformationClientValues> = (
+    errors,
+  ) => {
     // console.log('Form errors:', errors);
     Object.keys(errors).forEach((field) => {
-      const error = errors[field as keyof PersonalInformationValues];
+      const error = errors[field as keyof PersonalInformationClientValues];
       if (error) {
         toast.error(error.message);
       }
     });
+    return;
   };
 
-  const onSubmit: SubmitHandler<PersonalInformationValues> = (data) => {
-    console.log('Form data:', data);
-    toast.success('Personal information saved successfully!');
+  const onSubmit: SubmitHandler<PersonalInformationClientValues> = (values) => {
+    toast.promise(mutateAsync({ ...values }), {
+      description: 'Sit back, and relax',
+      descriptionClassName: 'text-[10px]',
+      loading: 'Processing...',
+      success: () => {
+        router.refresh();
+        return 'Personal information updated successfully.';
+      },
+      error: (err) => {
+        if (err instanceof TRPCClientError) {
+          return err.message;
+        }
+        return 'Failed to update personal information';
+      },
+    });
   };
 
   return (
-    <div className='w-full h-full'>
-      <form onSubmit={form.handleSubmit(onSubmit, onError)}>
-        <FieldSet className={'gap-3'}>
-          <FieldLegend>Personal Information</FieldLegend>
-          <FieldSeparator />
+    <FormProvider {...form}>
+      <div className='w-full h-full'>
+        <form onSubmit={form.handleSubmit(onSubmit, onError)}>
+          <FieldSet className={'gap-2'} disabled={isPending}>
+            <FieldLegend>Personal Information</FieldLegend>
+            <FieldSeparator />
 
-          <FieldGroup className={'grid grid-cols-2 gap-4'}>
-            <div className={'flex items-center justify-center gap-6'}>
-              <div className={'size-30'}>
-                <Avatar className={'w-full h-full rounded-full'}>
-                  <AvatarImage
-                    src='https://github.com/shadcn.png'
-                    className={'w-full h-full rounded-full '}
-                  />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-              </div>
+            <FieldGroup className={'grid grid-cols-2 gap-4'}>
+              {/* Separate avatar upload not inclued in this form */}
+              <AvatarUpload personalInformation={personalInformation} />
 
-              <div className={'flex flex-col gap-4'}>
-                <Button variant='outline' size={'sm'} type='button'>
-                  <IconUpload className='size-4' />
-                  Edit or Upload
-                </Button>
-                <Button variant='outline' size={'sm'} type='button'>
-                  <IconTrashX className='size-4' />
-                  Remove
-                </Button>
-              </div>
+              <FieldGroup className={'gap-2'}>
+                <Controller
+                  name='firstName'
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      className='gap-2'
+                      data-invalid={fieldState.invalid}
+                      aria-invalid={fieldState.invalid}
+                    >
+                      <FieldLabel htmlFor='firstName'>First Name</FieldLabel>
+                      <Input
+                        id='firstName'
+                        placeholder='Evil'
+                        {...field}
+                        value={field?.value?.length ? field.value : ''}
+                        onChange={field.onChange}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError
+                          className='text-xs'
+                          errors={[fieldState.error]}
+                        />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name='lastName'
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      className='gap-2'
+                      data-invalid={fieldState.invalid}
+                      aria-invalid={fieldState.invalid}
+                    >
+                      <FieldLabel htmlFor='lastName'>Last Name</FieldLabel>
+                      <Input
+                        id='lastName'
+                        placeholder='Rabbit'
+                        aria-invalid={fieldState.invalid}
+                        {...field}
+                        value={field?.value?.length ? field.value : ''}
+                        onChange={field.onChange}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError
+                          className='text-xs'
+                          errors={[fieldState.error]}
+                        />
+                      )}
+                    </Field>
+                  )}
+                />
+              </FieldGroup>
+            </FieldGroup>
+
+            <div className='grid grid-cols-2 gap-4'>
+              <Controller
+                name='spokenLanguages'
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field
+                    className='gap-2'
+                    data-invalid={fieldState.invalid}
+                    aria-invalid={fieldState.invalid}
+                  >
+                    <FieldLabel htmlFor='spokenLanguages'>
+                      Spoken Languages
+                    </FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field?.value?.length ? field.value[0] : ''}
+                      onValueChange={(e) => field.onChange([e])}
+                    >
+                      <SelectTrigger
+                        id='spokenLanguages'
+                        aria-invalid={fieldState.invalid}
+                      >
+                        <SelectValue placeholder='Ex. Hindi(India)' />
+                      </SelectTrigger>
+                      <SelectContent id='spokenLanguages'>
+                        <SelectGroup>
+                          <SelectLabel>Preferred language</SelectLabel>
+                          {Object.entries(languages).map(([key, value]) => {
+                            return (
+                              <SelectItem key={key} value={key}>
+                                {value}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+
+                    {fieldState.invalid && (
+                      <FieldError
+                        className='text-xs'
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name='country'
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field
+                    className='gap-2'
+                    data-invalid={fieldState.invalid}
+                    aria-invalid={fieldState.invalid}
+                  >
+                    <FieldLabel htmlFor='country'>Country</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field?.value?.length ? field.value : ''}
+                      onValueChange={(e) => field.onChange(e)}
+                    >
+                      <SelectTrigger
+                        id='country'
+                        aria-invalid={fieldState.invalid}
+                      >
+                        <SelectValue placeholder='India' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Choose a country</SelectLabel>
+                          {countries.map((country) => {
+                            return (
+                              <SelectItem
+                                key={country.iso2}
+                                value={country.name}
+                              >
+                                <Image
+                                  src={country.flag}
+                                  alt={country.name}
+                                  height={32}
+                                  width={32}
+                                  className='size-4 rounded-full'
+                                />
+                                {country.name} ({country.native})
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError
+                        className='text-xs'
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
             </div>
 
-            <FieldGroup className={'gap-2'}>
-              <Field>
-                <FieldLabel htmlFor='firstName'>First Name</FieldLabel>
-                <Input id='firstName' placeholder='Evil' required />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor='lastName'>Last Name</FieldLabel>
-                <Input id='lastName' placeholder='Rabbit' required />
-              </Field>
-            </FieldGroup>
-          </FieldGroup>
-
-          <div className='grid grid-cols-2 gap-4'>
-            <Field>
-              <FieldLabel htmlFor='checkout-exp-month-ts6'>
-                Language Preference
-              </FieldLabel>
-              <Select defaultValue=''>
-                <SelectTrigger id='checkout-exp-month-ts6'>
-                  <SelectValue placeholder='MM' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value='01'>01</SelectItem>
-                    <SelectItem value='02'>02</SelectItem>
-                    <SelectItem value='03'>03</SelectItem>
-                    <SelectItem value='04'>04</SelectItem>
-                    <SelectItem value='05'>05</SelectItem>
-                    <SelectItem value='06'>06</SelectItem>
-                    <SelectItem value='07'>07</SelectItem>
-                    <SelectItem value='08'>08</SelectItem>
-                    <SelectItem value='09'>09</SelectItem>
-                    <SelectItem value='10'>10</SelectItem>
-                    <SelectItem value='11'>11</SelectItem>
-                    <SelectItem value='12'>12</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor='checkout-7j9-exp-year-f59'>
-                Country
-              </FieldLabel>
-              <Select defaultValue=''>
-                <SelectTrigger id='checkout-7j9-exp-year-f59'>
-                  <SelectValue placeholder='YYYY' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value='2024'>2024</SelectItem>
-                    <SelectItem value='2025'>2025</SelectItem>
-                    <SelectItem value='2026'>2026</SelectItem>
-                    <SelectItem value='2027'>2027</SelectItem>
-                    <SelectItem value='2028'>2028</SelectItem>
-                    <SelectItem value='2029'>2029</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-          </div>
-
-          <Field>
-            <FieldLabel htmlFor='about'>About me</FieldLabel>
-            <Textarea
-              id='about'
-              placeholder='Write a short description about yourself...'
-              className='resize-none min-h-30'
+            <Controller
+              name='about'
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field
+                  className='gap-2'
+                  data-invalid={fieldState.invalid}
+                  aria-invalid={fieldState.invalid}
+                >
+                  <FieldLabel htmlFor='about'>About me</FieldLabel>
+                  <Textarea
+                    id='about'
+                    placeholder='Write a short description about yourself...'
+                    className='resize-y min-h-22'
+                    {...field}
+                    value={field?.value?.length ? field.value : ''}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError
+                      className='text-xs'
+                      errors={[fieldState.error]}
+                    />
+                  )}
+                </Field>
+              )}
             />
-          </Field>
-          <FieldSeparator />
 
-          <Field orientation='horizontal' className='justify-end gap-2'>
-            <Button type='submit' size={'sm'}>
-              Save
-            </Button>
-            <Button variant='outline' type='button' size={'sm'}>
-              Cancel
-            </Button>
-          </Field>
-        </FieldSet>
-      </form>
-    </div>
+            <FieldSeparator />
+
+            <Field orientation='horizontal' className='justify-end gap-2'>
+              <Button type='submit' size={'sm'} disabled={isPending}>
+                {isPending ? 'Updating...' : 'Update'}
+              </Button>
+              <Button
+                variant='outline'
+                type='button'
+                size={'sm'}
+                disabled={isPending}
+              >
+                Cancel
+              </Button>
+            </Field>
+          </FieldSet>
+        </form>
+      </div>
+    </FormProvider>
   );
 }

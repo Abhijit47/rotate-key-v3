@@ -29,6 +29,7 @@ import { NavMain } from './nav-main';
 import NavPropertyHold from './nav-property-hold';
 import NavRecentlyLiked from './nav-recently-liked';
 import { NavUser } from './nav-user';
+import { useSession } from '@/lib/auth-client';
 
 type ProfileLink = {
   navMain: {
@@ -156,11 +157,9 @@ const profileLinks: ProfileLink = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const user = {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  };
+  const { data } = useSession();
+
+  const userImage = data?.user ? `${data.user.image}` : `/api/avatar?name`;
 
   return (
     <Sidebar collapsible='offcanvas' {...props}>
@@ -171,10 +170,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuButton className='data-[slot=sidebar-menu-button]:p-1.5! h-full w-full rounded-full border! border-card! relative!'>
                 <Avatar className={'w-full h-full rounded-full'}>
                   <AvatarImage
-                    src='https://github.com/shadcn.png'
+                    src={userImage ?? '/api/avatar?name'}
                     className={'w-full h-full rounded-full '}
                   />
-                  <AvatarFallback>CN</AvatarFallback>
+                  <AvatarFallback>{data?.user.name}</AvatarFallback>
                 </Avatar>
                 <IconChessKing
                   className={
@@ -200,7 +199,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <Separator />
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );
