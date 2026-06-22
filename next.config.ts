@@ -24,9 +24,9 @@ const nextConfig: NextConfig = {
 
   images: {
     localPatterns: [
-      // {
-      //   pathname: '/assets/**',
-      // },
+      {
+        pathname: '/swaping/**',
+      },
       {
         pathname: '/api/avatar/**',
         // search is omitted, so ?v=123, ?t=456, or no query string are all allowed

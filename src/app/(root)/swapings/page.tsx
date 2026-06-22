@@ -1,9 +1,15 @@
-import { PropertyListings } from '@/features/property/components/property-listings';
+import { Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+
+import {
+  PropertyListings,
+  SwappingBanner,
+  SwappingCarousel,
+  SwappingFilterByType,
+} from '@/features/property/components/property-listings';
 import { prefetchPublicProperties } from '@/features/property/server/prefetch';
 import { requireAuth } from '@/lib/requireAuth';
 import { HydrateClient } from '@/trpc/server';
-import { Suspense } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 
 export default async function Swapings() {
   await requireAuth();
@@ -12,14 +18,20 @@ export default async function Swapings() {
   return (
     <HydrateClient>
       <ErrorBoundary
-        fallback={<div>Something went wrong loading the properties.</div>}>
+        fallback={<div>Something went wrong loading the properties.</div>}
+      >
         <main
           className={
             'max-w-(--breakpoint-xl) mx-auto px-4 2xl:px-0 space-y-8 py-8'
-          }>
+          }
+        >
+          <SwappingBanner />
+
           <section>
-            <h1 className={'text-3xl font-bold mb-4'}>Swapings</h1>
+            <SwappingFilterByType />
           </section>
+
+          <SwappingCarousel />
 
           <section>
             <Suspense fallback={<div>Loading Listings...</div>}>

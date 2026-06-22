@@ -1,6 +1,8 @@
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { type Metadata } from 'next';
+
 import Footer from '@/components/shared/footer';
 import Header from '@/components/shared/header';
-import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Root Layout',
@@ -15,7 +17,7 @@ export default function RootLayout({
   return (
     <>
       <Header />
-      {children}
+      <NuqsAdapter>{children}</NuqsAdapter>
       <Footer />
     </>
   );
