@@ -10,6 +10,7 @@ import { baseProcedure, createTRPCRouter } from '../init';
 import { swapRouter } from '@/features/swap/server/routers';
 import { engagementRouter } from '@/features/engagement/server/routers';
 import { reviewRouter } from '@/features/reviews/server/routers';
+import { userRouter } from '@/features/users/server/routers';
 
 export const appRouter = createTRPCRouter({
   hello: baseProcedure
@@ -38,6 +39,7 @@ export const appRouter = createTRPCRouter({
 
   auth: authRouter,
   admin: adminRouter,
+  user: userRouter,
   property: propertyRouter,
   chat: chatRouter,
   booking: bookingRouter,

@@ -650,9 +650,11 @@ function FileUpload(props: FileUploadProps) {
           data-slot='file-upload'
           dir={dir}
           {...rootProps}
-          className={cn('relative flex flex-col gap-2', className)}>
+          className={cn('relative flex flex-col gap-2', className)}
+        >
           {children}
           <input
+            title='file-upload'
             type='file'
             id={inputId}
             aria-labelledby={labelId}
@@ -1046,7 +1048,8 @@ function FileUploadItem(props: FileUploadItemProps) {
         className={cn(
           'relative flex items-center gap-2.5 rounded-md border p-3',
           className,
-        )}>
+        )}
+      >
         {props.children}
         <span id={statusId} className='sr-only'>
           {statusText}
@@ -1110,7 +1113,8 @@ function FileUploadItemPreview(props: FileUploadItemPreviewProps) {
       className={cn(
         'relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded border bg-accent/50 [&>svg]:size-10',
         className,
-      )}>
+      )}
+    >
       {onPreviewRender(itemContext.fileState.file)}
       {children}
     </ItemPreviewPrimitive>
@@ -1143,7 +1147,8 @@ function FileUploadItemMetadata(props: FileUploadItemMetadataProps) {
       data-slot='file-upload-metadata'
       dir={context.dir}
       {...metadataProps}
-      className={cn('flex min-w-0 flex-1 flex-col', className)}>
+      className={cn('flex min-w-0 flex-1 flex-col', className)}
+    >
       {children ?? (
         <>
           <span
@@ -1151,7 +1156,8 @@ function FileUploadItemMetadata(props: FileUploadItemMetadataProps) {
             className={cn(
               'truncate font-medium text-sm',
               size === 'sm' && 'font-normal text-[13px] leading-snug',
-            )}>
+            )}
+          >
             {itemContext.fileState.file.name}
           </span>
           <span
@@ -1159,13 +1165,15 @@ function FileUploadItemMetadata(props: FileUploadItemMetadataProps) {
             className={cn(
               'truncate text-muted-foreground text-xs',
               size === 'sm' && 'text-[11px] leading-snug',
-            )}>
+            )}
+          >
             {formatBytes(itemContext.fileState.file.size)}
           </span>
           {itemContext.fileState.error && (
             <span
               id={itemContext.messageId}
-              className='text-destructive text-xs'>
+              className='text-destructive text-xs'
+            >
               {itemContext.fileState.error}
             </span>
           )}
@@ -1220,14 +1228,16 @@ function FileUploadItemProgress(props: FileUploadItemProgressProps) {
           className={cn(
             'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
             className,
-          )}>
+          )}
+        >
           <svg
             className='-rotate-90 transform'
             width={size}
             height={size}
             viewBox={`0 0 ${size} ${size}`}
             fill='none'
-            stroke='currentColor'>
+            stroke='currentColor'
+          >
             <circle
               className='text-primary/20'
               strokeWidth='2'
@@ -1289,7 +1299,8 @@ function FileUploadItemProgress(props: FileUploadItemProgressProps) {
           className={cn(
             'relative h-1.5 w-full overflow-hidden rounded-full bg-primary/20',
             className,
-          )}>
+          )}
+        >
           <div
             className='h-full w-full flex-1 bg-primary transition-transform duration-300 ease-linear'
             style={{

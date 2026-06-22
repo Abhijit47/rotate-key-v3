@@ -15,6 +15,7 @@ const publicRoutes: Route[] = [
 // API routes that should always be accessible (no redirects)
 const publicAPIRoutes = [
   '/api/auth',
+  '/api/novu',
   '/api/trpc',
   '/api/signup',
   '/api/hello',
@@ -30,9 +31,9 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // api/novu is a public API route, so we should allow it to be accessed without authentication
-  if (pathname === '/api/novu' || pathname.startsWith('/api/novu/')) {
-    return NextResponse.next();
-  }
+  // if (pathname === '/api/novu' || pathname.startsWith('/api/novu/')) {
+  //   return NextResponse.next();
+  // }
   // CRITICAL: Never redirect API calls - they need to return proper responses
   const isPublicAPI = publicAPIRoutes.some((route) =>
     pathname.startsWith(route),
@@ -48,20 +49,24 @@ export async function proxy(request: NextRequest) {
   );
 
   // If no session and trying to access protected route, redirect to login
-  // if (!sessionCookie && !isPublicRoute) {
-  //   const loginUrl = new URL('/login', request.url);
-  //   // Store the attempted URL to redirect back after login
-  //   loginUrl.searchParams.set('callbackUrl', pathname);
-  //   return NextResponse.redirect(loginUrl);
-  // }
+  if (!sessionCookie && !isPublicRoute) {
+    const loginUrl = new URL('/login', request.nextUrl);
+    // Store the attempted URL to redirect back after login
+    loginUrl.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
 
+  // Should not Re-Open Routes after SignUp/login
   // If has session and trying to access auth pages, redirect to home
-  // if (sessionCookie && ['/login', '/sign-up'].includes(pathname)) {
-  //   return NextResponse.redirect(new URL('/login', request.url));
-  // }
+  if (
+    sessionCookie &&
+    ['/login', '/sign-up', 'onboarding'].includes(pathname)
+  ) {
+    return NextResponse.redirect(new URL('/', request.nextUrl));
+  }
 
   // if (!sessionCookie) {
-  //   return NextResponse.redirect(new URL('/sign-up', request.url));
+  //   return NextResponse.redirect(new URL('/login', request.url));
   // }
 
   return NextResponse.next();
@@ -71,8 +76,11 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/dashboard/:path*',
+    '/my-profile/:path*',
     '/profile/:path*',
     '/settings/:path*',
+    '/notifications/:path*',
+    '/swapings/:path*',
 
     // Always run for API routes
     // '/(api|trpc)(.*)',

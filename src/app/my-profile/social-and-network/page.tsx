@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import Image from 'next/image';
+
 import {
   Card,
   CardContent,
@@ -5,11 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import ProfileRadialChart from '@/features/my-profile/components/profile-radial-chart';
-
-import Image from 'next/image';
-
-import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Item,
   ItemContent,
@@ -18,14 +16,12 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/components/ui/item';
-import { Separator } from '@/components/ui/separator';
-import {
-  IconBrandFacebook,
-  IconBrandGoogle,
-  IconBrandLinkedin,
-  IconBrandX,
-} from '@tabler/icons-react';
-import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+
+import ProfileRadialChart from '@/features/my-profile/components/profile-radial-chart';
+import AddSocialLinks from '@/features/my-profile/components/add-social-links';
+import { Suspense } from 'react';
+import UserRecentListings from '@/features/my-profile/components/user-recent-listings';
 
 const music = [
   {
@@ -88,31 +84,7 @@ export default function SocialAndNetworkPage() {
       <div className='px-4 lg:px-6 space-y-6'>
         <div className={'grid grid-cols-12 gap-4'}>
           <div className={'col-span-full lg:col-span-8'}>
-            <Card className={'gap-3 py-4 h-full'}>
-              <CardHeader>
-                <CardTitle>Social and Network</CardTitle>
-              </CardHeader>
-              <Separator />
-              <CardContent
-                className={'space-y-4 h-full flex flex-col justify-center'}>
-                <Button variant={'outline'} className={'w-full'}>
-                  <IconBrandGoogle className={'size-4'} />
-                  Sign in with Google
-                </Button>
-                <Button variant={'outline'} className={'w-full'}>
-                  <IconBrandFacebook className={'size-4'} />
-                  Sign in with Facebook
-                </Button>
-                <Button variant={'outline'} className={'w-full'}>
-                  <IconBrandX className={'size-4'} />
-                  Sign in with Twitter/X
-                </Button>
-                <Button variant={'outline'} className={'w-full'}>
-                  <IconBrandLinkedin className={'size-4'} />
-                  Sign in with LinkedIn
-                </Button>
-              </CardContent>
-            </Card>
+            <AddSocialLinks />
           </div>
           <div className={'col-span-full lg:col-span-4'}>
             <ProfileRadialChart />
@@ -120,7 +92,7 @@ export default function SocialAndNetworkPage() {
         </div>
         <div className={'grid grid-cols-12'}>
           <div className={'col-span-full'}>
-            <Card className={'gap-3 py-4'}>
+            {/* <Card className={'gap-3 py-4'}>
               <CardHeader>
                 <CardTitle>Recent Listening</CardTitle>
               </CardHeader>
@@ -134,11 +106,15 @@ export default function SocialAndNetworkPage() {
                     variant: 'link',
                     size: 'sm',
                     className: 'w-full',
-                  })}>
+                  })}
+                >
                   View More
                 </Link>
               </CardFooter>
-            </Card>
+            </Card> */}
+            <Suspense fallback={<div>Loading...</div>}>
+              <UserRecentListings />
+            </Suspense>
           </div>
         </div>
       </div>

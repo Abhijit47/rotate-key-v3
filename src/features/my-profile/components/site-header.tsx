@@ -1,6 +1,16 @@
+'use client';
+
+import Link from 'next/link';
+
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import ThemeToggler from '../../common/components/theme-toggler';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+} from '@/components/ui/breadcrumb';
 
 export function SiteHeader() {
   return (
@@ -11,7 +21,15 @@ export function SiteHeader() {
           orientation='vertical'
           className='mx-2 data-[orientation=vertical]:h-4'
         />
-        <h1 className='text-base font-medium'>Home</h1>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href='/'> Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <div className='ml-auto flex items-center gap-2'>
           {/* <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
             <a

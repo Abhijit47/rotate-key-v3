@@ -34,3 +34,18 @@ export function formatMarkdownText(text?: string): string {
 
   return formatted;
 }
+
+export function generateBirthYears() {
+  const startYear = 1970;
+  const currentYear = new Date().getFullYear();
+  const length = currentYear - startYear + 1;
+
+  const years = Array.from({ length }, (_, i) => startYear + i);
+
+  const formatter = new Intl.DateTimeFormat('en-US', { year: 'numeric' });
+  const formattedYears = years.map((year) =>
+    formatter.format(new Date(year, 0, 1)),
+  );
+
+  return formattedYears;
+}

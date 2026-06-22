@@ -129,6 +129,7 @@ export const auth = betterAuth({
   account: {
     accountLinking: {
       enabled: true,
+      updateUserInfoOnLink: true,
       trustedProviders: ['facebook', 'google', 'email-password'], // Only allow linking accounts from these providers
     },
     storeStateStrategy: 'cookie',
