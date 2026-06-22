@@ -6,6 +6,6 @@ type UserInput = inferInput<typeof trpc.user.getProfileRatio>;
  * Prefetch Profile Completion Percentage
  * @param params
  */
-export function prefetchProfileCompletionPercentage(params: UserInput) {
+export function prefetchProfileCompletionPercentage(params?: UserInput) {
   return prefetch(trpc.user.getProfileRatio.queryOptions(params));
 }
