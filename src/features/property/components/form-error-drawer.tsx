@@ -138,7 +138,8 @@ export default function FormErrorDrawer() {
         <div className='bg-accent/50 mx-auto p-4 border-border border-dashed rounded-lg w-full max-w-lg'>
           <ul>
             {list.map((err) => (
-              <li key={crypto.randomUUID()} className='space-y-2'>
+              // <li key={crypto.randomUUID()} className='space-y-2'>
+              <li key={`${err.field}:${err.message}`} className='space-y-2'>
                 <strong className='text-destructive'>{err.field}</strong> :{' '}
                 <span className='text-foreground'>{err.message}</span>
               </li>

@@ -107,7 +107,7 @@ export default function CustomPopoverCommand(props: CustomPopoverCommandProps) {
                             // className='flex flex-row items-start space-x-2 space-y-1 py-2'
                             className='py-1'>
                             <Checkbox
-                              id={`${props.label ?? 'items'}-${item.id}`}
+                              id={`${props.label ?? 'items'}-${type.id}`}
                               checked={field.value?.includes(
                                 type.name.toLocaleLowerCase(),
                               )}

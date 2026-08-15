@@ -6,6 +6,7 @@ import {
   ZoomInIcon,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 import {
   formatBytes,
@@ -25,7 +26,6 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import { WizardValues } from '@/lib/validators/property-schemas';
-import { useFormContext } from 'react-hook-form';
 
 export default function Step10Form() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -90,10 +90,17 @@ export default function Step10Form() {
   function handleFilesChange(files: FileWithPreview[]) {
     console.log('Files changed:', files);
     // Update the form state with the new files
+
+    // TODO: upload File instances and store the returned remote URLs.
+
+    const urls = files
+      .map((f) => f.preview)
+      .filter((p): p is string => typeof p === 'string' && p.length > 0);
+
     form.setValue(
       'propertyImages',
-      ['https://picsum.photos/1000/800?random=1'],
-      { shouldValidate: true },
+      ['https://picsum.photos/1000/800?random=1', ...urls],
+      { shouldValidate: true, shouldDirty: true, shouldTouch: true },
     );
   }
 
@@ -229,7 +236,8 @@ export default function Step10Form() {
                   variant='secondary'
                   size='icon'
                   className='size-7'>
-                  <XIcon className='opacity-100/8' />
+                  {/* <XIcon className='opacity-100/8' /> */}
+                  <XIcon className='opacity-100/80' />
                 </Button>
               </div>
 

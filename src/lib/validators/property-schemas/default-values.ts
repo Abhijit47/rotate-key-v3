@@ -3,7 +3,7 @@ import { DefaultValues } from 'react-hook-form';
 
 import { WizardValues } from './index';
 
-const isDev = process.env.NODE_ENV !== 'development' ? true : false;
+const isDev = process.env.NODE_ENV !== 'development';
 
 const defaultValues: DefaultValues<WizardValues> = {
   region: { id: 999, name: '', flag: undefined },

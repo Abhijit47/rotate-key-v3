@@ -54,17 +54,24 @@ export function titleCaseSkipSpecial(str: string) {
   if (typeof str !== 'string') return '';
 
   // Split into tokens: words OR single special characters (/, -, &, etc.)
-  const parts = str.match(/[A-Za-z0-9]+|[^A-Za-z0-9\s]/g) || [];
-  return parts
-    .map((tok) => {
-      if (/^[A-Za-z0-9]+$/.test(tok)) {
-        // keep existing short words as normal; capitalize each word token
-        return tok.charAt(0).toUpperCase() + tok.slice(1).toLowerCase();
-      }
-      // punctuation / special chars kept as-is
-      return tok;
-    })
-    .join(' ');
+  // const parts = str.match(/[A-Za-z0-9]+|[^A-Za-z0-9\s]/g) || [];
+
+  // Preserve original whitespace and punctuation so we don't introduce spaces (e.g. "wi-fi" -> "Wi-Fi").
+  const parts = str.match(/[A-Za-z0-9]+|\s+|[^A-Za-z0-9\s]/g) || [];
+
+  return (
+    parts
+      .map((tok) => {
+        if (/^[A-Za-z0-9]+$/.test(tok)) {
+          // keep existing short words as normal; capitalize each word token
+          return tok.charAt(0).toUpperCase() + tok.slice(1).toLowerCase();
+        }
+        // punctuation / special chars kept as-is
+        return tok;
+      })
+      // .join(' ');
+      .join('')
+  );
 }
 
 // Examples:

@@ -47,7 +47,7 @@ export default function Step5Form() {
             <Input
               id={field.name}
               aria-invalid={fieldState.invalid}
-              placeholder='Jhon'
+              placeholder='John'
               autoComplete='name'
               {...field}
             />

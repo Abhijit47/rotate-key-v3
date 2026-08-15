@@ -287,8 +287,8 @@ const propertyOwnerPhone = z
   .optional()
   .superRefine((data, ctx) => {
     if (data) {
-      const phoneNumber = phoneUtil?.parse(data);
       try {
+        const phoneNumber = phoneUtil.parse(data);
         if (!phoneUtil.isPossibleNumber(phoneNumber)) {
           ctx.addIssue({
             code: 'invalid_format',

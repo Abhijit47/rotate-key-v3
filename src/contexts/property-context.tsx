@@ -111,6 +111,17 @@ const propertySteps = [
   },
 ];
 
+const safeSessionStorage =
+  typeof window === 'undefined'
+    ? undefined
+    : (() => {
+        try {
+          return window.sessionStorage;
+        } catch {
+          return undefined;
+        }
+      })();
+
 export function PropertyContextProvider({ children }: { children: ReactNode }) {
   const [step, setStep] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -158,7 +169,7 @@ export function PropertyContextProvider({ children }: { children: ReactNode }) {
     control: form.control,
     debounceDelay: 500,
     setValue: form.setValue,
-    storage: sessionStorage,
+    storage: safeSessionStorage,
     timeout: 1000 * 60 * 60 * 24, // 24 hours
     onDataRestored(data) {
       console.log('Restored form data:', data);

@@ -50,7 +50,7 @@ export default function Step8Form() {
             data-invalid={fieldState.invalid}
             aria-invalid={fieldState.invalid}>
             <FieldLabel htmlFor={field.name}>
-              <span>Rules & Regualtions</span>
+              <span>Rules & Regulations</span>
               <small className='italic font-normal text-muted-foreground'>
                 (Select some rules.)
               </small>

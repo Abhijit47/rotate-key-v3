@@ -60,7 +60,7 @@ export default function Step2Form() {
                 aria-invalid={fieldState.invalid}
                 placeholder='Ex. 1000'
                 // the pattern will be implicitly wrapped with ^(?: and )$, such that the match is required against the entire input value, i.e., ^(?:<pattern>)$ ex. min 100, 1000 something more
-                pattern={`^\d{10,}$`}
+                // pattern={`^\d{10,}$`}
                 type='number'
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
