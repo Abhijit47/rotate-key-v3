@@ -49,3 +49,38 @@ export function generateBirthYears() {
 
   return formattedYears;
 }
+
+export function titleCaseSkipSpecial(str: string) {
+  if (typeof str !== 'string') return '';
+
+  // Split into tokens: words OR single special characters (/, -, &, etc.)
+  const parts = str.match(/[A-Za-z0-9]+|[^A-Za-z0-9\s]/g) || [];
+  return parts
+    .map((tok) => {
+      if (/^[A-Za-z0-9]+$/.test(tok)) {
+        // keep existing short words as normal; capitalize each word token
+        return tok.charAt(0).toUpperCase() + tok.slice(1).toLowerCase();
+      }
+      // punctuation / special chars kept as-is
+      return tok;
+    })
+    .join(' ');
+}
+
+// Examples:
+// [
+//   'wi-fi',
+//   'air conditioning',
+//   'heating',
+//   'washing machine',
+//   'tv & streaming services',
+//   'closet / wardrobe space',
+//   'work desk / home office space',
+//   'hot water',
+//   'coffee maker / kettle',
+//   'cooking basics',
+//   'dishwasher',
+//   'fully equipped kitchen',
+//   'dining table & chairs',
+//   'cutlery & dishware',
+// ].forEach((s) => console.log(s, '=>', titleCaseSkipSpecial(s)));

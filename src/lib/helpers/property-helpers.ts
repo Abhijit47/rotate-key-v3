@@ -16,7 +16,7 @@ import {
   propertyOwnerships,
   propertyRules,
   propertySurroundings,
-  propertySwappings,
+  propertySwapings,
   propertyTypes,
 } from '@/constants/property-assets';
 
@@ -242,7 +242,7 @@ export const ownershipConstantTypes = makeArrayOfStrings({
   type: 'other',
 });
 export const swappingConstantTypes = makeArrayOfStrings({
-  data: propertySwappings,
+  data: propertySwapings,
   type: 'other',
 });
 export const rentalConstantTypes = makeArrayOfStrings({

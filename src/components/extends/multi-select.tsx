@@ -274,6 +274,11 @@ interface MultiSelectProps
    * Optional, defaults to false.
    */
   closeOnSelect?: boolean;
+
+  /** Additional class names to apply custom styles to the command list inside the popover.
+   * Optional, can be used to add custom styles.
+   */
+  commandClassName?: string;
 }
 
 /**
@@ -330,6 +335,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
       deduplicateOptions = false,
       resetOnDefaultValueChange = true,
       closeOnSelect = false,
+      commandClassName,
       ...props
     },
     ref,
@@ -774,7 +780,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
         <Popover
           open={isPopoverOpen}
           onOpenChange={setIsPopoverOpen}
-          modal={modalPopover}>
+          modal={modalPopover}
+        >
           <div id={triggerDescriptionId} className='sr-only'>
             Multi-select dropdown. Use arrow keys to navigate, Enter to select,
             and Escape to close.
@@ -815,7 +822,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
               style={{
                 ...widthConstraints,
                 maxWidth: `min(${widthConstraints.maxWidth}, 100%)`,
-              }}>
+              }}
+            >
               {selectedValues.length > 0 ? (
                 <div className='flex justify-between items-center w-full'>
                   <div
@@ -832,7 +840,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                             paddingBottom: '4px',
                           }
                         : {}
-                    }>
+                    }
+                  >
                     {selectedValues
                       .slice(0, responsiveSettings.maxCount)
                       .map((value) => {
@@ -872,7 +881,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                                 animationConfig?.duration || animation
                               }s`,
                               animationDelay: `${animationConfig?.delay || 0}s`,
-                            }}>
+                            }}
+                          >
                             {IconComponent && !responsiveSettings.hideIcons && (
                               <IconComponent
                                 className={cn(
@@ -889,7 +899,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                             <span
                               className={cn(
                                 screenSize === 'mobile' && 'truncate',
-                              )}>
+                              )}
+                            >
                               {option.label}
                             </span>
                             <div
@@ -910,7 +921,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                                 }
                               }}
                               aria-label={`Remove ${option.label} from selection`}
-                              className='ml-2 h-4 w-4 cursor-pointer hover:bg-white/20 rounded-sm p-0.5 -m-0.5 focus:outline-none focus:ring-1 focus:ring-white/50'>
+                              className='ml-2 h-4 w-4 cursor-pointer hover:bg-white/20 rounded-sm p-0.5 -m-0.5 focus:outline-none focus:ring-1 focus:ring-white/50'
+                            >
                               <XCircle
                                 className={cn(
                                   'h-3 w-3',
@@ -939,7 +951,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                             animationConfig?.duration || animation
                           }s`,
                           animationDelay: `${animationConfig?.delay || 0}s`,
-                        }}>
+                        }}
+                      >
                         {`+ ${
                           selectedValues.length - responsiveSettings.maxCount
                         } more`}
@@ -972,7 +985,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                         }
                       }}
                       aria-label={`Clear all ${selectedValues.length} selected options`}
-                      className='flex items-center justify-center h-4 w-4 mx-2 cursor-pointer text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 rounded-sm'>
+                      className='flex items-center justify-center h-4 w-4 mx-2 cursor-pointer text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 rounded-sm'
+                    >
                       <XIcon className='h-4 w-4' />
                     </div>
                     <Separator
@@ -1016,8 +1030,9 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
               touchAction: 'manipulation',
             }}
             align='start'
-            onEscapeKeyDown={() => setIsPopoverOpen(false)}>
-            <Command>
+            onEscapeKeyDown={() => setIsPopoverOpen(false)}
+          >
+            <Command className={commandClassName}>
               {searchable && (
                 <CommandInput
                   placeholder='Search options...'
@@ -1038,7 +1053,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                   'max-h-[40vh] overflow-y-auto multiselect-scrollbar',
                   screenSize === 'mobile' && 'max-h-[50vh]',
                   'overscroll-behavior-y-contain',
-                )}>
+                )}
+              >
                 <CommandEmpty>
                   {emptyIndicator || 'No results found.'}
                 </CommandEmpty>{' '}
@@ -1055,7 +1071,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                       aria-label={`Select all ${
                         getAllOptions().length
                       } options`}
-                      className='cursor-pointer'>
+                      className='cursor-pointer'
+                    >
                       <div
                         className={cn(
                           'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
@@ -1065,7 +1082,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                             ? 'bg-primary text-primary-foreground'
                             : 'opacity-50 [&_svg]:invisible',
                         )}
-                        aria-hidden='true'>
+                        aria-hidden='true'
+                      >
                         <CheckIcon className='h-4 w-4' />
                       </div>
                       <span>
@@ -1100,7 +1118,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                               option.disabled &&
                                 'opacity-50 cursor-not-allowed',
                             )}
-                            disabled={option.disabled}>
+                            disabled={option.disabled}
+                          >
                             <div
                               className={cn(
                                 'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
@@ -1108,7 +1127,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                                   ? 'bg-primary text-primary-foreground'
                                   : 'opacity-50 [&_svg]:invisible',
                               )}
-                              aria-hidden='true'>
+                              aria-hidden='true'
+                            >
                               <CheckIcon className='h-4 w-4' />
                             </div>
                             {option.icon && (
@@ -1141,7 +1161,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                             'cursor-pointer',
                             option.disabled && 'opacity-50 cursor-not-allowed',
                           )}
-                          disabled={option.disabled}>
+                          disabled={option.disabled}
+                        >
                           <div
                             className={cn(
                               'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
@@ -1149,7 +1170,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                                 ? 'bg-primary text-primary-foreground'
                                 : 'opacity-50 [&_svg]:invisible',
                             )}
-                            aria-hidden='true'>
+                            aria-hidden='true'
+                          >
                             <CheckIcon className='h-4 w-4' />
                           </div>
                           {option.icon && (
@@ -1171,7 +1193,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                       <>
                         <CommandItem
                           onSelect={handleClear}
-                          className='flex-1 justify-center cursor-pointer'>
+                          className='flex-1 justify-center cursor-pointer'
+                        >
                           Clear
                         </CommandItem>
                         <Separator
@@ -1182,7 +1205,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                     )}
                     <CommandItem
                       onSelect={() => setIsPopoverOpen(false)}
-                      className='flex-1 justify-center cursor-pointer max-w-full'>
+                      className='flex-1 justify-center cursor-pointer max-w-full'
+                    >
                       Close
                     </CommandItem>
                   </div>

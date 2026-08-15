@@ -48,74 +48,54 @@ import {
 } from '@/assets/surrounding-icons';
 
 // types
+type RentType = {
+  id: string;
+  name: string;
+  description: string;
+};
+
+type CategoryType = {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  rentType: RentType[];
+};
+
 export type PropertyType = {
   id: string;
   categoryName: string;
-  categoryTypes: {
-    id: string;
-    name: string;
-    icon: React.FC<React.SVGProps<SVGSVGElement>>;
-    description: string;
-  }[];
+  categoryTypes: Omit<CategoryType, 'rentType'>[];
 };
 
 export type PropertyOwnershipType = {
   id: string;
   categoryName: string;
-  categoryTypes: {
-    id: string;
-    name: string;
-    icon: React.FC<React.SVGProps<SVGSVGElement>>;
-    description: string;
-  }[];
+  categoryTypes: Omit<CategoryType, 'rentType'>[];
 };
 
 export type PropertySwappingType = {
   id: string;
   categoryName: string;
-  categoryTypes: {
-    id: string;
-    name: string;
-    icon: React.FC<React.SVGProps<SVGSVGElement>>;
-    description: string;
-  }[];
+  categoryTypes: Omit<CategoryType, 'rentType'>[];
 };
 
 export type PropertySurroundingsType = {
   id: string;
   categoryName: string;
-  categoryTypes: {
-    id: string;
-    name: string;
-    icon: React.FC<React.SVGProps<SVGSVGElement>>;
-    description: string;
-  }[];
+  categoryTypes: Omit<CategoryType, 'rentType'>[];
 };
 
 export type PropertyEnvironmentType = {
   id: string;
   categoryName: string;
-  categoryTypes: {
-    id: string;
-    name: string;
-    icon: React.FC<React.SVGProps<SVGSVGElement>>;
-    description: string;
-  }[];
+  categoryTypes: Omit<CategoryType, 'rentType'>[];
 };
 
 export type PropertyRentalPeriodType = {
   id: string;
   categoryName: string;
-  categoryTypes: {
-    id: string;
-    name: string;
-    description: string;
-    rentType: {
-      id: string;
-      name: string;
-      description: string;
-    }[];
-  }[];
+  categoryTypes: Omit<CategoryType, 'icon'>[];
 };
 
 export const propertyRentalPeriods: PropertyRentalPeriodType[] = [
@@ -1813,7 +1793,7 @@ export const propertyOwnerships: PropertyOwnershipType[] = [
   // },
 ];
 
-export const propertySwappings: PropertySwappingType[] = [
+export const propertySwapings: PropertySwappingType[] = [
   {
     id: '441197ea-902f-4a0d-b3fc-bf8d75325ddb',
     categoryName: 'Swapping Types',
@@ -1834,3 +1814,228 @@ export const propertySwappings: PropertySwappingType[] = [
     ],
   },
 ];
+
+export const propertyBedRooms = [
+  {
+    id: 'bed249c1-bfe9-414d-975d-2b32185ec37a',
+    value: 1,
+  },
+  {
+    id: '12f37e1e-fb6e-4e52-8328-9c8eca12ae66',
+    value: 2,
+  },
+  {
+    id: '6d8ed415-2b74-4bac-9ece-0371d4408de5',
+    value: 3,
+  },
+  {
+    id: '54165b11-abad-4d65-a9cd-43f472a7b325',
+    value: 4,
+  },
+  {
+    id: '66b65cce-e0a2-4f2c-978d-5359086ec3ad',
+    value: 5,
+  },
+  {
+    id: 'b39d374a-4a5e-47f3-8ac5-d00db3bbd166',
+    value: 6,
+  },
+  {
+    id: 'b95546ba-288c-4aea-8609-0e32727d7f5b',
+    value: 7,
+  },
+  {
+    id: '39c382d5-293e-45bf-a79b-4fa46270eaaa',
+    value: 8,
+  },
+  {
+    id: '4dee8dbd-ec60-4f0f-b65c-3721765ec4f0',
+    value: 9,
+  },
+  {
+    id: 'b1a08837-39c5-4a05-bc2f-98e1381134ed',
+    value: 10,
+  },
+];
+
+export const propertyBathRooms = [
+  {
+    id: 'cdf0c3f1-11cc-482d-939c-8f94ab4a7f8f',
+    value: 1,
+  },
+  {
+    id: 'a2d2aeb7-8013-4748-98d9-ad43e3c85dc4',
+    value: 2,
+  },
+  {
+    id: '5b07abc5-ad72-460a-af16-ee1e72eff386',
+    value: 3,
+  },
+  {
+    id: '0368bd00-e276-4781-b4ae-772b42904365',
+    value: 4,
+  },
+  {
+    id: '5f7f99ac-3c94-4b68-96a7-ab0ba5364607',
+    value: 5,
+  },
+  {
+    id: '35e66711-6bf1-4962-944f-067b9650b25c',
+    value: 6,
+  },
+  {
+    id: '077ecd0f-e1f3-40b6-827b-c6ea2888ca6c',
+    value: 7,
+  },
+  {
+    id: '4b82bd6d-e905-4eea-94cf-84e68db2e5ba',
+    value: 8,
+  },
+  {
+    id: '7b870747-36c3-4d08-9461-e384c05b3e04',
+    value: 9,
+  },
+  {
+    id: '848088be-e52f-4ced-8f61-44e62251d49a',
+    value: 10,
+  },
+];
+
+export const propertyBeds = [
+  {
+    id: '05818950-52d6-406b-b51d-810923690700',
+    value: 1,
+  },
+  {
+    id: '059d42be-71b7-4c9a-a248-3f5119081c75',
+    value: 2,
+  },
+  {
+    id: '8e5b6ad9-f63c-4c09-89e6-87e9f7fe7af1',
+    value: 3,
+  },
+  {
+    id: '3bedd921-e3e0-4339-b633-9c2080db41e4',
+    value: 4,
+  },
+  {
+    id: 'b6707e69-ed7f-4e27-8e31-6a702e1a8de8',
+    value: 5,
+  },
+  {
+    id: '4624c011-157f-4e11-b0f9-f5ec6942ebd1',
+    value: 6,
+  },
+  {
+    id: '4d2a6141-f9cf-4d1b-bbd9-833bd5fd3ade',
+    value: 7,
+  },
+  {
+    id: '6758b6cb-ef82-4b3d-8963-b90894b852d5',
+    value: 8,
+  },
+  {
+    id: '2d342ed5-d1bb-4270-8f12-49e7305a1897',
+    value: 9,
+  },
+  {
+    id: '6b8c6168-9ed0-422e-bb33-9d875fbe0246',
+    value: 10,
+  },
+];
+
+export const propertyGuests = [
+  {
+    id: '0e5a0aef-1020-408f-bb14-9e81b68a89c9',
+    value: 1,
+  },
+  {
+    id: 'ceb44f74-edd9-45b2-96eb-8900e1303a40',
+    value: 2,
+  },
+  {
+    id: '02d5b07c-2690-4598-8674-7cc73bf8ae55',
+    value: 3,
+  },
+  {
+    id: 'eb8527fc-6f58-425d-9a2e-997dc5bdc7d0',
+    value: 4,
+  },
+  {
+    id: '904fb6c9-f6b5-4364-b965-03202b4b054a',
+    value: 5,
+  },
+  {
+    id: '6ad6903b-ea92-496d-849e-df6e47a880b2',
+    value: 6,
+  },
+  {
+    id: 'f4aeefea-f9d0-4fc4-acd5-39ae18b82304',
+    value: 7,
+  },
+  {
+    id: '3f6b6679-52cf-479b-8cfc-c4e3de041cad',
+    value: 8,
+  },
+  {
+    id: '0ac116ab-e4e0-4d30-8daa-cb0f7cb9a052',
+    value: 9,
+  },
+  {
+    id: '9cbd8a4a-16a5-4f4f-8e6c-a20f24fb9986',
+    value: 10,
+  },
+];
+
+export const propertyAreaUnits = [
+  { label: 'SQFT', value: 'sqft' },
+  { label: 'SQM', value: 'sqm' },
+  { label: 'ACRE', value: 'acre' },
+  { label: 'HECTARE', value: 'hectare' },
+] as const;
+
+// create enums for zod schemas
+
+export const propertyAreaUnitsEnum = propertyAreaUnits.map(
+  (unit) => unit.value,
+);
+
+export const propertyTypesEnum = propertyTypes
+  .map((type) => {
+    return type.categoryTypes.map((category) => category.name.toLowerCase());
+  })
+  .flat() as [string, ...string[]];
+
+export const propertyOwnershipsEnum = propertyOwnerships
+  .map((type) => {
+    return type.categoryTypes.map((category) => category.name.toLowerCase());
+  })
+  .flat() as [string, ...string[]];
+
+export const propertySwapingsEnum = propertySwapings
+  .map((type) => {
+    return type.categoryTypes.map((category) => category.name.toLowerCase());
+  })
+  .flat() as [string, ...string[]];
+
+export const propertySurroundingsEnum = propertySurroundings
+  .map((type) => {
+    return type.categoryTypes.map((category) => category.name.toLowerCase());
+  })
+  .flat() as [string, ...string[]];
+
+export const propertyEnvironmentsEnum = propertyEnvironments
+  .map((type) => {
+    return type.categoryTypes.map((category) => category.name.toLowerCase());
+  })
+  .flat() as [string, ...string[]];
+
+export const propertyAccomodationsEnum = propertyAccomodations
+  .map((type) => {
+    return type.categoryTypes.map((category) => category.name.toLowerCase());
+  })
+  .flat() as [string, ...string[]];
+
+export const hostLanguageEnum = hostLanguages.map(
+  (language) => language.language,
+) as [string, ...string[]];

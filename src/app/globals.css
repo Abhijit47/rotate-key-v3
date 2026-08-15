@@ -60,6 +60,24 @@
 
   --animate-slide-out: slideOut 0.5s ease-in;
 
+  --color-invert-foreground: var(--invert-foreground);
+
+  --color-invert: var(--invert);
+
+  --color-warning-foreground: var(--warning-foreground);
+
+  --color-warning: var(--warning);
+
+  --color-info-foreground: var(--info-foreground);
+
+  --color-info: var(--info);
+
+  --color-success-foreground: var(--success-foreground);
+
+  --color-success: var(--success);
+
+  --color-destructive-foreground: var(--destructive-foreground);
+
   @keyframes slideOut {
     0% {
       transform: translateY(0%);
@@ -183,6 +201,14 @@
   --code-selection: oklch(0.96 0.01 151.09);
   --code-border: oklch(0.9 0.009977999999999999 151.09);
   --radius: 0.5rem;
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-900);
+  --info: var(--color-violet-500);
+  --info-foreground: var(--color-violet-900);
+  --warning: var(--color-yellow-500);
+  --warning-foreground: var(--color-yellow-900);
+  --invert: var(--color-zinc-900);
+  --invert-foreground: var(--color-zinc-50);
 }
 
 .dark {
@@ -229,6 +255,14 @@
   --code-selection: oklch(0.18 0.008315000000000001 151.09);
   --code-border: oklch(0.32999999999999996 0.009977999999999999 151.09);
   --radius: 0.5rem;
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-600);
+  --info: var(--color-violet-500);
+  --info-foreground: var(--color-violet-600);
+  --warning: var(--color-yellow-500);
+  --warning-foreground: var(--color-yellow-600);
+  --invert: var(--color-zinc-700);
+  --invert-foreground: var(--color-zinc-50);
 }
 
 @layer base {
@@ -271,20 +305,20 @@
   border-radius: 50px !important;
 }
 
-.nv-popoverContent > .nv-inboxContent > div:last-child{
+.nv-popoverContent > .nv-inboxContent > div:last-child {
   display: none !important;
 }
 
 .react-pdf__Document > .react-pdf__Page > .react-pdf__Page__canvas {
-  @apply w-100! h-125! mx-auto! rounded-lg!
+  @apply w-100! h-125! mx-auto! rounded-lg!;
 }
 
-.react-pdf__Document >.react-pdf__Page > .react-pdf__Page__textContent{
-  @apply w-100! h-125! mx-auto! rounded-lg!
+.react-pdf__Document > .react-pdf__Page > .react-pdf__Page__textContent {
+  @apply w-100! h-125! mx-auto! rounded-lg!;
 }
 
-.react-pdf__Document > .react-pdf__Page > .react-pdf__Page__annotations{
-  @apply w-100! h-125! mx-auto! rounded-lg!
+.react-pdf__Document > .react-pdf__Page > .react-pdf__Page__annotations {
+  @apply w-100! h-125! mx-auto! rounded-lg!;
 }
 
 .link-hint {
