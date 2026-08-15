@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
+import * as React from 'react';
 import * as RPNInput from 'react-phone-number-input';
 import flags from 'react-phone-number-input/flags';
 
@@ -97,15 +97,13 @@ const CountrySelect = ({
       onOpenChange={(open) => {
         setIsOpen(open);
         open && setSearchValue('');
-      }}
-    >
+      }}>
       <PopoverTrigger asChild>
         <Button
           type='button'
           variant='outline'
           className='flex gap-1 rounded-e-none rounded-s-lg border-r-0 px-3 focus:z-10'
-          disabled={disabled}
-        >
+          disabled={disabled}>
           <FlagComponent
             country={selectedCountry}
             countryName={selectedCountry}
@@ -118,7 +116,7 @@ const CountrySelect = ({
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-[300px] p-0'>
+      <PopoverContent className='w-75 p-0' align='start'>
         <Command>
           <CommandInput
             value={searchValue}

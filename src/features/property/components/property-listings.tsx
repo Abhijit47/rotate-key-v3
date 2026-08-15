@@ -2,25 +2,25 @@
 
 import { IconHomePlus } from '@tabler/icons-react';
 import { TRPCClientError } from '@trpc/client';
+import AutoPlay from 'embla-carousel-autoplay';
 import {
   ArrowUpRightFromSquareIcon,
   ArrowUpRightIcon,
   CheckCheckIcon,
   HeartIcon,
+  Loader2,
   PenLineIcon,
+  Settings2,
   ThumbsDownIcon,
   ThumbsUpIcon,
-  Settings2,
-  Loader2,
 } from 'lucide-react';
 import { Route } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import AutoPlay from 'embla-carousel-autoplay';
 import { useQueryStates } from 'nuqs';
 import { useTransition } from 'react';
+import { toast } from 'sonner';
 
 import SwappingBannerBG from '../../../../public/swaping/banner.jpg';
 
@@ -53,33 +53,12 @@ import {
 // import AutoPlay from 'embla-carousel-autoplay';
 // import { type EmblaOptionsType } from 'embla-carousel';
 
-import { propertyTypes } from '@/constants/property-assets';
-import { swappingSearchParams } from '../searchParams';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { useUpgradeModal } from '@/features/common/hooks/use-upgrade-modal';
-import { useSession } from '@/lib/auth-client';
-import { useLikeProperty } from '@/features/engagement/hooks/use-engagements';
-import SectionWrapper from '@/components/shared/section-wrapper';
-import SectionHeadingGroup from '@/components/shared/section-heading-group';
-import SectionHeading from '@/components/shared/section-heading';
-import SectionDescription from '@/components/shared/section-description';
-import { rooms } from '@/constants/dummy-data';
-import { ModalProvider } from '@/contexts/modal-context';
 import DatePickerWithRange from '@/components/shared/date-picker-with-range-select';
+import SectionDescription from '@/components/shared/section-description';
+import SectionHeading from '@/components/shared/section-heading';
+import SectionHeadingGroup from '@/components/shared/section-heading-group';
+import SectionWrapper from '@/components/shared/section-wrapper';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -88,7 +67,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { rooms } from '@/constants/dummy-data';
+import { propertyTypes } from '@/constants/property-assets';
+import { ModalProvider } from '@/contexts/modal-context';
+import { useUpgradeModal } from '@/features/common/hooks/use-upgrade-modal';
+import { useLikeProperty } from '@/features/engagement/hooks/use-engagements';
+import { useSession } from '@/lib/auth-client';
+import { cn } from '@/lib/utils';
+import { swappingSearchParams } from '../searchParams';
 import PropertyFilters from './property-filters';
 
 function prettifyText(text: string) {
@@ -100,7 +100,7 @@ function prettifyText(text: string) {
 
 export function EmptyPropertiesState() {
   return (
-    <Empty className='border border-dashed mt-auto'>
+    <Empty className='border border-dashed mx-auto min-w-sm'>
       <EmptyHeader>
         <EmptyMedia variant='icon'>
           <IconHomePlus />
@@ -111,7 +111,7 @@ export function EmptyPropertiesState() {
           your first property listing.
         </EmptyDescription>
       </EmptyHeader>
-      <EmptyContent className='flex-row justify-center gap-2'>
+      <EmptyContent className='items-center flex-wrap justify-center gap-2'>
         <Button asChild>
           <Link href='/property/new'>Create Property</Link>
         </Button>
@@ -123,8 +123,7 @@ export function EmptyPropertiesState() {
         variant='link'
         asChild
         className='text-muted-foreground'
-        size='sm'
-      >
+        size='sm'>
         <Link href='#'>
           Learn More <ArrowUpRightIcon />
         </Link>
@@ -167,8 +166,7 @@ export function PropertyListings() {
       ) : (
         <SectionWrapper>
           <div
-            className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}
-          >
+            className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}>
             {properties?.map((property) => {
               // const isSelfProperty =
               //   property.authorId === data?.user?.id || false;
@@ -219,8 +217,7 @@ export function PropertyListings() {
                         size={'icon-sm'}
                         disabled
                         aria-label={'Save property (currently unavailable)'}
-                        title={'Save property (currently unavailable)'}
-                      >
+                        title={'Save property (currently unavailable)'}>
                         <HeartIcon className={'size-4'} />
                       </Button>
 
@@ -240,8 +237,7 @@ export function PropertyListings() {
                               isLikedByMe
                                 ? undefined
                                 : () => handleLikeProperty(property.id)
-                            }
-                          >
+                            }>
                             {isLikedByMe ? (
                               <ThumbsDownIcon className={'size-4 text-white'} />
                             ) : (
@@ -264,8 +260,7 @@ export function PropertyListings() {
                     {property.amenities.map((amenity, index) => (
                       <p
                         key={index}
-                        className={'text-sm text-muted-foreground'}
-                      >
+                        className={'text-sm text-muted-foreground'}>
                         <span className={'inline-flex items-center gap-1'}>
                           <CheckCheckIcon className={'size-4'} />
                           {prettifyText(amenity)}
@@ -280,8 +275,7 @@ export function PropertyListings() {
                       className={buttonVariants({
                         variant: 'outline',
                         size: 'sm',
-                      })}
-                    >
+                      })}>
                       View Details{' '}
                       <ArrowUpRightFromSquareIcon className={'size-4'} />
                     </Link>
@@ -378,8 +372,7 @@ export function MyPropertyListings() {
                           variant: 'outline',
                           size: 'sm',
                           className: 'mr-4',
-                        })}
-                      >
+                        })}>
                         Edit Details <PenLineIcon className={'size-4'} />
                       </Link>
 
@@ -388,8 +381,7 @@ export function MyPropertyListings() {
                         size={'sm'}
                         className={'mr-4'}
                         onClick={() => handleDeleteProperty(property.id)}
-                        disabled={isPending}
-                      >
+                        disabled={isPending}>
                         {isPending ? 'Deleting...' : 'Delete'}
                       </Button>
                     </>
@@ -400,8 +392,7 @@ export function MyPropertyListings() {
                     className={buttonVariants({
                       variant: 'outline',
                       size: 'sm',
-                    })}
-                  >
+                    })}>
                     View Details{' '}
                     <ArrowUpRightFromSquareIcon className={'size-4'} />
                   </Link>
@@ -425,14 +416,12 @@ export function SwappingBanner() {
     <section
       className={
         'bg-primary-100 dark:bg-primary-500/30 pt-12 md:pt-16 lg:pt-20 rounded-2xl'
-      }
-    >
+      }>
       <SectionWrapper>
         <div
           className={
             'h-dvh sm:h-dvh lg:h-auto w-full sm:aspect-square md:aspect-video lg:aspect-video xl:aspect-22/9 rounded-2xl overflow-hidden bg-secondary-950 relative'
-          }
-        >
+          }>
           <Image
             src={SwappingBannerBG}
             alt={'Swapping Banner'}
@@ -461,11 +450,9 @@ export function SwappingBannerHeading() {
     <div
       className={
         'absolute w-full h-full grid place-items-start lg:place-items-center lg:content-center px-4 mt-16 md:mt-8 lg:mt-0'
-      }
-    >
+      }>
       <SectionHeadingGroup
-        className={'text-center space-y-4 md:space-y-6 lg:space-y-8'}
-      >
+        className={'text-center space-y-4 md:space-y-6 lg:space-y-8'}>
         <SectionHeading align='center' className={'text-primary-300'}>
           DISCOVER YOUR DESIRED HOUSE
         </SectionHeading>
@@ -510,22 +497,19 @@ export function CarouselDetails({ carousel }: CarouselDetailsProps) {
     <div
       className={
         'absolute left-0 bottom-0 sm:bottom-4 w-full px-2 sm:px-8 py-2 xs:py-4 sm:py-6 z-20'
-      }
-    >
+      }>
       <div className={'flex items-center justify-between'}>
         <div className={'text-tertiary-50 inline-grid gap-2 ml-4'}>
           <h3
             className={
               'text-yellow-500 text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold lg:font-bold'
-            }
-          >
+            }>
             {carousel.type}
           </h3>
           <p
             className={
               'text-white dark:text-foreground text-base md:text-lg lg:text-xl'
-            }
-          >
+            }>
             {carousel.state}
           </p>
           <p className={'text-white dark:text-foreground text-xs sm:text-sm'}>
@@ -536,8 +520,7 @@ export function CarouselDetails({ carousel }: CarouselDetailsProps) {
           <Button
             onClick={() => toast.info('Feature coming soon...')}
             size={'sm'}
-            className='inline-flex items-center gap-2 rounded-md bg-transparent py-1.5 px-3 text-sm/6 font-semibold text-yellow-500 focus:outline-none ring-2 ring-yellow-500 data-hover:bg-yellow-600 data-hover:text-tertiary-50 data-open:bg-gray-700 data-focus:outline-1 data-focus:outline-yellow-500'
-          >
+            className='inline-flex items-center gap-2 rounded-md bg-transparent py-1.5 px-3 text-sm/6 font-semibold text-yellow-500 focus:outline-none ring-2 ring-yellow-500 data-hover:bg-yellow-600 data-hover:text-tertiary-50 data-open:bg-gray-700 data-focus:outline-1 data-focus:outline-yellow-500'>
             Hold for now
           </Button>
         </div>
@@ -562,16 +545,14 @@ export function SwappingCarousel() {
             duration: 200,
             startIndex: 0,
             slidesToScroll: 'auto',
-          }}
-        >
+          }}>
           <CarouselContent className={'h-full w-full rounded-lg'}>
             {rooms.map((carousel, idx) => (
               <CarouselItem
                 key={carousel.id}
                 className={
                   'aspect-square sm:aspect-square md:aspect-video lg:aspect-20/9 h-full w-full relative'
-                }
-              >
+                }>
                 <div className='relative'>
                   <Image
                     src={carousel.images[idx]}
@@ -600,18 +581,17 @@ export function SwappingCarousel() {
 export function SwappingFilter() {
   return (
     <div
-      className={'absolute left-0 bottom-0 sm:bottom-4 lg:bottom-8 w-full px-8'}
-    >
+      className={
+        'absolute left-0 bottom-0 sm:bottom-4 lg:bottom-8 w-full px-8'
+      }>
       <div
         className={
           'bg-primary-200/50 w-fit mx-auto backdrop-blur-sm rounded-2xl lg:rounded-full p-4'
-        }
-      >
+        }>
         <Card
           className={
             'p-2 rounded-2xl lg:rounded-full ring ring-primary-500 max-w-2xl mx-auto'
-          }
-        >
+          }>
           <CardContent className={'p-2 flex items-center flex-wrap gap-2'}>
             <Input
               type='text'
@@ -624,8 +604,9 @@ export function SwappingFilter() {
 
             <Button
               size={'sm'}
-              className={'lg:rounded-full w-full lg:w-fit hover:cursor-pointer'}
-            >
+              className={
+                'lg:rounded-full w-full lg:w-fit hover:cursor-pointer'
+              }>
               View Home
             </Button>
 
@@ -633,15 +614,13 @@ export function SwappingFilter() {
               <DialogTrigger asChild>
                 <Button
                   size={'sm'}
-                  className={'w-full lg:w-fit hover:cursor-pointer'}
-                >
+                  className={'w-full lg:w-fit hover:cursor-pointer'}>
                   <Settings2 className={'size-4'} />
                   <span className={'sr-only'}>more settings</span>
                 </Button>
               </DialogTrigger>
               <DialogContent
-                className={'max-w-xs xs:max-w-md sm:max-w-lg md:max-w-xl'}
-              >
+                className={'max-w-xs xs:max-w-md sm:max-w-lg md:max-w-xl'}>
                 <DialogHeader>
                   <DialogTitle>
                     Property Filters{' '}
@@ -697,14 +676,12 @@ export function SwappingFilterByType() {
               duration: 200,
               startIndex: 0,
               slidesToScroll: 'auto',
-            }}
-          >
+            }}>
             <CarouselContent className={'-ml-4'}>
               {types.map((type, index) => (
                 <CarouselItem
                   key={index}
-                  className='pl-4 basis-6/12 sm:basis-3/12 lg:basis-2/12 group'
-                >
+                  className='pl-4 basis-6/12 sm:basis-3/12 lg:basis-2/12 group'>
                   <Button
                     disabled={isTransition}
                     variant={
@@ -725,8 +702,7 @@ export function SwappingFilterByType() {
                           type: type.name.toLowerCase(),
                         }));
                       });
-                    }}
-                  >
+                    }}>
                     {isTransition ? (
                       <span>
                         <Loader2 className={'size-4 md:size-6 animate-spin'} />
@@ -750,8 +726,7 @@ export function SwappingFilterByType() {
                         'text-xs font-medium text-wrap text-clip text-primary-500 dark:group-hover:text-primary-100',
                         selectedType === type.name.toLowerCase() &&
                           'font-semibold text-white',
-                      )}
-                    >
+                      )}>
                       {type.name}
                     </span>
                   </Button>

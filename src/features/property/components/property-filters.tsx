@@ -20,7 +20,7 @@ import SwappingTypeFilter from './filters/swapping-type-filter';
 export default function PropertyFilters() {
   return (
     <div>
-      <ScrollArea className='h-[300px] md:h-[500px] w-full rounded-md border p-4'>
+      <ScrollArea className='h-75 md:h-125 w-full rounded-md border p-4'>
         {/* Dates */}
         <MoveInAndOutFilter />
 
@@ -56,8 +56,7 @@ export default function PropertyFilters() {
         <Card className={'py-2 md:py-4'}>
           <CardDescription className={'px-2 md:px-4'}>
             <DialogFooter
-              className={'justify-between sm:justify-between flex-wrap gap-2'}
-            >
+              className={'justify-between sm:justify-between flex-wrap gap-2'}>
               <DialogTrigger asChild>
                 <Button size={'sm'} variant={'outline'}>
                   Clear All

@@ -6,8 +6,14 @@ export default function Footer() {
   const pathname = usePathname();
 
   const chatSlugRegex = /^\/chat\/[^/]+$/;
+  // http://localhost:3000/property/new
+  const propertyNewRegex = /^\/property\/new$/;
 
   if (pathname && chatSlugRegex.test(pathname)) {
+    return null;
+  }
+
+  if (pathname && propertyNewRegex.test(pathname)) {
     return null;
   }
 
