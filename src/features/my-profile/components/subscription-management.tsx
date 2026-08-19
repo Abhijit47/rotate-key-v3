@@ -248,17 +248,17 @@ export function SubscriptionManagement() {
               Current Plan Features
             </h4>
             <div className='flex flex-wrap gap-2 sm:gap-3'>
-              {benefits?.length === 0 ? (
+              {subscriptions[0]?.product?.benefits?.length === 0 ? (
                 <p>No benefits found for this plan.</p>
               ) : (
                 <>
-                  {benefits?.map((feature) => (
+                  {subscriptions[0]?.product?.benefits?.map((feature) => (
                     <div
                       key={feature.id}
                       className='group border-border/80 hover:border-primary/30 hover:bg-primary/5 flex items-center gap-2 rounded-lg border p-2 transition-all duration-200 sm:p-2'>
                       <div className='bg-primary group-hover:bg-primary h-1 w-1 shrink-0 rounded-full transition-all duration-200 group-hover:scale-125 sm:h-1.5 sm:w-1.5'></div>
                       <span className='text-muted-foreground group-hover:text-foreground text-xs transition-colors duration-200 sm:text-sm'>
-                        {feature.benefit.description}
+                        {feature?.description}
                       </span>
                     </div>
                   ))}

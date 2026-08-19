@@ -329,14 +329,14 @@ export function UpdatePlanDialog(props: UpdatePlanDialogProps) {
                             <Button
                               className='w-full touch-manipulation text-sm font-medium sm:text-base'
                               disabled={
-                                selectedPlan === subscriptions[0].product.id
+                                selectedPlan === subscriptions[0]?.product.id
                               }
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onPlanChange(plan.id);
                                 handleOpenChange(false);
                               }}>
-                              {selectedPlan === subscriptions[0].product.id
+                              {selectedPlan === subscriptions[0]?.product.id
                                 ? 'Current Plan'
                                 : 'Upgrade'}
                             </Button>

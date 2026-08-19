@@ -24,6 +24,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
+import { AccessibilitiesLateral } from '@/constants/property-assets-types';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -121,7 +122,7 @@ export default function Step7Form() {
                                     <Checkbox
                                       id={`accessibility-${item.id}`}
                                       checked={field.value?.includes(
-                                        item.name.toLocaleLowerCase(),
+                                        item.name.toLocaleLowerCase() as AccessibilitiesLateral,
                                       )}
                                       onCheckedChange={(checked) => {
                                         return checked

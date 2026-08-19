@@ -24,6 +24,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
+import { RulesLateral } from '@/constants/property-assets-types';
 import { cn } from '@/lib/utils';
 
 export default function Step8Form() {
@@ -117,7 +118,7 @@ export default function Step8Form() {
                                     <Checkbox
                                       id={`rule-${item.id}`}
                                       checked={field.value?.includes(
-                                        item.name.toLocaleLowerCase(),
+                                        item.name.toLocaleLowerCase() as RulesLateral,
                                       )}
                                       onCheckedChange={(checked) => {
                                         return checked

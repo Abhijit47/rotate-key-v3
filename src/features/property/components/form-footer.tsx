@@ -3,6 +3,7 @@ import {
   CheckCircle2Icon,
   ChevronLeftCircle,
   ChevronRightCircle,
+  EditIcon,
 } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
 
@@ -14,8 +15,11 @@ import { Progress } from '@/components/ui/progress';
 import { Spinner } from '@/components/ui/spinner';
 import { usePropertyContext } from '@/contexts/property-context';
 import { type WizardValues } from '@/lib/validators/property-schemas';
+import { useParams } from 'next/navigation';
 
 export default function PropertyFormFooter() {
+  const params = useParams();
+
   const {
     isLastStep,
     isIntroStep,
@@ -35,23 +39,33 @@ export default function PropertyFormFooter() {
       <Progress value={progress} className={'w-full'} />
       {isLastStep ? (
         <Field orientation='horizontal' className='justify-between'>
-          <Button
-            size={'sm'}
-            type='button'
-            variant='outline'
-            onClick={() => form.reset()}>
+          <Button type='button' variant='outline' onClick={() => form.reset()}>
             <IconTrashX className={'size-4'} />
             Reset
           </Button>
-          <Button size={'sm'} type='submit' form='form-rhf-property'>
-            Submit <CheckCircle2Icon className={'size-4'} />
+          <Button
+            type='submit'
+            form={
+              params?.id
+                ? `form-rhf-property-${params.id}`
+                : 'form-rhf-property'
+            }>
+            {params?.id ? (
+              <span className='inline-flex items-center gap-2'>
+                Update Property
+                <EditIcon className={'size-4'} />
+              </span>
+            ) : (
+              <span className='inline-flex items-center gap-2'>
+                Create Property <CheckCircle2Icon className={'size-4'} />
+              </span>
+            )}
           </Button>
         </Field>
       ) : (
         <Field orientation='horizontal' className='justify-between'>
           <Button
             type='button'
-            size={'sm'}
             variant={'secondary'}
             onClick={onPrevStep}
             disabled={isFirstStep}>
@@ -61,7 +75,6 @@ export default function PropertyFormFooter() {
           </Button>
           <Button
             type='button'
-            size={'sm'}
             onClick={() => {
               onNextStep();
             }}

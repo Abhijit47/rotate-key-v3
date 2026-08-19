@@ -116,7 +116,24 @@ export const premiumProcedure = protectedProcedure.use(
       });
     }
 
-    const rawLimit = propertyListingBenefit.benefitMetadata?.[tier];
+    /*
+    "benefitMetadata":{"pro":"unlimited","free":"1","basic":"3"}
+    tier comes with pro-monthly, pro-yearly, basic-monthly, basic-yearly, free,  we need to map the tier to the benefitMetadata key, which is either pro, basic, or free. The mapping is as follows:
+    pro-monthly -> pro
+    pro-yearly -> pro
+    */
+
+    const tierMapping: Record<string, string> = {
+      'pro-monthly': 'pro',
+      'pro-yearly': 'pro',
+      'basic-monthly': 'basic',
+      'basic-yearly': 'basic',
+      free: 'free',
+    };
+
+    const mappedTier = tierMapping[tier];
+
+    const rawLimit = propertyListingBenefit.benefitMetadata?.[mappedTier];
     const limit =
       rawLimit === 'unlimited' ? Infinity : parseInt(String(rawLimit), 10);
 

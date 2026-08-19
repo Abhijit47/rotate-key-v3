@@ -1,6 +1,6 @@
 {
-  "id": "72807120-a490-4474-97d1-37f750873f63",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "936b9459-4c73-4fbd-894e-7ecabc18fadf",
+  "prevId": "72807120-a490-4474-97d1-37f750873f63",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1387,9 +1387,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "type": {
-          "name": "type",
-          "type": "type",
+        "roomType": {
+          "name": "roomType",
+          "type": "room_type",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
@@ -2369,6 +2369,31 @@
         "month-to-month lease"
       ]
     },
+    "public.room_type": {
+      "name": "room_type",
+      "schema": "public",
+      "values": [
+        "apartment",
+        "house",
+        "villa",
+        "penthouse",
+        "studio",
+        "cottage",
+        "townhouse",
+        "duplex/triplex",
+        "shared apartment",
+        "co-living space",
+        "guest house",
+        "office space",
+        "retail space",
+        "warehouse/industrial space",
+        "hotel/resort",
+        "raw land",
+        "construction-ready land",
+        "multi-family home",
+        "gated community property"
+      ]
+    },
     "public.surrounding": {
       "name": "surrounding",
       "schema": "public",
@@ -2394,31 +2419,6 @@
       "values": [
         "permanent swap",
         "temporary swap"
-      ]
-    },
-    "public.type": {
-      "name": "type",
-      "schema": "public",
-      "values": [
-        "apartment",
-        "house",
-        "villa",
-        "penthouse",
-        "studio",
-        "cottage",
-        "townhouse",
-        "duplex/triplex",
-        "shared apartment",
-        "co-living space",
-        "guest house",
-        "office space",
-        "retail space",
-        "warehouse/industrial space",
-        "hotel/resort",
-        "raw land",
-        "construction-ready land",
-        "multi-family home",
-        "gated community property"
       ]
     },
     "public.status": {

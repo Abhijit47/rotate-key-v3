@@ -33,32 +33,32 @@ export default function Step4Form() {
     name: 'propertyBedRooms',
     control: form.control,
     compute: (val) => {
-      if (val?.length > 0) return val;
-      return undefined;
+      if (val > 0) return val;
+      return 0;
     },
   });
   const watchedBathroom = useWatch({
     name: 'propertyBathRooms',
     control: form.control,
     compute: (val) => {
-      if (val?.length > 0) return val;
-      return undefined;
+      if (val > 0) return val;
+      return 0;
     },
   });
   const watchedBeds = useWatch({
     name: 'numberOfBeds',
     control: form.control,
     compute: (val) => {
-      if (val?.length > 0) return val;
-      return undefined;
+      if (val > 0) return val;
+      return 0;
     },
   });
   const watchedGuests = useWatch({
     name: 'numberOfGuests',
     control: form.control,
     compute: (val) => {
-      if (val?.length > 0) return val;
-      return undefined;
+      if (val > 0) return val;
+      return 0;
     },
   });
 
@@ -83,14 +83,14 @@ export default function Step4Form() {
                 </FieldDescription>
               )}
               <FieldDescription className={'text-xs absolute right-0 top-0'}>
-                {!watchedBedroom?.length ? '0 room' : `${watchedBedroom} rooms`}
+                {watchedBedroom <= 0 ? '0 room' : `${watchedBedroom} rooms`}
               </FieldDescription>
             </FieldContent>
             <Slider
               id={field.name}
               name={field.name}
               value={[Number(field.value) || 0]}
-              onValueChange={(value) => field.onChange(String(value[0]))}
+              onValueChange={(value) => field.onChange(value[0])}
               aria-invalid={fieldState.invalid}
               data-invalid={fieldState.invalid}
               max={10}
@@ -121,7 +121,7 @@ export default function Step4Form() {
                 </FieldDescription>
               )}
               <FieldDescription className={'text-xs absolute right-0 top-0'}>
-                {!watchedBathroom?.length
+                {watchedBathroom <= 0
                   ? '0 bathroom'
                   : `${watchedBathroom} bathrooms`}
               </FieldDescription>
@@ -129,7 +129,7 @@ export default function Step4Form() {
                 id={field.name}
                 name={field.name}
                 value={[Number(field.value) || 0]}
-                onValueChange={(value) => field.onChange(String(value[0]))}
+                onValueChange={(value) => field.onChange(value[0])}
                 aria-invalid={fieldState.invalid}
                 data-invalid={fieldState.invalid}
                 max={10}
@@ -161,13 +161,13 @@ export default function Step4Form() {
                 </FieldDescription>
               )}
               <FieldDescription className={'text-xs absolute right-0 top-0'}>
-                {!watchedBeds?.length ? '0 beds' : `${watchedBeds} beds`}
+                {watchedBeds <= 0 ? '0 beds' : `${watchedBeds} beds`}
               </FieldDescription>
               <Slider
                 id={field.name}
                 name={field.name}
                 value={[Number(field.value) || 0]}
-                onValueChange={(value) => field.onChange(String(value[0]))}
+                onValueChange={(value) => field.onChange(value[0])}
                 aria-invalid={fieldState.invalid}
                 data-invalid={fieldState.invalid}
                 max={10}
@@ -200,15 +200,13 @@ export default function Step4Form() {
                 </FieldDescription>
               )}
               <FieldDescription className={'text-xs absolute right-0 top-0'}>
-                {!watchedGuests?.length
-                  ? '0 guests'
-                  : `${watchedGuests} guests`}
+                {watchedGuests <= 0 ? '0 guests' : `${watchedGuests} guests`}
               </FieldDescription>
               <Slider
                 id={field.name}
                 name={field.name}
                 value={[Number(field.value) || 0]}
-                onValueChange={(value) => field.onChange(String(value[0]))}
+                onValueChange={(value) => field.onChange(value[0])}
                 aria-invalid={fieldState.invalid}
                 data-invalid={fieldState.invalid}
                 max={10}

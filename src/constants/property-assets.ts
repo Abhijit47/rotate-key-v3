@@ -98,7 +98,7 @@ export type PropertyRentalPeriodType = {
   categoryTypes: Omit<CategoryType, 'icon'>[];
 };
 
-export const propertyRentalPeriods: PropertyRentalPeriodType[] = [
+export const propertyRentalPeriods = [
   {
     id: '191c86ed-de1e-44ce-814f-15b7d2cbd8c3',
     categoryName: 'Rental Types',
@@ -192,7 +192,7 @@ export const propertyRentalPeriods: PropertyRentalPeriodType[] = [
       },
     ],
   },
-];
+] as const;
 
 export const hostLanguages = [
   {
@@ -290,9 +290,9 @@ export const hostLanguages = [
     language: 'urdu',
     flag: '/flag-svgs/pk.svg',
   },
-];
+] as const;
 
-export const propertyTypes: PropertyType[] = [
+export const propertyTypes = [
   {
     id: '83285bf8-4ea3-4287-8955-88596d9290bf',
     categoryName: 'Residential',
@@ -432,9 +432,17 @@ export const propertyTypes: PropertyType[] = [
       },
     ],
   },
-];
+] as const;
 
-export const propertyAccomodations: PropertyType[] = [
+// type Accomodation = {
+//   id: string;
+//   categoryName: AccommodationCategoryLaterral;
+//   categoryTypes: Omit<CategoryType, 'rentType'>[] & {
+//     name: AccommodationLateral;
+//   };
+// };
+
+export const propertyAccomodations = [
   {
     id: crypto.randomUUID(),
     categoryName: 'Entire Place',
@@ -481,9 +489,9 @@ export const propertyAccomodations: PropertyType[] = [
       },
     ],
   },
-];
+] as const;
 
-export const propertyAccessibilities: PropertyType[] = [
+export const propertyAccessibilities = [
   {
     id: '3b962f03-1df6-461b-99ad-8b3a41f9bad7',
     categoryName: 'Entrance & Parking',
@@ -716,9 +724,9 @@ export const propertyAccessibilities: PropertyType[] = [
       },
     ],
   },
-];
+] as const;
 
-export const propertyAmenities: PropertyType[] = [
+export const propertyAmenities = [
   {
     id: '999d0a25-be8b-48b2-8cc8-6c5fa5be128a',
     categoryName: 'General Amenities',
@@ -1243,9 +1251,9 @@ export const propertyAmenities: PropertyType[] = [
       },
     ],
   },
-];
+] as const;
 
-export const propertyRules: PropertyType[] = [
+export const propertyRules = [
   {
     id: '5d1e5217-aed2-46b3-91e5-fcc919015214',
     categoryName: 'General Rules',
@@ -1461,9 +1469,9 @@ export const propertyRules: PropertyType[] = [
       },
     ],
   },
-];
+] as const;
 
-export const propertySurroundings: PropertySurroundingsType[] = [
+export const propertySurroundings = [
   {
     id: '11e14c1a-fa95-46a0-a7f1-c031e463438c',
     categoryName: 'Natural & Scenic Surroundings',
@@ -1634,9 +1642,9 @@ export const propertySurroundings: PropertySurroundingsType[] = [
       },
     ],
   },
-];
+] as const;
 
-export const propertyEnvironments: PropertyEnvironmentType[] = [
+export const propertyEnvironments = [
   {
     id: '2ac09a78-a7b1-4d40-8181-d9eedd2f05cf',
     categoryName: 'Rural & Countryside',
@@ -1709,9 +1717,9 @@ export const propertyEnvironments: PropertyEnvironmentType[] = [
       },
     ],
   },
-];
+] as const;
 
-export const propertyOwnerships: PropertyOwnershipType[] = [
+export const propertyOwnerships = [
   {
     id: '493e31f0-b032-442c-b7ee-02cb7b7e8f31',
     categoryName: 'Ownership Types',
@@ -1791,9 +1799,9 @@ export const propertyOwnerships: PropertyOwnershipType[] = [
   //     },
   //   ],
   // },
-];
+] as const;
 
-export const propertySwapings: PropertySwappingType[] = [
+export const propertySwapings = [
   {
     id: '441197ea-902f-4a0d-b3fc-bf8d75325ddb',
     categoryName: 'Swapping Types',
@@ -1813,7 +1821,7 @@ export const propertySwapings: PropertySwappingType[] = [
       },
     ],
   },
-];
+] as const;
 
 export const propertyBedRooms = [
   {
@@ -1993,49 +2001,3 @@ export const propertyAreaUnits = [
   { label: 'ACRE', value: 'acre' },
   { label: 'HECTARE', value: 'hectare' },
 ] as const;
-
-// create enums for zod schemas
-
-export const propertyAreaUnitsEnum = propertyAreaUnits.map(
-  (unit) => unit.value,
-);
-
-export const propertyTypesEnum = propertyTypes
-  .map((type) => {
-    return type.categoryTypes.map((category) => category.name.toLowerCase());
-  })
-  .flat() as [string, ...string[]];
-
-export const propertyOwnershipsEnum = propertyOwnerships
-  .map((type) => {
-    return type.categoryTypes.map((category) => category.name.toLowerCase());
-  })
-  .flat() as [string, ...string[]];
-
-export const propertySwapingsEnum = propertySwapings
-  .map((type) => {
-    return type.categoryTypes.map((category) => category.name.toLowerCase());
-  })
-  .flat() as [string, ...string[]];
-
-export const propertySurroundingsEnum = propertySurroundings
-  .map((type) => {
-    return type.categoryTypes.map((category) => category.name.toLowerCase());
-  })
-  .flat() as [string, ...string[]];
-
-export const propertyEnvironmentsEnum = propertyEnvironments
-  .map((type) => {
-    return type.categoryTypes.map((category) => category.name.toLowerCase());
-  })
-  .flat() as [string, ...string[]];
-
-export const propertyAccomodationsEnum = propertyAccomodations
-  .map((type) => {
-    return type.categoryTypes.map((category) => category.name.toLowerCase());
-  })
-  .flat() as [string, ...string[]];
-
-export const hostLanguageEnum = hostLanguages.map(
-  (language) => language.language,
-) as [string, ...string[]];

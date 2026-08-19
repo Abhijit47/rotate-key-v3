@@ -4,6 +4,14 @@ CREATE TYPE "public"."plan_slug" AS ENUM('free', 'basic', 'pro');--> statement-b
 CREATE TYPE "public"."role" AS ENUM('admin', 'moderator', 'user');--> statement-breakpoint
 CREATE TYPE "public"."social_provider" AS ENUM('facebook', 'google');--> statement-breakpoint
 CREATE TYPE "public"."booking_status" AS ENUM('pending', 'confirmed', 'cancelled');--> statement-breakpoint
+CREATE TYPE "public"."accommodation" AS ENUM('entire apartment', 'entire house', 'private room', 'shared place');--> statement-breakpoint
+CREATE TYPE "public"."area_unit" AS ENUM('sqft', 'sqm', 'acre', 'hectare');--> statement-breakpoint
+CREATE TYPE "public"."environment" AS ENUM('village', 'countryside', 'isolated', 'farmland', 'urban area', 'metro city', 'town', 'suburban', 'gated community');--> statement-breakpoint
+CREATE TYPE "public"."ownership" AS ENUM('freehold', 'leasehold', 'co-ownership', 'timeshare ownership', 'inherited property', 'joint ownership', 'corporate-owned', 'rented property');--> statement-breakpoint
+CREATE TYPE "public"."rent_period" AS ENUM('daily rental', 'weekly rental', 'monthly rental', '3-month lease', '6-month lease', '1-year lease (long-term)', '2-year lease', '5-year lease', '10+ year lease', '1-year lease (contractual)', 'month-to-month lease');--> statement-breakpoint
+CREATE TYPE "public"."surrounding" AS ENUM('mountain', 'island', 'hill station', 'sea facing / coastal', 'lakeside', 'forest', 'desert', 'tropical', 'snowy region', 'temperate zone', 'arid / dry region', 'windy coastal area', 'evergreen forest zone');--> statement-breakpoint
+CREATE TYPE "public"."swaping" AS ENUM('permanent swap', 'temporary swap');--> statement-breakpoint
+CREATE TYPE "public"."type" AS ENUM('apartment', 'house', 'villa', 'penthouse', 'studio', 'cottage', 'townhouse', 'duplex/triplex', 'shared apartment', 'co-living space', 'guest house', 'office space', 'retail space', 'warehouse/industrial space', 'hotel/resort', 'raw land', 'construction-ready land', 'multi-family home', 'gated community property');--> statement-breakpoint
 CREATE TYPE "public"."status" AS ENUM('pending', 'completed', 'rejected', 'approved', 'declined');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
@@ -143,18 +151,45 @@ CREATE TABLE "private_schema"."matches-test-env" (
 --> statement-breakpoint
 CREATE TABLE "property" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"type" varchar NOT NULL,
-	"street_address" varchar NOT NULL,
-	"city" varchar,
-	"state" varchar,
-	"zip_code" varchar,
-	"images" jsonb NOT NULL,
+	"region" jsonb NOT NULL,
+	"country" jsonb NOT NULL,
+	"state" jsonb NOT NULL,
+	"city" jsonb NOT NULL,
+	"zipcode" varchar(10) NOT NULL,
+	"street_address" varchar(100) NOT NULL,
+	"area" varchar(20) NOT NULL,
+	"areaUnit" "area_unit" NOT NULL,
+	"description" varchar(3000) NOT NULL,
+	"type" "type" NOT NULL,
+	"ownership" "ownership" NOT NULL,
+	"swaping" "swaping" NOT NULL,
+	"rentPeriod" "rent_period" NOT NULL,
+	"surrounding" "surrounding" NOT NULL,
+	"environment" "environment" NOT NULL,
+	"accommodation" "accommodation" NOT NULL,
+	"beds" integer NOT NULL,
+	"bed_rooms" integer NOT NULL,
+	"bath_rooms" integer NOT NULL,
+	"guests" integer NOT NULL,
+	"owner_name" varchar(100) DEFAULT 'n/a',
+	"owner_email" varchar(100) DEFAULT 'n/a',
+	"owner_phone" varchar(20) DEFAULT 'n/a',
+	"known_languages" jsonb NOT NULL,
 	"amenities" jsonb NOT NULL,
+	"accessibilities" jsonb NOT NULL,
+	"rules" jsonb NOT NULL,
+	"stays_date_range" jsonb NOT NULL,
+	"stays_duration" varchar(20) NOT NULL,
+	"images" jsonb NOT NULL,
 	"is_available" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"author_id" uuid NOT NULL,
-	CONSTRAINT "property_id_unique" UNIQUE("id")
+	CONSTRAINT "property_id_unique" UNIQUE("id"),
+	CONSTRAINT "check_beds" CHECK ("property"."beds" >= 0 AND "property"."beds" <= 10),
+	CONSTRAINT "check_bedRooms" CHECK ("property"."bed_rooms" >= 0 AND "property"."bed_rooms" <= 10),
+	CONSTRAINT "check_bathRooms" CHECK ("property"."bath_rooms" >= 0 AND "property"."bath_rooms" <= 10),
+	CONSTRAINT "check_guests" CHECK ("property"."guests" >= 0 AND "property"."guests" <= 10)
 );
 --> statement-breakpoint
 CREATE TABLE "swaps" (
@@ -197,6 +232,22 @@ CREATE TABLE "reviews" (
 	CONSTRAINT "reviews_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
+CREATE TABLE "property_test" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"type" varchar NOT NULL,
+	"street_address" varchar NOT NULL,
+	"city" varchar,
+	"state" varchar,
+	"zip_code" varchar,
+	"images" jsonb NOT NULL,
+	"amenities" jsonb NOT NULL,
+	"is_available" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"author_id" uuid NOT NULL,
+	CONSTRAINT "property_test_id_unique" UNIQUE("id")
+);
+--> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_property_id_property_id_fk" FOREIGN KEY ("property_id") REFERENCES "public"."property"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -219,6 +270,7 @@ ALTER TABLE "swaps" ADD CONSTRAINT "swaps_property2_id_property_id_fk" FOREIGN K
 ALTER TABLE "swaps" ADD CONSTRAINT "swaps_user1_booking_id_bookings_id_fk" FOREIGN KEY ("user1_booking_id") REFERENCES "public"."bookings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "swaps" ADD CONSTRAINT "swaps_user2_booking_id_bookings_id_fk" FOREIGN KEY ("user2_booking_id") REFERENCES "public"."bookings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reviews" ADD CONSTRAINT "reviews_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "property_test" ADD CONSTRAINT "property_test_author_id_user_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "account_userId_idx" ON "account" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "session_userId_idx" ON "session" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "verification_identifier_idx" ON "verification" USING btree ("identifier");--> statement-breakpoint

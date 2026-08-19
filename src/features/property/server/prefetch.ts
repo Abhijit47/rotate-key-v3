@@ -39,6 +39,16 @@ export function prefetchPropertyDetails(propertyId: string) {
 }
 
 /**
+ * Prefetch one property details by ID for update
+ * @param propertyId
+ */
+export function prefetchPropertyDetailsForUpdate(propertyId: string) {
+  return prefetch(
+    trpc.property.getPropertyDetailsForUpdate.queryOptions({ id: propertyId }),
+  );
+}
+
+/**
  * Prefetch my properties with params
  * @param params
  */

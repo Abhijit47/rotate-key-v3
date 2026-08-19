@@ -23,6 +23,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
+import { AmenitiesLateral } from '@/constants/property-assets-types';
 import { cn } from '@/lib/utils';
 import { type WizardValues } from '@/lib/validators/property-schemas';
 
@@ -122,7 +123,7 @@ export default function Step6Form() {
                                     <Checkbox
                                       id={`amenity-${item.id}`}
                                       checked={field.value?.includes(
-                                        item.name.toLocaleLowerCase(),
+                                        item.name.toLocaleLowerCase() as AmenitiesLateral,
                                       )}
                                       onCheckedChange={(checked) => {
                                         return checked

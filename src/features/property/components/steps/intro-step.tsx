@@ -1,6 +1,7 @@
-import { IconHomePlus } from '@tabler/icons-react';
+import { IconHomeEdit, IconHomePlus } from '@tabler/icons-react';
 import { ArrowUpRightIcon } from 'lucide-react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
@@ -15,19 +16,29 @@ import {
 import { usePropertyContext } from '@/contexts/property-context';
 
 export default function IntroStep() {
+  const params = useParams();
   const { isLoading, onNextStep, onToggleErrorDrawer } = usePropertyContext();
 
   return (
-    <CardContent className={'space-y-4'}>
-      <Empty className={'border-2 border-dashed'}>
+    <CardContent className={'space-y-4 w-full'}>
+      <Empty className={'border-2 border-dashed w-full'}>
         <EmptyHeader>
           <EmptyMedia variant='icon'>
-            <IconHomePlus />
+            {params?.id ? (
+              <>
+                <IconHomeEdit />
+              </>
+            ) : (
+              <IconHomePlus />
+            )}
           </EmptyMedia>
-          <EmptyTitle>No Properties Yet!</EmptyTitle>
+          <EmptyTitle>
+            {params?.id ? 'Update Property' : 'No Properties Yet!'}
+          </EmptyTitle>
           <EmptyDescription>
-            You haven&apos;t created any properties yet. Get started by creating
-            your first property.
+            {params?.id
+              ? 'Update your property details below. Please ensure that all information is accurate and up-to-date to attract potential swappers.'
+              : "You haven\'t created any properties yet. Get started by creating your first property."}
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent className='flex flex-col md:flex-row justify-center gap-2'>
@@ -40,7 +51,11 @@ export default function IntroStep() {
               onToggleErrorDrawer();
             }}
             disabled={isLoading}>
-            {isLoading ? 'Please wait...' : 'Create a new property'}
+            {isLoading
+              ? 'Please wait...'
+              : params?.id
+                ? 'Go for update'
+                : 'Create a new property'}
           </Button>
         </EmptyContent>
         <Button

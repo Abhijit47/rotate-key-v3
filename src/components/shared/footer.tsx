@@ -17,6 +17,12 @@ export default function Footer() {
     return null;
   }
 
+  // http://localhost:3000/property/fe1fb455-65b8-46bf-8df3-929540628ec1/update
+  const propertyUpdateRegex = /^\/property\/[^/]+\/update$/;
+  if (pathname && propertyUpdateRegex.test(pathname)) {
+    return null;
+  }
+
   return (
     <footer>
       <div

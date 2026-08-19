@@ -20,25 +20,24 @@ const defaultValues: DefaultValues<WizardValues> = {
     ? 'This is a beautiful room with all the amenities you need. It is located in the heart of the city and has a beautiful view of the mountains.'
     : '',
 
-  propertyType: isDev ? 'cottage' : '',
-  propertyOwnership: isDev ? 'co-ownership' : '',
-  propertySwaping: isDev ? 'temporary swap' : '',
-  propertyRentalTypes: isDev ? '1-year lease (long-term)' : '',
-  propertySurrounding: isDev ? 'forest' : '',
-  propertyEnvironment: isDev ? 'town' : '',
+  propertyType: isDev ? 'cottage' : undefined,
+  propertyOwnership: isDev ? 'co-ownership' : undefined,
+  propertySwaping: isDev ? 'temporary swap' : undefined,
+  propertyRentalTypes: isDev ? '1-year lease (long-term)' : undefined,
+  propertySurrounding: isDev ? 'forest' : undefined,
+  propertyEnvironment: isDev ? 'town' : undefined,
 
   // Optional fields
   propertyOwnerName: '',
   propertyOwnerEmail: '',
-  // propertyOwnerPhone:isDev? '+91 99999-11111 ', // dont make undefined or ''
   propertyOwnerPhone: undefined,
 
-  propertyBedRooms: isDev ? '4' : '', // dont make undefined
-  propertyBathRooms: isDev ? '2' : '', // dont make undefined,
-  numberOfGuests: isDev ? '3' : '', // dont make undefined
-  numberOfBeds: isDev ? '2' : '', // dont make undefined
+  propertyBedRooms: isDev ? 4 : 0, // dont make undefined
+  propertyBathRooms: isDev ? 2 : 0, // dont make undefined,
+  numberOfGuests: isDev ? 3 : 0, // dont make undefined
+  numberOfBeds: isDev ? 2 : 0, // dont make undefined
   hostKnownLanguages: isDev ? ['hindi', 'bengali', 'english'] : undefined,
-  propertyAccomodationType: isDev ? 'private room' : '',
+  propertyAccomodationType: isDev ? 'private room' : undefined,
   propertyAmenities: isDev
     ? [
         'wi-fi',
