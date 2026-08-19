@@ -43,7 +43,7 @@ export default function Step3Form() {
     name: 'propertyType',
     control: form.control,
     compute: (val) => {
-      if (val.length > 0) return val;
+      if (val?.length > 0) return val;
       return undefined;
     },
   });
@@ -52,7 +52,7 @@ export default function Step3Form() {
     name: 'propertyOwnership',
     control: form.control,
     compute: (val) => {
-      if (val.length > 0) return val;
+      if (val?.length > 0) return val;
       return undefined;
     },
   });

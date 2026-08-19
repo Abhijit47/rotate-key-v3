@@ -2,17 +2,19 @@
 
 import { useFormPersist } from '@liorpo/react-hook-form-persist';
 import type { ReactNode } from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { zodResolver } from 'zod-resolver-lite';
 
+import { usePropertyDetailsForUpdate } from '@/features/property/hooks/use-property';
+import useSessionStorage from '@/hooks/use-session-storage';
 import {
   type WizardValues,
   combinedPropertySchema,
   currentStepFields,
   defaultValues,
 } from '@/lib/validators/property-schemas';
-import { toast } from 'sonner';
 
 type PropertyContextType = {
   isSidebarOpen: boolean;
@@ -39,6 +41,8 @@ type PropertyContextType = {
   onToggleErrorDrawer: () => void;
   isLoading: boolean;
   // nextStep: () => void;
+
+  propertyDetailsError?: string;
 
   progress: number;
   clearDraft: () => void;
@@ -122,12 +126,33 @@ const safeSessionStorage =
         }
       })();
 
-export function PropertyContextProvider({ children }: { children: ReactNode }) {
-  const [step, setStep] = useState(0);
+type PropertyContextProviderProps = {
+  children: ReactNode;
+  propertyId?: string;
+};
+
+const initialValues = {
+  step: 0,
+  progress: 0,
+};
+
+export function PropertyContextProvider(props: PropertyContextProviderProps) {
+  const { children, propertyId } = props;
+
+  const [propertyFormStats, setPropertyFormStats] = useSessionStorage({
+    key: 'property-form-stats',
+    initialValue: initialValues,
+  });
+
+  const [step, setStep] = useState(propertyFormStats.step);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isErrorDrawerOpen, setIsErrorDrawerOpen] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(propertyFormStats.progress);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [propertyDetailsErr, setPropertyDetailsErr] = useState<
+    string | undefined
+  >();
 
   const isIntroStep = step === 0;
   const isFirstStep = !isIntroStep && step === 1;
@@ -156,6 +181,13 @@ export function PropertyContextProvider({ children }: { children: ReactNode }) {
       'Here you can create a new property listing or request an exchange. To get started, select a category from the menu and fill in the required details. We’ll save your progress automatically as you go.',
   };
 
+  const {
+    data: propertyDetails,
+    isLoading: propertyDetailsLoading,
+    isError: propertyDetailsError,
+    error: propertyDetailsErrorData,
+  } = usePropertyDetailsForUpdate(propertyId || '');
+
   // react hook form initialize here
   const form = useForm<WizardValues>({
     resolver: zodResolver(combinedPropertySchema),
@@ -163,9 +195,75 @@ export function PropertyContextProvider({ children }: { children: ReactNode }) {
     mode: 'onChange',
     // criteriaMode: "all", // 👈 Enable all errors
     progressive: true,
+    disabled: propertyDetailsLoading || propertyDetailsError,
   });
 
-  const { clear: clearDraft } = useFormPersist('new-property-form', {
+  useEffect(() => {
+    if (propertyDetailsError) {
+      setPropertyDetailsErr(
+        propertyDetailsErrorData.message || 'Failed to fetch property details',
+      );
+    }
+  }, [propertyDetailsError, propertyDetailsErrorData]);
+
+  useEffect(() => {
+    if (propertyDetails) {
+      const revertFromDate = propertyDetails.staysDateRange?.from
+        ? new Date(propertyDetails.staysDateRange.from)
+        : new Date();
+
+      // set one month later for the to date if not provided
+      const revertToDate = propertyDetails.staysDateRange?.to
+        ? new Date(propertyDetails.staysDateRange.to)
+        : new Date(revertFromDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days later
+      form.setValues(
+        {
+          region: propertyDetails.region,
+          country: propertyDetails.country,
+          state: propertyDetails.state,
+          city: propertyDetails.city,
+          streetAddress: propertyDetails.streetAddress,
+          zipcode: propertyDetails.zipcode,
+          propertyArea: propertyDetails.area,
+          propertyAreaUnit: propertyDetails.areaUnit,
+          propertyDescription: propertyDetails.description,
+          propertyType: propertyDetails.roomType,
+          propertyOwnership: propertyDetails.ownership,
+          propertySwaping: propertyDetails.swaping,
+          propertyRentalTypes: propertyDetails.rentPeriod,
+          propertySurrounding: propertyDetails.surrounding,
+          propertyEnvironment: propertyDetails.environment,
+          propertyAccomodationType: propertyDetails.accommodation,
+          propertyBedRooms: propertyDetails.bedRooms,
+          propertyBathRooms: propertyDetails.bathRooms,
+          numberOfGuests: propertyDetails.guests,
+          numberOfBeds: propertyDetails.beds,
+          hostKnownLanguages: propertyDetails.knownLanguages,
+          propertyRules: propertyDetails.rules,
+          propertyAccessibilities: propertyDetails.accessibilities,
+          propertyAmenities: propertyDetails.amenities,
+          staysDateRange: {
+            from: revertFromDate,
+            to: revertToDate,
+          },
+          staysDurationInDays: propertyDetails.staysDuration,
+          propertyImages: propertyDetails.images,
+          propertyOwnerName: propertyDetails.ownerName ?? '',
+        },
+        {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        },
+      );
+    }
+  }, [propertyDetails, form]);
+
+  const FormPersistKey = propertyId
+    ? `update-property-form-${propertyId}`
+    : 'new-property-form';
+
+  const { clear: clearDraft } = useFormPersist(FormPersistKey, {
     control: form.control,
     debounceDelay: 500,
     setValue: form.setValue,
@@ -216,6 +314,13 @@ export function PropertyContextProvider({ children }: { children: ReactNode }) {
             setStep((prev) => Math.min(prev + 1, propertySteps.length));
             // inc by 10%
             setProgress((prev) => Math.min(prev + 10, 100));
+
+            // Save the current step to session storage
+            setPropertyFormStats((prev) => ({
+              ...prev,
+              step: Math.min(prev.step + 1, propertySteps.length),
+              progress: Math.min(prev.progress + 10, 100),
+            }));
           }
           setIsLoading(false);
           return 'Form is valid! Moving to next step...';
@@ -233,6 +338,13 @@ export function PropertyContextProvider({ children }: { children: ReactNode }) {
     // setProgress((prev) => Math.max(prev, step - 1));
     // dec by 10%
     setProgress((prev) => Math.max(prev - 10, 10));
+
+    // Save the current step to session storage
+    setPropertyFormStats((prev) => ({
+      ...prev,
+      step: Math.max(prev.step - 1, 1),
+      progress: Math.max(prev.progress - 10, 10),
+    }));
   }
 
   function handleStepChange(newStep: number) {
@@ -249,6 +361,13 @@ export function PropertyContextProvider({ children }: { children: ReactNode }) {
             setStep(newStep);
             // inc by 10%
             setProgress((prev) => Math.min(prev + 10, 100));
+
+            // Save the current step to session storage
+            setPropertyFormStats((prev) => ({
+              ...prev,
+              step: newStep,
+              progress: Math.min(prev.progress + 10, 100),
+            }));
           }
           setIsLoading(false);
           return 'Form is valid! Moving to next step...';
@@ -278,6 +397,8 @@ export function PropertyContextProvider({ children }: { children: ReactNode }) {
     onToggleErrorDrawer: toggleErrorDrawer,
     isLoading,
     // nextStep,
+
+    propertyDetailsError: propertyDetailsErr,
 
     progress,
     clearDraft,

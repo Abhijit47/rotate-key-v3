@@ -116,7 +116,37 @@ export const premiumProcedure = protectedProcedure.use(
       });
     }
 
-    const rawLimit = propertyListingBenefit.benefitMetadata?.[tier];
+    /*
+    "benefitMetadata":{"pro":"unlimited","free":"1","basic":"3"}
+    tier comes with pro-monthly, pro-yearly, basic-monthly, basic-yearly, free,  we need to map the tier to the benefitMetadata key, which is either pro, basic, or free. The mapping is as follows:
+    pro-monthly -> pro
+    pro-yearly -> pro
+    */
+
+    const tierMapping: Record<string, string> = {
+      'pro-monthly': 'pro',
+      'pro-yearly': 'pro',
+      'basic-monthly': 'basic',
+      'basic-yearly': 'basic',
+      free: 'free',
+    };
+
+    /**
+     * copilot concern:
+     * If tier is already one of the benefitMetadata keys (e.g. 'pro'/'basic'/'free') or an unknown value, tierMapping[tier] can be undefined, making rawLimit undefined and limit NaN. Fall back to the original tier when no mapping exists.
+     */
+    const mappedTier = tierMapping[tier];
+
+    // instead of doing this, i can simply throw an error if the mappedTier is undefined, because that means the tier is not one of the expected values. This will prevent any unexpected behavior later on.
+    // const mappedTier = tierMapping[tier] ?? tier;
+    if (!mappedTier) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: `Unknown subscription tier: ${tier}. Please contact support.`,
+      });
+    }
+
+    const rawLimit = propertyListingBenefit.benefitMetadata?.[mappedTier];
     const limit =
       rawLimit === 'unlimited' ? Infinity : parseInt(String(rawLimit), 10);
 

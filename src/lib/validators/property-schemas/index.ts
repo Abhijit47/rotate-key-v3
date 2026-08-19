@@ -5,20 +5,26 @@ export { default as defaultValues } from './default-values';
 
 import {
   hostLanguageEnum,
+  propertyAccessibilitiesEnum,
   propertyAccomodationsEnum,
+  propertyAmenitiesEnum,
   propertyAreaUnitsEnum,
   propertyEnvironmentsEnum,
   propertyOwnershipsEnum,
+  propertyRentPeriodEnum,
+  propertyRulesEnum,
   propertySurroundingsEnum,
   propertySwapingsEnum,
   propertyTypesEnum,
-} from '@/constants/property-assets';
+} from '@/constants/property-assets-enums';
 import { emailRegex, validatePostalCode } from '@/lib/helpers/property-helpers';
 
 const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
 
 const WIZARD_STEPS = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | (10 as const);
 const wizardRegistry = z.registry<{ step: typeof WIZARD_STEPS }>();
+
+// TODO: MAKE ALL FIELDS WITH property prefix to avoid naming conflicts with other forms in the future and later will can remove the prefix and show in UI
 
 // STEP-1
 const region = z
@@ -148,9 +154,7 @@ const propertySwaping = z
   .enum(propertySwapingsEnum, { error: 'Please select a swaping type.' })
   .register(wizardRegistry, { step: 3 });
 const propertyRentalTypes = z
-  .string()
-  .min(1, { error: 'Property rental type is required' })
-  .max(50, { error: 'Property rental type must be 1 to 50 characters.' })
+  .enum(propertyRentPeriodEnum, { error: 'Please select a rental type.' })
   .register(wizardRegistry, { step: 3 });
 const propertySurrounding = z
   .enum(propertySurroundingsEnum, {
@@ -165,76 +169,101 @@ const propertyEnvironment = z
 
 // STEP-4
 const propertyBedRooms = z
-  .string()
-  .superRefine((data, ctx) => {
-    if (data === '') {
-      ctx.addIssue({
-        code: 'custom',
-        // origin: 'string',
-        minimum: 1,
-        inclusive: true,
-        path: [],
-        message: 'Bedrooms must be at least 1',
-      });
-      ctx.aborted = true;
-    } else {
-      ctx.aborted = false;
-    }
-  })
+  .number()
+  .positive()
+  .gte(1, { message: 'Bedrooms must be at least 1' })
+  .lte(10, { message: 'Bedrooms must be at most 10' })
+  // .superRefine((data, ctx) => {
+  //   if (data === '') {
+  //     ctx.addIssue({
+  //       code: 'custom',
+  //       // origin: 'string',
+  //       minimum: 1,
+  //       inclusive: true,
+  //       path: [],
+  //       message: 'Bedrooms must be at least 1',
+  //     });
+  //     ctx.aborted = true;
+  //   } else {
+  //     ctx.aborted = false;
+  //   }
+  // })
+  // .transform((val) => (val === '' ? 0 : parseInt(val, 10)))
   .register(wizardRegistry, { step: 4 });
 const propertyBathRooms = z
-  .string()
-  .superRefine((data, ctx) => {
-    if (data === '') {
-      ctx.addIssue({
-        code: 'custom',
-        // origin: 'string',
-        minimum: 1,
-        inclusive: true,
-        path: [],
-        message: 'Bathrooms must be at least 1',
-      });
-      ctx.aborted = true;
-    } else {
-      ctx.aborted = false;
-    }
-  })
+  // .string()
+  // .min(1, { error: 'Bathrooms must be at least 1' })
+  // .max(10, { error: 'Bathrooms must be at most 10' })
+  .number()
+  .positive()
+  .gte(1, { message: 'Bathrooms must be at least 1' })
+  .lte(10, { message: 'Bathrooms must be at most 10' })
+  // .superRefine((data, ctx) => {
+  //   if (data === '') {
+  //     ctx.addIssue({
+  //       code: 'custom',
+  //       // origin: 'string',
+  //       minimum: 1,
+  //       inclusive: true,
+  //       path: [],
+  //       message: 'Bathrooms must be at least 1',
+  //     });
+  //     ctx.aborted = true;
+  //   } else {
+  //     ctx.aborted = false;
+  //   }
+  // })
+  // .transform((val) => (val === '' ? 0 : parseInt(val, 10)))
   .register(wizardRegistry, { step: 4 });
 const numberOfGuests = z
-  .string()
-  .superRefine((data, ctx) => {
-    if (data === '') {
-      ctx.addIssue({
-        code: 'custom',
-        // origin: 'string',
-        minimum: 1,
-        inclusive: true,
-        path: [],
-        message: 'Guests must be at least 1',
-      });
-      ctx.aborted = true;
-    } else {
-      ctx.aborted = false;
-    }
-  })
+  .number()
+  .positive()
+  .gte(1, { message: 'Guests must be at least 1' })
+  .lte(10, { message: 'Guests must be at most 10' })
+  // .string()
+  // .min(1, { error: 'Guests must be at least 1' })
+  // .max(10, { error: 'Guests must be at most 10' })
+  // .superRefine((data, ctx) => {
+  //   if (data === '') {
+  //     ctx.addIssue({
+  //       code: 'custom',
+  //       // origin: 'string',
+  //       minimum: 1,
+  //       inclusive: true,
+  //       path: [],
+  //       message: 'Guests must be at least 1',
+  //     });
+  //     ctx.aborted = true;
+  //   } else {
+  //     ctx.aborted = false;
+  //   }
+  // })
+  // .transform((val) => (val === '' ? 0 : parseInt(val, 10)))
   .register(wizardRegistry, { step: 4 });
 const numberOfBeds = z
-  .string()
-  .superRefine((data, ctx) => {
-    if (data === '') {
-      ctx.addIssue({
-        code: 'custom',
-        // origin: 'string',
-        minimum: 1,
-        inclusive: true,
-        path: [],
-        message: 'Beds must be at least 1',
-      });
-      ctx.aborted = true;
-    } else {
-      ctx.aborted = false;
-    }
-  })
+  .number()
+  .positive()
+  .gte(1, { message: 'Beds must be at least 1' })
+  .lte(10, { message: 'Beds must be at most 10' })
+  // .string()
+  // .min(1, { error: 'Beds must be at least 1' })
+  // .max(10, { error: 'Beds must be at most 10' })
+  // .superRefine((data, ctx) => {
+  //   if (data === '') {
+  //     ctx.addIssue({
+  //       code: 'custom',
+  //       // origin: 'string',
+  //       minimum: 1,
+  //       inclusive: true,
+  //       path: [],
+  //       message: 'Beds must be at least 1',
+  //     });
+  //     ctx.aborted = true;
+  //   } else {
+  //     ctx.aborted = false;
+  //   }
+  // })
+  // .transform((val) => (val === '' ? 0 : parseInt(val, 10)))
   .register(wizardRegistry, { step: 4 });
 const propertyAccomodationType = z
   .enum(propertyAccomodationsEnum, {
@@ -322,9 +351,9 @@ const hostKnownLanguages = z
 // STEP-6
 const propertyAmenities = z
   .array(
-    z
-      .string({ error: 'At least one amenity must be selected.' })
-      .nonempty({ error: 'At least one amenity must be selected.' }),
+    z.enum(propertyAmenitiesEnum, {
+      error: 'At least one amenity must be selected.',
+    }),
   )
   .refine((amenities) => amenities.length > 0, {
     path: [],
@@ -336,9 +365,9 @@ const propertyAmenities = z
 // STEP-7
 const propertyAccessibilities = z
   .array(
-    z
-      .string({ error: 'At least one accessibilities must be selected.' })
-      .nonempty({ error: 'At least one accessibilities must be selected.' }),
+    z.enum(propertyAccessibilitiesEnum, {
+      error: 'At least one accessibilities must be selected.',
+    }),
   )
   .refine((accessibilities) => accessibilities.length > 0, {
     path: [],
@@ -350,9 +379,9 @@ const propertyAccessibilities = z
 // STEP-8
 const propertyRules = z
   .array(
-    z
-      .string({ error: 'At least one rules must be selected.' })
-      .nonempty({ error: 'At least one rules must be selected.' }),
+    z.enum(propertyRulesEnum, {
+      error: 'At least one rules must be selected.',
+    }),
   )
   .refine((rules) => rules.length > 0, {
     path: [],
@@ -424,6 +453,12 @@ export const combinedPropertySchema = z.object({
   // files,
   propertyImages,
 });
+
+export const updatePropertySchema = combinedPropertySchema.partial().extend({
+  propertyId: z.uuid({ version: 'v4', error: 'Invalid property ID' }),
+});
+
+export type UpdatePropertyValues = z.infer<typeof updatePropertySchema>;
 
 export type WizardValues = z.infer<typeof combinedPropertySchema>;
 export type WizardFieldKey = keyof WizardValues;

@@ -37,7 +37,7 @@ export default function UpgradeModal(props: UpgradeModalProps) {
   // const benefits =
   //   customerState?.grantedBenefits.map((b) => {
   //     return plans.map(
-  //       (plan) =>
+  //       (plan) =>Polar benefits list failed.
   //         plan.benefits.find((benefit) => benefit.id === b.benefitId)
   //           ?.description || '',
   //     )[0];

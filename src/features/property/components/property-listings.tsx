@@ -199,7 +199,7 @@ export function PropertyListings() {
                   <Separator />
                   <CardHeader className={'px-4'}>
                     <CardTitle className={'capitalize'}>
-                      {property.type}
+                      {property.roomType}
                     </CardTitle>
                     <CardDescription className={'capitalize'}>
                       {property.streetAddress}
@@ -342,7 +342,7 @@ export function MyPropertyListings() {
                 <Separator />
                 <CardHeader className={'px-4'}>
                   <CardTitle className={'capitalize'}>
-                    {property.type}
+                    {property.roomType}
                   </CardTitle>
                   <CardDescription className={'capitalize'}>
                     {property.streetAddress}
@@ -353,7 +353,7 @@ export function MyPropertyListings() {
                 </CardHeader>
                 <Separator />
                 <CardContent className={'px-4'}>
-                  {property.amenities.map((amenity, index) => (
+                  {property.amenities.slice(0, 4).map((amenity, index) => (
                     <p key={index} className={'text-sm text-muted-foreground'}>
                       <span className={'inline-flex items-center gap-1'}>
                         <CheckCheckIcon className={'size-4'} />
@@ -361,6 +361,11 @@ export function MyPropertyListings() {
                       </span>
                     </p>
                   ))}
+                  {property.amenities.length > 4 ? (
+                    <span className={'text-sm text-muted-foreground'}>
+                      more...
+                    </span>
+                  ) : null}
                 </CardContent>
                 <CardFooter className={'px-4 justify-end mt-auto'}>
                   {property.authorId === data?.user?.id ? (

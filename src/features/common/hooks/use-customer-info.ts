@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 
+import { CustomerBenefitGrant } from '@polar-sh/sdk/models/components/customerbenefitgrant.js';
 import type { CustomerState } from '@polar-sh/sdk/models/components/customerstate';
+import { CustomerSubscription } from '@polar-sh/sdk/models/components/customersubscription.js';
 import type { Subscription } from '@polar-sh/sdk/models/components/subscription';
 
 import { authClient } from '@/lib/auth-client';
-import { CustomerBenefitGrant } from '@polar-sh/sdk/models/components/customerbenefitgrant.js';
-import { CustomerSubscription } from '@polar-sh/sdk/models/components/customersubscription.js';
 
 export function useCustomerInfo() {
   const [loading, setLoading] = useState(true);
@@ -26,60 +26,100 @@ export function useCustomerInfo() {
   const [subscriptionsError, setSubscriptionsError] =
     useState<CustomerStateError | null>(null);
 
+  // Fetch customer state, benefits, and subscriptions on component mount
   useEffect(() => {
-    try {
-      (async function () {
-        setLoading(true);
-        const [state, benefits, subscriptions] = await Promise.all([
-          authClient.customer.state(),
-          authClient.customer.benefits.list({
-            query: {
-              page: 1,
-              limit: 10,
-            },
-          }),
-          authClient.customer.subscriptions.list({
-            query: {
-              page: 1,
-              limit: 10,
-              active: true,
-            },
-          }),
-        ]);
-        if (!state.data || !benefits.data || !subscriptions.data) {
-          setCustomerError(state.error);
-          setBenefitError(benefits.error);
-          setSubscriptionsError(subscriptions.error);
+    (async function () {
+      try {
+        const res = await authClient.customer.state();
+        if (!res.data) {
+          setCustomerError(res.error);
           setLoading(false);
           setIsError(true);
         } else {
-          setCustomerState(state.data);
-          setBenefits(benefits.data.result.items);
-          setSubscriptions(subscriptions.data.result.items);
+          setCustomerState(res.data);
           setLoading(false);
         }
-      })();
-    } catch (error) {
-      console.error('Error fetching customer data in useUpgradeModal:', error);
-      // eslint-disable-next-line
-      setIsError(true);
-      setCustomerError({
-        status: 500,
-        statusText: 'Internal Server Error',
-        message: 'Failed to fetch customer data',
-      });
-      setBenefitError({
-        status: 500,
-        statusText: 'Internal Server Error',
-        message: 'Failed to fetch benefits data',
-      });
-      setSubscriptionsError({
-        status: 500,
-        statusText: 'Internal Server Error',
-        message: 'Failed to fetch subscriptions data',
-      });
-      setLoading(false);
-    }
+      } catch (error) {
+        console.error(
+          'Error fetching customer data in useUpgradeModal:',
+          error,
+        );
+        // eslint-disable-next-line
+        setIsError(true);
+        setCustomerError({
+          status: 500,
+          statusText: 'Internal Server Error',
+          message: 'Failed to fetch customer data',
+        });
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async function () {
+      try {
+        const res = await authClient.customer.benefits.list({
+          query: {
+            page: 1,
+            limit: 12,
+          },
+        });
+        if (!res.data) {
+          setBenefitError(res.error);
+          setLoading(false);
+          setIsError(true);
+        } else {
+          setBenefits(res.data.result.items);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching benefits in useUpgradeModal:', error);
+        // eslint-disable-next-line
+        setIsError(true);
+        setBenefitError({
+          status: 500,
+          statusText: 'Internal Server Error',
+          message: 'Failed to fetch benefits data',
+        });
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async function () {
+      try {
+        const res = await authClient.customer.subscriptions.list({
+          query: {
+            page: 1,
+            limit: 12,
+            active: true,
+          },
+        });
+        if (!res.data) {
+          setSubscriptionsError(res.error);
+          setLoading(false);
+          setIsError(true);
+        } else {
+          setSubscriptions(res.data.result.items);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error(
+          'Error fetching customer data in useUpgradeModal:',
+          error,
+        );
+        // eslint-disable-next-line
+        setIsError(true);
+        setSubscriptionsError({
+          status: 500,
+          statusText: 'Internal Server Error',
+          message: 'Failed to fetch subscriptions data',
+        });
+        setLoading(false);
+      }
+    })();
   }, []);
 
   return {

@@ -1,6 +1,7 @@
 import { useTRPC } from '@/trpc/client';
 import {
   useMutation,
+  useQuery,
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query';
@@ -65,7 +66,7 @@ export function useUpdateProperty() {
         await queryClient.invalidateQueries(
           trpc.property.getPublicProperties.queryOptions(),
         );
-        router.push('/swapings');
+        router.push('/my-properties');
       },
       onError: (err) => {
         console.error({ err });
@@ -107,6 +108,21 @@ export function useProperty(propertyId: string) {
   return useSuspenseQuery(
     trpc.property.getPropertyDetails.queryOptions({ id: propertyId }),
   );
+}
+
+/**
+ * Hook for getting a property details by ID for update
+ * @param propertyId - Optional property ID. If not provided, the hook will not fetch data.
+ */
+
+export function usePropertyDetailsForUpdate(propertyId: string) {
+  const trpc = useTRPC();
+  return useQuery({
+    ...trpc.property.getPropertyDetailsForUpdate.queryOptions({
+      id: propertyId,
+    }),
+    enabled: propertyId.length > 0,
+  });
 }
 
 /**

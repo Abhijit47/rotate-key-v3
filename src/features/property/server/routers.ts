@@ -15,9 +15,11 @@ import {
   addLikeToPropertySchema,
   deletePropertySchema,
   propertyIdSchema,
-  propertySchema,
-  updatePropertySchema,
 } from '@/lib/validators/property-schema';
+import {
+  combinedPropertySchema,
+  updatePropertySchema,
+} from '@/lib/validators/property-schemas';
 import {
   // baseProcedure,
   createTRPCRouter,
@@ -27,7 +29,7 @@ import {
 
 export const propertyRouter = createTRPCRouter({
   createProperty: premiumProcedure
-    .input(propertySchema)
+    .input(combinedPropertySchema)
     .mutation(async ({ input, ctx }) => {
       const { user } = ctx.auth;
       try {
@@ -50,9 +52,50 @@ export const propertyRouter = createTRPCRouter({
         const [newProperty] = await db
           .insert(PropertyTable)
           .values({
-            ...input,
-            images: JSON.parse(JSON.stringify(input.images)),
-            amenities: JSON.parse(JSON.stringify(input.amenities)),
+            region: input.region,
+            country: input.country,
+            state: input.state,
+            city: input.city,
+            zipcode: input.zipcode,
+            streetAddress: input.streetAddress,
+
+            area: input.propertyArea,
+            areaUnit: input.propertyAreaUnit,
+            description: input.propertyDescription,
+
+            roomType: input.propertyType,
+            ownership: input.propertyOwnership,
+            swaping: input.propertySwaping,
+            rentPeriod: input.propertyRentalTypes,
+            surrounding: input.propertySurrounding,
+            environment: input.propertyEnvironment,
+            accommodation: input.propertyAccomodationType,
+
+            beds: input.numberOfBeds,
+            bedRooms: input.propertyBedRooms,
+            bathRooms: input.propertyBathRooms,
+            guests: input.numberOfGuests,
+
+            ownerName: input.propertyOwnerName
+              ? input.propertyOwnerName
+              : 'n/a',
+            ownerEmail: input.propertyOwnerEmail
+              ? input.propertyOwnerEmail
+              : 'n/a',
+            ownerPhone: input.propertyOwnerPhone
+              ? input.propertyOwnerPhone
+              : 'n/a',
+            knownLanguages: input.hostKnownLanguages,
+
+            amenities: input.propertyAmenities,
+            accessibilities: input.propertyAccessibilities,
+            rules: input.propertyRules,
+
+            staysDateRange: input.staysDateRange,
+            staysDuration: input.staysDurationInDays,
+
+            images: input.propertyImages,
+
             authorId: user.id,
           })
           .returning();
@@ -88,11 +131,11 @@ export const propertyRouter = createTRPCRouter({
           });
         }
         // update property that associated with the user
-        const { id, ...updateData } = input;
+        const { propertyId, ...updateData } = input;
 
         const existingProperty = await db.query.property.findFirst({
           where: and(
-            eq(PropertyTable.id, id),
+            eq(PropertyTable.id, propertyId),
             eq(PropertyTable.authorId, user.id),
           ),
         });
@@ -107,16 +150,107 @@ export const propertyRouter = createTRPCRouter({
         const [updatedProperty] = await db
           .update(PropertyTable)
           .set({
-            ...updateData,
-            images: updateData.images
-              ? updateData.images
-              : existingProperty.images,
-            amenities: updateData.amenities
-              ? updateData.amenities
+            region: updateData.region
+              ? updateData.region
+              : existingProperty.region,
+            country: updateData.country
+              ? updateData.country
+              : existingProperty.country,
+            state: updateData.state ? updateData.state : existingProperty.state,
+            city: updateData.city ? updateData.city : existingProperty.city,
+            zipcode: updateData.zipcode
+              ? updateData.zipcode
+              : existingProperty.zipcode,
+            streetAddress: updateData.streetAddress
+              ? updateData.streetAddress
+              : existingProperty.streetAddress,
+
+            area: updateData.propertyArea
+              ? updateData.propertyArea
+              : existingProperty.area,
+            areaUnit: updateData.propertyAreaUnit
+              ? updateData.propertyAreaUnit
+              : existingProperty.areaUnit,
+            description: updateData.propertyDescription
+              ? updateData.propertyDescription
+              : existingProperty.description,
+
+            roomType: updateData.propertyType
+              ? updateData.propertyType
+              : existingProperty.roomType,
+            ownership: updateData.propertyOwnership
+              ? updateData.propertyOwnership
+              : existingProperty.ownership,
+            swaping: updateData.propertySwaping
+              ? updateData.propertySwaping
+              : existingProperty.swaping,
+            rentPeriod: updateData.propertyRentalTypes
+              ? updateData.propertyRentalTypes
+              : existingProperty.rentPeriod,
+            surrounding: updateData.propertySurrounding
+              ? updateData.propertySurrounding
+              : existingProperty.surrounding,
+            environment: updateData.propertyEnvironment
+              ? updateData.propertyEnvironment
+              : existingProperty.environment,
+            accommodation: updateData.propertyAccomodationType
+              ? updateData.propertyAccomodationType
+              : existingProperty.accommodation,
+
+            beds: updateData.numberOfBeds
+              ? updateData.numberOfBeds
+              : existingProperty.beds,
+            bedRooms: updateData.propertyBedRooms
+              ? updateData.propertyBedRooms
+              : existingProperty.bedRooms,
+            bathRooms: updateData.propertyBathRooms
+              ? updateData.propertyBathRooms
+              : existingProperty.bathRooms,
+            guests: updateData.numberOfGuests
+              ? updateData.numberOfGuests
+              : existingProperty.guests,
+
+            ownerName: updateData.propertyOwnerName
+              ? updateData.propertyOwnerName
+              : existingProperty.ownerName,
+            ownerEmail: updateData.propertyOwnerEmail
+              ? updateData.propertyOwnerEmail
+              : existingProperty.ownerEmail,
+            ownerPhone: updateData.propertyOwnerPhone
+              ? updateData.propertyOwnerPhone
+              : existingProperty.ownerPhone,
+            knownLanguages: updateData.hostKnownLanguages
+              ? updateData.hostKnownLanguages
+              : existingProperty.knownLanguages,
+
+            amenities: updateData.propertyAmenities
+              ? updateData.propertyAmenities
               : existingProperty.amenities,
+            accessibilities: updateData.propertyAccessibilities
+              ? updateData.propertyAccessibilities
+              : existingProperty.accessibilities,
+            rules: updateData.propertyRules
+              ? updateData.propertyRules
+              : existingProperty.rules,
+
+            staysDateRange: updateData.staysDateRange
+              ? updateData.staysDateRange
+              : existingProperty.staysDateRange,
+            staysDuration: updateData.staysDurationInDays
+              ? updateData.staysDurationInDays
+              : existingProperty.staysDuration,
+
+            images: updateData.propertyImages
+              ? updateData.propertyImages
+              : existingProperty.images,
+
+            updatedAt: new Date(),
           })
           .where(
-            and(eq(PropertyTable.id, id), eq(PropertyTable.authorId, user.id)),
+            and(
+              eq(PropertyTable.id, propertyId),
+              eq(PropertyTable.authorId, user.id),
+            ),
           )
           .returning();
         return updatedProperty;
@@ -243,6 +377,10 @@ export const propertyRouter = createTRPCRouter({
 
       return {
         ...existingProperty,
+        // Do not expose owner contact data through property details.
+        ownerName: undefined,
+        ownerEmail: undefined,
+        ownerPhone: undefined,
         isBookedByMe: !!isBookedByMe,
         bookDetailsWithCurrentUser: isBookedByMe,
       };
@@ -256,21 +394,48 @@ export const propertyRouter = createTRPCRouter({
       const { id } = input;
 
       // get properties that associated with the user or not within the user
-      const removeProperty = await db.query.property.findFirst({
+      const result = await db.query.property.findFirst({
         where: and(
           eq(PropertyTable.id, id),
           eq(PropertyTable.authorId, user.id),
         ),
       });
 
-      if (!removeProperty) {
+      if (!result) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Property not found',
         });
       }
 
-      return removeProperty;
+      return result;
+    }),
+
+  // get property details for update only for the owner of the property
+  getPropertyDetailsForUpdate: protectedProcedure
+    .input(propertyIdSchema)
+    .query(async ({ input, ctx }) => {
+      const { user } = ctx.auth;
+      const { id: propertyId } = input;
+
+      const existingProperty = await db.query.property.findFirst({
+        where: and(
+          eq(PropertyTable.id, propertyId),
+          eq(PropertyTable.authorId, user.id),
+        ),
+      });
+
+      if (!existingProperty) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Property not found',
+        });
+      }
+
+      const { id, isAvailable, authorId, createdAt, updatedAt, ...rest } =
+        existingProperty;
+
+      return rest;
     }),
 
   getUserProperties: protectedProcedure.query(async ({ ctx }) => {
