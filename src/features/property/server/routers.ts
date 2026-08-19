@@ -377,6 +377,10 @@ export const propertyRouter = createTRPCRouter({
 
       return {
         ...existingProperty,
+        // Do not expose owner contact data through property details.
+        ownerName: undefined,
+        ownerEmail: undefined,
+        ownerPhone: undefined,
         isBookedByMe: !!isBookedByMe,
         bookDetailsWithCurrentUser: isBookedByMe,
       };

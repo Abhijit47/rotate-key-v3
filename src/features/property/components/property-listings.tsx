@@ -361,9 +361,11 @@ export function MyPropertyListings() {
                       </span>
                     </p>
                   ))}
-                  <span className={'text-sm text-muted-foreground'}>
-                    more...
-                  </span>
+                  {property.amenities.length > 4 ? (
+                    <span className={'text-sm text-muted-foreground'}>
+                      more...
+                    </span>
+                  ) : null}
                 </CardContent>
                 <CardFooter className={'px-4 justify-end mt-auto'}>
                   {property.authorId === data?.user?.id ? (

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 
+import { CustomerBenefitGrant } from '@polar-sh/sdk/models/components/customerbenefitgrant.js';
 import type { CustomerState } from '@polar-sh/sdk/models/components/customerstate';
+import { CustomerSubscription } from '@polar-sh/sdk/models/components/customersubscription.js';
 import type { Subscription } from '@polar-sh/sdk/models/components/subscription';
 
 import { authClient } from '@/lib/auth-client';
-import { CustomerBenefitGrant } from '@polar-sh/sdk/models/components/customerbenefitgrant.js';
-import { CustomerSubscription } from '@polar-sh/sdk/models/components/customersubscription.js';
 
 export function useCustomerInfo() {
   const [loading, setLoading] = useState(true);
@@ -28,8 +28,8 @@ export function useCustomerInfo() {
 
   // Fetch customer state, benefits, and subscriptions on component mount
   useEffect(() => {
-    try {
-      (async function () {
+    (async function () {
+      try {
         const res = await authClient.customer.state();
         if (!res.data) {
           setCustomerError(res.error);
@@ -39,23 +39,26 @@ export function useCustomerInfo() {
           setCustomerState(res.data);
           setLoading(false);
         }
-      })();
-    } catch (error) {
-      console.error('Error fetching customer data in useUpgradeModal:', error);
-      // eslint-disable-next-line
-      setIsError(true);
-      setCustomerError({
-        status: 500,
-        statusText: 'Internal Server Error',
-        message: 'Failed to fetch customer data',
-      });
-      setLoading(false);
-    }
+      } catch (error) {
+        console.error(
+          'Error fetching customer data in useUpgradeModal:',
+          error,
+        );
+        // eslint-disable-next-line
+        setIsError(true);
+        setCustomerError({
+          status: 500,
+          statusText: 'Internal Server Error',
+          message: 'Failed to fetch customer data',
+        });
+        setLoading(false);
+      }
+    })();
   }, []);
 
   useEffect(() => {
-    try {
-      (async function () {
+    (async function () {
+      try {
         const res = await authClient.customer.benefits.list({
           query: {
             page: 1,
@@ -70,23 +73,23 @@ export function useCustomerInfo() {
           setBenefits(res.data.result.items);
           setLoading(false);
         }
-      })();
-    } catch (error) {
-      console.error('Error fetching benefits in useUpgradeModal:', error);
-      // eslint-disable-next-line
-      setIsError(true);
-      setBenefitError({
-        status: 500,
-        statusText: 'Internal Server Error',
-        message: 'Failed to fetch benefits data',
-      });
-      setLoading(false);
-    }
+      } catch (error) {
+        console.error('Error fetching benefits in useUpgradeModal:', error);
+        // eslint-disable-next-line
+        setIsError(true);
+        setBenefitError({
+          status: 500,
+          statusText: 'Internal Server Error',
+          message: 'Failed to fetch benefits data',
+        });
+        setLoading(false);
+      }
+    })();
   }, []);
 
   useEffect(() => {
-    try {
-      (async function () {
+    (async function () {
+      try {
         const res = await authClient.customer.subscriptions.list({
           query: {
             page: 1,
@@ -102,18 +105,21 @@ export function useCustomerInfo() {
           setSubscriptions(res.data.result.items);
           setLoading(false);
         }
-      })();
-    } catch (error) {
-      console.error('Error fetching customer data in useUpgradeModal:', error);
-      // eslint-disable-next-line
-      setIsError(true);
-      setSubscriptionsError({
-        status: 500,
-        statusText: 'Internal Server Error',
-        message: 'Failed to fetch subscriptions data',
-      });
-      setLoading(false);
-    }
+      } catch (error) {
+        console.error(
+          'Error fetching customer data in useUpgradeModal:',
+          error,
+        );
+        // eslint-disable-next-line
+        setIsError(true);
+        setSubscriptionsError({
+          status: 500,
+          statusText: 'Internal Server Error',
+          message: 'Failed to fetch subscriptions data',
+        });
+        setLoading(false);
+      }
+    })();
   }, []);
 
   return {

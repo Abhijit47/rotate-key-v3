@@ -84,25 +84,27 @@ export default function NewProperty() {
       <Separator />
       <FormErrorDrawer />
 
-      <Button
-        type='button'
-        className={'absolute bottom-0 left-6/12'}
-        onClick={() => {
-          toast.promise(testMutate(), {
-            loading: 'Testing premium...',
-            success: () => {
-              return 'Premium test successful';
-            },
-            error: (err) => {
-              if (err instanceof TRPCClientError) {
-                handleError(err);
-              }
-              return err.message || 'Failed to test premium';
-            },
-          });
-        }}>
-        TestPremium
-      </Button>
+      {isDev ? (
+        <Button
+          type='button'
+          className={'absolute bottom-0 left-6/12'}
+          onClick={() => {
+            toast.promise(testMutate(), {
+              loading: 'Testing premium...',
+              success: () => {
+                return 'Premium test successful';
+              },
+              error: (err) => {
+                if (err instanceof TRPCClientError) {
+                  handleError(err);
+                }
+                return err.message || 'Failed to test premium';
+              },
+            });
+          }}>
+          TestPremium
+        </Button>
+      ) : null}
 
       <ScrollArea className='h-[calc(100vh-8em)] w-full overflow-x-hidden'>
         <CardContent>

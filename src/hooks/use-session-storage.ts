@@ -31,6 +31,10 @@ const useSessionStorage = <T>({
     try {
       const sessionStorageValue = sessionStorage.getItem(key);
       if (typeof sessionStorageValue !== 'string') {
+        if (typeof initialValue === 'undefined') {
+          return initialValue as T;
+        }
+
         let serializedInitialValue: string;
 
         if (raw) {
@@ -84,7 +88,7 @@ const useSessionStorage = <T>({
       // If user is in private mode or has storage restriction
       // sessionStorage can throw. Also JSON.stringify can throw.
     }
-  }, [key, state, raw]);
+  }, [key, state]);
 
   // Clear the session storage item after the specified timeout
   useEffect(() => {

@@ -42,6 +42,8 @@ type PropertyContextType = {
   isLoading: boolean;
   // nextStep: () => void;
 
+  propertyDetailsError?: string;
+
   progress: number;
   clearDraft: () => void;
 };
@@ -148,6 +150,10 @@ export function PropertyContextProvider(props: PropertyContextProviderProps) {
   const [progress, setProgress] = useState(propertyFormStats.progress);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [propertyDetailsErr, setPropertyDetailsErr] = useState<
+    string | undefined
+  >();
+
   const isIntroStep = step === 0;
   const isFirstStep = !isIntroStep && step === 1;
   const isLastStep = propertySteps.length === step;
@@ -175,9 +181,12 @@ export function PropertyContextProvider(props: PropertyContextProviderProps) {
       'Here you can create a new property listing or request an exchange. To get started, select a category from the menu and fill in the required details. We’ll save your progress automatically as you go.',
   };
 
-  const { data: propertyDetails, isFetching } = usePropertyDetailsForUpdate(
-    propertyId || '',
-  );
+  const {
+    data: propertyDetails,
+    isLoading: propertyDetailsLoading,
+    isError: propertyDetailsError,
+    error: propertyDetailsErrorData,
+  } = usePropertyDetailsForUpdate(propertyId || '');
 
   // react hook form initialize here
   const form = useForm<WizardValues>({
@@ -186,7 +195,16 @@ export function PropertyContextProvider(props: PropertyContextProviderProps) {
     mode: 'onChange',
     // criteriaMode: "all", // 👈 Enable all errors
     progressive: true,
+    disabled: propertyDetailsLoading || propertyDetailsError,
   });
+
+  useEffect(() => {
+    if (propertyDetailsError) {
+      setPropertyDetailsErr(
+        propertyDetailsErrorData.message || 'Failed to fetch property details',
+      );
+    }
+  }, [propertyDetailsError, propertyDetailsErrorData]);
 
   useEffect(() => {
     if (propertyDetails) {
@@ -219,7 +237,7 @@ export function PropertyContextProvider(props: PropertyContextProviderProps) {
           propertyBedRooms: propertyDetails.bedRooms,
           propertyBathRooms: propertyDetails.bathRooms,
           numberOfGuests: propertyDetails.guests,
-          numberOfBeds: propertyDetails.bedRooms,
+          numberOfBeds: propertyDetails.beds,
           hostKnownLanguages: propertyDetails.knownLanguages,
           propertyRules: propertyDetails.rules,
           propertyAccessibilities: propertyDetails.accessibilities,
@@ -379,6 +397,8 @@ export function PropertyContextProvider(props: PropertyContextProviderProps) {
     onToggleErrorDrawer: toggleErrorDrawer,
     isLoading,
     // nextStep,
+
+    propertyDetailsError: propertyDetailsErr,
 
     progress,
     clearDraft,

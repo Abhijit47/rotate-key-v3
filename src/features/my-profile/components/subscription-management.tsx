@@ -248,10 +248,13 @@ export function SubscriptionManagement() {
               Current Plan Features
             </h4>
             <div className='flex flex-wrap gap-2 sm:gap-3'>
-              {subscriptions[0]?.product?.benefits?.length === 0 ? (
+              {!subscriptions[0]?.product?.benefits?.length ? (
                 <p>No benefits found for this plan.</p>
               ) : (
                 <>
+                  {/* TODO: We can do once benefits data will fetch properly 
+                    benefits?.length === 0
+                    */}
                   {subscriptions[0]?.product?.benefits?.map((feature) => (
                     <div
                       key={feature.id}
