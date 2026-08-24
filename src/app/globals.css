@@ -1,12 +1,14 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
-@import 'shadcn/tailwind.css';
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-@import '@c15t/nextjs/styles.css';
+@import "@c15t/nextjs/styles.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --breakpoint-xs: 20rem;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -78,6 +80,11 @@
 
   --color-destructive-foreground: var(--destructive-foreground);
 
+  /* view transition */
+  --duration-exit: 150ms;
+  --duration-enter: 210ms;
+  --duration-move: 400ms;
+
   @keyframes slideOut {
     0% {
       transform: translateY(0%);
@@ -86,6 +93,36 @@
       transform: translateY(-100%);
     }
   }
+
+  @keyframes fade {
+    from {
+      filter: blur(3px);
+      opacity: 0;
+    }
+    to {
+      filter: blur(0);
+      opacity: 1;
+    }
+  }
+  @keyframes slide-y {
+    from {
+      transform: translateY(10px);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+
+::view-transition-old(.slide-down) {
+  animation:
+    var(--duration-exit) ease-out both fade reverse,
+    var(--duration-exit) ease-out both slide-y reverse;
+}
+::view-transition-new(.slide-up) {
+  animation:
+    var(--duration-enter) ease-in var(--duration-exit) both fade,
+    var(--duration-move) ease-in both slide-y;
 }
 
 /* :root {

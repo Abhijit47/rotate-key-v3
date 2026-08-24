@@ -23,6 +23,11 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { PropertyType } from '@/constants/property-assets';
+import {
+  AccessibilitiesLateral,
+  AmenitiesLateral,
+  RulesLateral,
+} from '@/constants/property-assets-types';
 import { cn } from '@/lib/utils';
 import type { WizardValues } from '@/lib/validators/property-schemas';
 
@@ -43,6 +48,8 @@ type CustomPopoverCommandProps = {
   isInvalid: boolean;
 };
 
+type LiteralType = AmenitiesLateral | AccessibilitiesLateral | RulesLateral;
+
 export default function CustomPopoverCommand(props: CustomPopoverCommandProps) {
   const [searchItem, setSearchItem] = useState('');
 
@@ -57,7 +64,7 @@ export default function CustomPopoverCommand(props: CustomPopoverCommandProps) {
           id={props.name}
           variant='outline'
           className={cn(
-            'w-full justify-between font-normal text-ellipsis overflow-hidden',
+            'justify-between w-full overflow-hidden font-normal text-ellipsis',
           )}>
           {props.itemsLength?.length ? (
             <span className={'capitalize text-xs sm:text-sm line-clamp-1'}>
@@ -67,13 +74,13 @@ export default function CustomPopoverCommand(props: CustomPopoverCommandProps) {
             <>
               <span>Select {props.label ?? 'items'}</span>
               <span>
-                <ChevronsUpDownIcon className='ml-auto h-4 w-4 opacity-50' />
+                <ChevronsUpDownIcon className='opacity-50 ml-auto w-4 h-4' />
               </span>
             </>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-full p-0' align='start'>
+      <PopoverContent className='p-0 w-full' align='start'>
         <Command
           shouldFilter={true}
           filter={(value, search, keywords) => {
@@ -83,7 +90,7 @@ export default function CustomPopoverCommand(props: CustomPopoverCommandProps) {
             return 0;
           }}
           loop={true}
-          className='rounded-lg border shadow-md min-w-auto sm:min-w-md md:min-w-lg'>
+          className='shadow-md border rounded-lg min-w-auto sm:min-w-md md:min-w-lg'>
           <CommandInput
             placeholder={`Search ${props.label ?? 'items'}...`}
             value={searchItem}
@@ -109,7 +116,7 @@ export default function CustomPopoverCommand(props: CustomPopoverCommandProps) {
                             <Checkbox
                               id={`${props.label ?? 'items'}-${type.id}`}
                               checked={field.value?.includes(
-                                type.name.toLocaleLowerCase(),
+                                type.name.toLocaleLowerCase() as never,
                               )}
                               onCheckedChange={(checked) => {
                                 return checked
@@ -128,7 +135,7 @@ export default function CustomPopoverCommand(props: CustomPopoverCommandProps) {
                             />
                             <FieldLabel
                               htmlFor={`${props.label ?? 'items'}-${item.id}`}
-                              className='text-sm font-normal'
+                              className='font-normal text-sm'
                               data-invalid={props.isInvalid}
                               aria-invalid={props.isInvalid}>
                               {item.categoryName}

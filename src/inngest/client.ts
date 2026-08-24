@@ -19,6 +19,10 @@ type UserDeleted = {
   data: { id: string };
 };
 
+type PropertyHoldingExpiryCheck = {
+  data: { propertyId: string };
+};
+
 type Events = {
   'test/hello.world': {
     data: { email: string };
@@ -39,6 +43,9 @@ type Events = {
       newMatchId: string;
     };
   };
+
+  'property/hold-expiry-check': PropertyHoldingExpiryCheck;
+
   'user/new.signup.complete': UserSignup;
   'user/oauth.signup.complete': UserSignup;
   'user/onboarding.complete': UserOnboarding;

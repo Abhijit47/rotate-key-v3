@@ -7,15 +7,15 @@ import {
 } from '@/components/ui/accordion';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { propertyOwnershipsEnum } from '@/constants/property-assets-enums';
-import { OwnershipLateral } from '@/constants/property-assets-types';
+import { propertySwapingsEnum } from '@/constants/property-assets-enums';
+import { SwapingLateral } from '@/constants/property-assets-types';
 import { usePropertyFilter } from '@/contexts/property-filter-context';
 import { titleCaseSkipSpecial } from '@/lib/utils';
 import { advancedFilterParams } from '../../searchParams';
 
-export default function OwnershipTypeFilter({ itemNo }: { itemNo: string }) {
-  const { isTransition, startTransition } = usePropertyFilter();
-  const [{ ownership }, setValues] = useQueryStates(advancedFilterParams, {
+export default function SwappingTypeFilter({ itemNo }: { itemNo: string }) {
+  const { startTransition } = usePropertyFilter();
+  const [{ swaping }, setValues] = useQueryStates(advancedFilterParams, {
     shallow: false,
     history: 'replace',
     startTransition,
@@ -25,28 +25,28 @@ export default function OwnershipTypeFilter({ itemNo }: { itemNo: string }) {
     },
   });
 
-  // const [ownership, setOwnership] = useState<OwnershipLateral | undefined>(
-  //   'freehold',
+  // const [swapping, setSwapping] = useState<SwapingLateral | undefined>(
+  //   'permanent swap',
   // );
 
   return (
     <AccordionItem value={`item-${itemNo}`}>
-      <AccordionTrigger>Ownership Type</AccordionTrigger>
+      <AccordionTrigger>Swapping Type</AccordionTrigger>
       <AccordionContent>
         <Tabs
-          value={ownership ?? undefined}
-          className='w-58.75 xs:w-[350px] sm:w-125'
+          value={swaping ?? undefined}
+          className='w-58.75 xs:w-[350px] sm:w-107.5 md:w-full'
           onValueChange={(val) =>
             setValues((prev) => ({
               ...prev,
-              ownership: val as OwnershipLateral | undefined,
+              swaping: val as SwapingLateral | undefined,
             }))
           }>
           <ScrollArea className='w-full whitespace-nowrap'>
-            <TabsList className={'gap-2'}>
-              {propertyOwnershipsEnum.map((type, idx) => {
+            <TabsList className={'gap-2 w-full'}>
+              {propertySwapingsEnum.map((type, idx) => {
                 return (
-                  <TabsTrigger key={idx} value={type} disabled={isTransition}>
+                  <TabsTrigger key={idx} value={type}>
                     {titleCaseSkipSpecial(type)}
                   </TabsTrigger>
                 );

@@ -100,3 +100,8 @@ export const propertyAccomodationsEnum = propertyAccomodations
 export const hostLanguageEnum = hostLanguages.map(
   (language) => language.language,
 );
+
+export const sortOrderEnum = {
+  'Ascending (A-Z)': 'asc',
+  'Descending (Z-A)': 'desc',
+} as const;

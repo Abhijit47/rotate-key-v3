@@ -1,13 +1,14 @@
 import { format } from 'date-fns';
+import { eq } from 'drizzle-orm';
 import { NonRetriableError } from 'inngest';
 import { StreamChat, UserResponse } from 'stream-chat';
-import { eq } from 'drizzle-orm';
 
 import { db } from '@/drizzle/db';
-import { user } from '@/drizzle/schema';
+import { propertyHold, user } from '@/drizzle/schema';
 import { match as MatchTable } from '@/drizzle/schema/match';
 import { env } from '@/env';
 import { auth } from '@/lib/auth';
+import { generateSubscriberHash } from '@/lib/generate-hash';
 import { generateChannelId } from '@/lib/helpers';
 import { polarClient } from '@/lib/polar';
 import {
@@ -16,7 +17,6 @@ import {
   sendInAppNotification,
 } from '@/novu/functions';
 import { inngest } from './client';
-import { generateSubscriberHash } from '@/lib/generate-hash';
 
 export const helloWorld = inngest.createFunction(
   { id: 'hello-world' },
@@ -352,6 +352,50 @@ export const createChannelBetweenMatchedUsers = inngest.createFunction(
     return {
       success: true,
       message: `Channel ${channelInstance.id} created for matched users ${user1Id} and ${user2Id}`,
+    };
+  },
+);
+
+export const propertyHoldingExpiryCheck = inngest.createFunction(
+  { id: 'property-holding-expiry-check' },
+  { event: 'property/hold-expiry-check' },
+  async ({ event, step }) => {
+    const { propertyId } = event.data;
+
+    const existingProperty = await step.run(
+      'get-existing-property',
+      async () => {
+        return await db.query.propertyHold.findFirst({
+          where(fields, { eq }) {
+            return eq(fields.propertyId, propertyId);
+          },
+        });
+      },
+    );
+
+    if (!existingProperty) {
+      throw new NonRetriableError('Property holding not found!');
+    }
+
+    // sleep upto expiration time
+    const expireTime = existingProperty.expiredAt;
+    if (!expireTime) {
+      throw new NonRetriableError('Property holding expiry time not found!');
+    }
+
+    const date = new Date(expireTime);
+    await step.sleepUntil('wait-for-expiration', date);
+
+    await step.run('update-property-holding-status', async () => {
+      return await db
+        .update(propertyHold)
+        .set({ holdStatus: 'inactive', isActiveHold: false })
+        .where(eq(propertyHold.id, existingProperty.id));
+    });
+
+    return {
+      success: true,
+      message: 'Property holding status updated successfully',
     };
   },
 );

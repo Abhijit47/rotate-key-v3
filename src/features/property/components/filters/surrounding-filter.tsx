@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useQueryStates } from 'nuqs';
 
 import {
   AccordionContent,
@@ -6,28 +6,48 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { surroundingConstantTypes } from '@/lib/helpers/property-helpers';
+import { propertySurroundingsEnum } from '@/constants/property-assets-enums';
+import { usePropertyFilter } from '@/contexts/property-filter-context';
+import { titleCaseSkipSpecial } from '@/lib/utils';
+import { advancedFilterParams } from '../../searchParams';
 
 export default function SurroundingFilter({ itemNo }: { itemNo: string }) {
-  const [surrounding, setSurrounding] = useState('island');
+  const { startTransition } = usePropertyFilter();
+  const [{ surrounding }, setValues] = useQueryStates(advancedFilterParams, {
+    shallow: false,
+    history: 'replace',
+    startTransition,
+    limitUrlUpdates: {
+      method: 'throttle',
+      timeMs: 300,
+    },
+  });
+
+  // const [surrounding, setSurrounding] = useState<
+  //   SurroundingLateral | undefined
+  // >('desert');
 
   return (
     <AccordionItem value={`item-${itemNo}`}>
       <AccordionTrigger>Surrounding</AccordionTrigger>
       <AccordionContent>
         <div className={'flex items-center flex-wrap gap-2'}>
-          {surroundingConstantTypes.map((type, idx) => (
-            <Badge
-              key={idx}
-              className={'cursor-pointer'}
-              variant={
-                surrounding === type.toLowerCase() ? 'default' : 'outline'
-              }
-              onClick={() => setSurrounding(type.toLowerCase())}
-            >
-              {type}
-            </Badge>
-          ))}
+          {propertySurroundingsEnum.map((type, idx) => {
+            return (
+              <Badge
+                key={idx}
+                className={'cursor-pointer'}
+                variant={surrounding === type ? 'default' : 'outline'}
+                onClick={() => {
+                  setValues((prev) => ({
+                    ...prev,
+                    surrounding: type === surrounding ? null : type,
+                  }));
+                }}>
+                {titleCaseSkipSpecial(type)}
+              </Badge>
+            );
+          })}
         </div>
       </AccordionContent>
     </AccordionItem>

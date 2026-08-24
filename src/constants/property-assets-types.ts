@@ -1,4 +1,4 @@
-type AccommodationCategoryLaterral =
+export type AccommodationCategoryLaterral =
   | 'entire place'
   | 'private accommodation'
   | 'shared accommodation';
@@ -18,11 +18,11 @@ type AccessibilitiesCategoryLateral =
   | 'smart & assistive technology'
   | 'communication & safety';
 
-type RentPeriodCategoryLateral =
-  | 'Short-Term Rentals'
-  | 'Medium-Term Rentals'
-  | 'Long-Term Rentals'
-  | 'Leased Property';
+export type RentPeriodCategoryLateral =
+  | 'short-term rentals'
+  | 'medium-term rentals'
+  | 'long-term rentals'
+  | 'leased property';
 
 export type RentPeriodLateral =
   | 'daily rental'

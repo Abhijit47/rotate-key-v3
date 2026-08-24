@@ -7,7 +7,12 @@ import { account, session, user } from './auth';
 import { bookings } from './booking';
 import { like } from './like';
 import { match } from './match';
-import { property } from './property';
+import {
+  property,
+  propertyFavorite,
+  propertyHold,
+  propertyStats,
+} from './property';
 import { ReviewTable } from './reviews';
 import { SwapsTable } from './swap';
 
@@ -25,6 +30,11 @@ export const userRelations = relations(user, ({ many }) => ({
   likes: many(like),
 
   reviews: many(ReviewTable, { relationName: 'userReview' }),
+
+  propertyHolds: many(propertyHold, { relationName: 'propertyHoldsByUser' }),
+  propertyFavorites: many(propertyFavorite, {
+    relationName: 'propertyFavoritesByUser',
+  }),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -49,6 +59,53 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
   bookings: many(bookings),
   // All likes received by this property
   receivedLikes: many(like, { relationName: 'property' }),
+
+  propertyHolds: many(propertyHold, { relationName: 'propertyHolds' }),
+  propertyFavorites: many(propertyFavorite, {
+    relationName: 'propertyFavorites',
+  }),
+  propertyStats: one(propertyStats, {
+    fields: [property.id],
+    references: [propertyStats.id],
+    relationName: 'propertyStats',
+  }),
+}));
+
+export const propertyHoldRelations = relations(propertyHold, ({ one }) => ({
+  property: one(property, {
+    fields: [propertyHold.propertyId],
+    references: [property.id],
+    relationName: 'propertyHolds',
+  }),
+  holdBy: one(user, {
+    fields: [propertyHold.holdBy],
+    references: [user.id],
+    relationName: 'propertyHoldsByUser',
+  }),
+}));
+
+export const propertyFavoriteRelations = relations(
+  propertyFavorite,
+  ({ one }) => ({
+    property: one(property, {
+      fields: [propertyFavorite.propertyId],
+      references: [property.id],
+      relationName: 'propertyFavorites',
+    }),
+    favoriteBy: one(user, {
+      fields: [propertyFavorite.favoriteBy],
+      references: [user.id],
+      relationName: 'propertyFavoritesByUser',
+    }),
+  }),
+);
+
+export const propertyStatsRelations = relations(propertyStats, ({ one }) => ({
+  property: one(property, {
+    fields: [propertyStats.propertyId],
+    references: [property.id],
+    relationName: 'propertyStats',
+  }),
 }));
 
 export const matchRelations = relations(match, ({ one, many }) => ({

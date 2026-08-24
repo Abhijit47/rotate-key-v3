@@ -193,5 +193,70 @@ export const property = pgTable(
 //   }),
 // }));
 
+export const HoldStatus = pgEnum('hold_status', ['active', 'inactive']);
+
+export const propertyHold = pgTable('propertyHold', {
+  id: uuid('id').defaultRandom().primaryKey().unique().notNull(),
+
+  propertyId: uuid('property_id')
+    .references(() => property.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  holdBy: uuid('hold_by')
+    .references(() => user.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  holdStatus: HoldStatus(),
+  isActiveHold: boolean('is_active_hold').default(true).notNull(),
+
+  holdDate: timestamp('hold_date'),
+  expiredAt: timestamp('expired_at').$onUpdate(() => new Date()),
+});
+
+export const propertyFavorite = pgTable('propertyFavorite', {
+  id: uuid('id').defaultRandom().primaryKey().unique().notNull(),
+
+  propertyId: uuid('property_id')
+    .references(() => property.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  favoriteBy: uuid('favorite_by')
+    .references(() => user.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  favoriteAt: timestamp('favorite_at')
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const propertyStats = pgTable('propertyStats', {
+  id: uuid('id').defaultRandom().primaryKey().unique().notNull(),
+
+  propertyId: uuid('property_id')
+    .unique()
+    .references(() => property.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  views: integer('views').default(0).notNull(),
+  favorites: integer('favorites').default(0).notNull(),
+  holds: integer('holds').default(0).notNull(),
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
 export type InsertProperty = typeof property.$inferInsert;
 export type SelectProperty = typeof property.$inferSelect;
+
+export type InsertPropertyHold = typeof propertyHold.$inferInsert;
+export type SelectPropertyHold = typeof propertyHold.$inferSelect;
+export type HoldStatus = typeof HoldStatus.enumValues;
+
+export type InsertPropertyFavorite = typeof propertyFavorite.$inferInsert;
+export type SelectPropertyFavorite = typeof propertyFavorite.$inferSelect;
+
+export type InsertPropertyStats = typeof propertyStats.$inferInsert;
+export type SelectPropertyStats = typeof propertyStats.$inferSelect;

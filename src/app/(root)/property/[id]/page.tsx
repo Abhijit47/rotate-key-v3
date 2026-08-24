@@ -1,15 +1,16 @@
-import { buttonVariants } from '@/components/ui/button';
-import { prefetchPropertyDetails } from '@/features/property/server/prefetch';
-// import { prefetchUserProperty } from '@/features/property/server/prefetch';
-import BookingForm from '@/features/booking/components/booking-form';
-import { PropertyListing } from '@/features/property/components/property-listings';
-import { requireAuth } from '@/lib/requireAuth';
-import { HydrateClient } from '@/trpc/server';
 import { ArrowLeftCircle } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { after } from 'next/server';
 import { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+
+import { buttonVariants } from '@/components/ui/button';
+import BookingForm from '@/features/booking/components/booking-form';
+import { PropertyListing } from '@/features/property/components/property-listings';
+import { prefetchPropertyDetails } from '@/features/property/server/prefetch';
+import { requireAuth } from '@/lib/requireAuth';
+import { HydrateClient, caller } from '@/trpc/server';
 
 export default async function PropertyPage(props: PageProps<'/property/[id]'>) {
   await requireAuth();
@@ -20,6 +21,14 @@ export default async function PropertyPage(props: PageProps<'/property/[id]'>) {
   }
 
   prefetchPropertyDetails(propertyId);
+
+  // add view to a property on page load (after render layout)
+  after(async () => {
+    await caller.engagement.addViewsToProperty({
+      propertyId,
+      path: `/property/${propertyId}`,
+    });
+  });
 
   return (
     <HydrateClient>

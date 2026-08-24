@@ -5,21 +5,6 @@ import { randomBytes } from 'crypto';
 // import axios from 'axios';
 import patterns from './countries-regex';
 
-// CONSANTS
-import {
-  propertyRentalPeriods,
-  hostLanguages,
-  propertyAccessibilities,
-  propertyAccomodations,
-  propertyAmenities,
-  propertyEnvironments,
-  propertyOwnerships,
-  propertyRules,
-  propertySurroundings,
-  propertySwapings,
-  propertyTypes,
-} from '@/constants/property-assets';
-
 // Function to help with conditional classnames
 export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -197,6 +182,13 @@ export function formatTimeAgo(date: Date) {
   }
 }
 
+export function prettifyText(text: string) {
+  return text
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 type ConstantPropertyDataType = {
   categoryTypes: {
     id: string;
@@ -225,54 +217,54 @@ export function makeArrayOfStrings(params: MakeArrayOfStringType) {
     return params.data
       .flatMap((type) => type.categoryTypes)
       .flatMap((category) => category.rentType ?? fallback)
-      .map((option) => option.name);
+      .map((option) => option.name.toLowerCase());
   } else {
     return params.data
       .flatMap((type) => type.categoryTypes)
-      .map((option) => option.name);
+      .map((option) => option.name.toLowerCase());
   }
 }
 
-export const propertyConstantTypes = makeArrayOfStrings({
-  data: propertyTypes,
-  type: 'other',
-});
-export const ownershipConstantTypes = makeArrayOfStrings({
-  data: propertyOwnerships,
-  type: 'other',
-});
-export const swappingConstantTypes = makeArrayOfStrings({
-  data: propertySwapings,
-  type: 'other',
-});
-export const rentalConstantTypes = makeArrayOfStrings({
-  data: propertyRentalPeriods,
-  type: 'rental',
-});
-export const environmentConstantTypes = makeArrayOfStrings({
-  data: propertyEnvironments,
-  type: 'other',
-});
-export const surroundingConstantTypes = makeArrayOfStrings({
-  data: propertySurroundings,
-  type: 'other',
-});
-export const accomodationConstantTypes = makeArrayOfStrings({
-  data: propertyAccomodations,
-  type: 'other',
-});
-export const amenitiesConstantTypes = makeArrayOfStrings({
-  data: propertyAmenities,
-  type: 'other',
-});
-export const rulesConstantTypes = makeArrayOfStrings({
-  data: propertyRules,
-  type: 'other',
-});
-export const accessibilitiesConstantTypes = makeArrayOfStrings({
-  data: propertyAccessibilities,
-  type: 'other',
-});
-export const languagesConstantTypes = hostLanguages.map(
-  (language) => language.language,
-);
+// export const propertyConstantTypes = makeArrayOfStrings({
+//   data: propertyTypes,
+//   type: 'other',
+// });
+// export const ownershipConstantTypes = makeArrayOfStrings({
+//   data: propertyOwnerships,
+//   type: 'other',
+// });
+// export const swappingConstantTypes = makeArrayOfStrings({
+//   data: propertySwapings,
+//   type: 'other',
+// });
+// export const rentalConstantTypes = makeArrayOfStrings({
+//   data: propertyRentalPeriods,
+//   type: 'rental',
+// });
+// export const environmentConstantTypes = makeArrayOfStrings({
+//   data: propertyEnvironments,
+//   type: 'other',
+// });
+// export const surroundingConstantTypes = makeArrayOfStrings({
+//   data: propertySurroundings,
+//   type: 'other',
+// });
+// export const accomodationConstantTypes = makeArrayOfStrings({
+//   data: propertyAccomodations,
+//   type: 'other',
+// });
+// export const amenitiesConstantTypes = makeArrayOfStrings({
+//   data: propertyAmenities,
+//   type: 'other',
+// });
+// export const rulesConstantTypes = makeArrayOfStrings({
+//   data: propertyRules,
+//   type: 'other',
+// });
+// export const accessibilitiesConstantTypes = makeArrayOfStrings({
+//   data: propertyAccessibilities,
+//   type: 'other',
+// });
+// export const languagesConstantTypes = hostLanguages.map(
+//   (language) => language.language,
+// );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useQueryStates } from 'nuqs';
 
 import {
   AccordionContent,
@@ -6,22 +6,28 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
-
 import { Label } from '@/components/ui/label';
 import { propertyAmenities } from '@/constants/property-assets';
-
-const isDev = process.env.NODE_ENV === 'development' ? true : false;
+import { AmenitiesLateral } from '@/constants/property-assets-types';
+import { usePropertyFilter } from '@/contexts/property-filter-context';
+import { advancedFilterParams } from '../../searchParams';
 
 export default function AmmenitiesFilter({ itemNo }: { itemNo: string }) {
-  const [amenities, setAmenities] = useState(() => {
-    return isDev
-      ? [
-          propertyAmenities[0].categoryTypes[0].name,
-          propertyAmenities[0].categoryTypes[1].name,
-          propertyAmenities[0].categoryTypes[3].name,
-        ]
-      : [];
+  const { startTransition } = usePropertyFilter();
+  const [{ amenities }, setValues] = useQueryStates(advancedFilterParams, {
+    shallow: false,
+    history: 'replace',
+    startTransition,
+    limitUrlUpdates: {
+      method: 'throttle',
+      timeMs: 300,
+    },
   });
+
+  // const [amenities, setAmenities] = useState<AmenitiesLateral[]>(() => {
+  //   return isDev ? ["air conditioning", "alarm clock", "bbq grill"] : [];
+  // });
+  // console.log("🚀 ~ AmmenitiesFilter ~ amenities:", amenities);
 
   return (
     <AccordionItem value={`item-${itemNo}`}>
@@ -38,19 +44,28 @@ export default function AmmenitiesFilter({ itemNo }: { itemNo: string }) {
                   <div key={amenity.id} className='flex items-center space-x-2'>
                     <Checkbox
                       id={amenity.name.toLowerCase()}
-                      checked={amenities.includes(amenity.name)}
+                      checked={amenities?.includes(
+                        amenity.name.toLowerCase() as AmenitiesLateral,
+                      )}
                       onCheckedChange={(checked) => {
-                        setAmenities((prev) =>
-                          checked
-                            ? [...prev, amenity.name]
-                            : prev.filter((item) => item !== amenity.name),
-                        );
+                        setValues((prev) => ({
+                          ...prev,
+                          amenities: checked
+                            ? [
+                                ...(prev.amenities || []),
+                                amenity.name.toLowerCase() as AmenitiesLateral,
+                              ]
+                            : (prev.amenities || []).filter(
+                                (item) =>
+                                  (item.toLowerCase() as AmenitiesLateral) !==
+                                  (amenity.name.toLowerCase() as AmenitiesLateral),
+                              ),
+                        }));
                       }}
                     />
                     <Label
                       htmlFor={amenity.name.toLowerCase()}
-                      className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-                    >
+                      className='peer-disabled:opacity-70 font-medium text-sm leading-none peer-disabled:cursor-not-allowed'>
                       {amenity.name}
                     </Label>
                   </div>

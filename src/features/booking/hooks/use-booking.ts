@@ -1,9 +1,10 @@
-import { useTRPC } from '@/trpc/client';
 import {
   useMutation,
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query';
+
+import { useTRPC } from '@/trpc/client';
 
 /**
  * Hook for create a booking
@@ -16,7 +17,7 @@ export function useCreateBooking() {
       onSuccess: async (vars) => {
         await Promise.all([
           queryClient.invalidateQueries(
-            trpc.property.getPublicProperties.queryOptions(),
+            trpc.property.getPublicProperties.queryOptions({}),
           ),
           queryClient.invalidateQueries(
             trpc.property.getPropertyDetails.queryOptions({
@@ -71,7 +72,7 @@ export function useUpdateBookingStatus() {
             }),
           ),
           queryClient.invalidateQueries(
-            trpc.property.getPublicProperties.queryOptions(),
+            trpc.property.getPublicProperties.queryOptions({}),
           ),
         ]);
       },

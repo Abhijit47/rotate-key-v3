@@ -1,41 +1,73 @@
-import { Suspense } from 'react';
+import { SearchParams } from 'nuqs/server';
+import { Suspense, ViewTransition } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
+import { PropertyFilterProvider } from '@/contexts/property-filter-context';
 import {
-  PropertyListings,
+  SwapingsPropertyListings,
   SwappingBanner,
   SwappingCarousel,
   SwappingFilterByType,
-} from '@/features/property/components/property-listings';
+} from '@/features/property/components/swaping-properties';
+import { loadBasicFilterAddonParams } from '@/features/property/searchParams';
 import { prefetchPublicProperties } from '@/features/property/server/prefetch';
 import { requireAuth } from '@/lib/requireAuth';
 import { HydrateClient } from '@/trpc/server';
 
-export default async function Swapings() {
+type PageProps = {
+  searchParams: Promise<SearchParams>;
+};
+
+export default async function Swapings({ searchParams }: PageProps) {
   await requireAuth();
-  prefetchPublicProperties();
+
+  // console.log("searchParams", await searchParams);
+
+  const filters = await loadBasicFilterAddonParams(searchParams);
+
+  // console.log({ filters });
+
+  prefetchPublicProperties(filters);
 
   return (
     <HydrateClient>
       <ErrorBoundary
-        fallback={<div>Something went wrong loading the properties.</div>}
-      >
+        fallback={<div>Something went wrong loading the properties.</div>}>
         <main
           className={
             'max-w-(--breakpoint-xl) mx-auto px-4 2xl:px-0 space-y-8 py-8'
-          }
-        >
+          }>
           <SwappingBanner />
-
-          <section>
-            <SwappingFilterByType />
-          </section>
 
           <SwappingCarousel />
 
           <section>
-            <Suspense fallback={<div>Loading Listings...</div>}>
-              <PropertyListings />
+            <Suspense
+              fallback={
+                <ViewTransition exit='slide-down' default='none'>
+                  <div className='h-32'>Loading Swapings Filter...</div>
+                </ViewTransition>
+              }>
+              <ViewTransition enter='slide-up' default='none'>
+                <PropertyFilterProvider>
+                  <SwappingFilterByType />
+                </PropertyFilterProvider>
+              </ViewTransition>
+            </Suspense>
+          </section>
+
+          <section>
+            <Suspense
+              fallback={
+                <ViewTransition exit='slide-down' default='none'>
+                  <div className='h-32'>Loading Listings...</div>
+                </ViewTransition>
+              }>
+              <ViewTransition enter='slide-up' default='none'>
+                <PropertyFilterProvider>
+                  <SwapingsPropertyListings />
+                </PropertyFilterProvider>
+              </ViewTransition>
             </Suspense>
           </section>
         </main>

@@ -233,7 +233,7 @@ export function SwapDialog() {
 
     // toast.success("You submitted the following values:", {
     //   description: (
-    //     <pre className="mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 font-mono text-code-foreground">
+    //     <pre className="bg-code mt-2 p-4 rounded-md w-[320px] overflow-x-auto font-mono text-code-foreground">
     //       <code className="font-mono">
     //         {JSON.stringify(sentToApi, null, 2)}
     //       </code>
@@ -343,12 +343,13 @@ export function SwapDialog() {
                             <SelectItem
                               key={item.id}
                               value={item.property.id}
-                              className='flex items-center justify-between flex-wrap w-full'>
-                              <span className='flex items-center justify-start flex-wrap gap-1'>
+                              className='flex flex-wrap justify-between items-center w-full'>
+                              <span className='flex flex-wrap justify-start items-center gap-1'>
                                 {item.property.streetAddress},
-                                {item.property.city},{item.property.state},
-                                {item.property.zipCode},
-                                {item.property.type.toUpperCase()}
+                                {item.property.city.name},
+                                {item.property.state.name},
+                                {item.property.zipcode},
+                                {item.property.roomType.toUpperCase()}
                               </span>
                               <Badge
                                 variant={
@@ -395,7 +396,7 @@ export function SwapDialog() {
                                   variant='outline'
                                   // disabled={property.isBookedByMe}
                                   className={cn(
-                                    'flex-col h-10 w-full border-r-0 rounded-r-none border-b-0 rounded-b-none gap-0 bg-transparent',
+                                    'flex-col gap-0 bg-transparent border-r-0 border-b-0 rounded-r-none rounded-b-none w-full h-10',
                                     fieldState.invalid && 'border-red-500',
                                     fieldState.error && 'border-red-500',
                                     !fieldState.isValidating &&

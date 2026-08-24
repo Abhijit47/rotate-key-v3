@@ -11,11 +11,6 @@ import {
 } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import {
-  updatePropertySchema,
-  UpdatePropertyValues,
-} from '@/lib/validators/property-schema';
-
 import { MultiSelect } from '@/components/extends/multi-select';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -46,6 +41,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  updatePropertySchema,
+  UpdatePropertyValues,
+} from '@/lib/validators/property-schema';
 import { useUpdateProperty, useUserProperty } from '../hooks/use-property';
 
 const propertyTypes = [
@@ -105,11 +104,11 @@ export default function UpdatePropertyForm({
     resolver: zodResolver(updatePropertySchema),
     defaultValues: {
       id: propertyId,
-      type: property.type,
+      type: property.roomType,
       streetAddress: property?.streetAddress,
-      city: property?.city ?? '',
-      state: property?.state ?? '',
-      zipCode: property?.zipCode ?? '',
+      city: property?.city.name ?? '',
+      state: property?.state.name ?? '',
+      zipCode: property?.zipcode ?? '',
       images: property?.images,
       amenities: property?.amenities,
     },
@@ -133,21 +132,21 @@ export default function UpdatePropertyForm({
 
   const onSubmit: SubmitHandler<UpdatePropertyValues> = (data) => {
     console.log({ data });
-    toast.promise(mutateAsync(data), {
-      loading: 'Updating property...',
-      success: () => {
-        form.reset();
-        return 'Property updated successfully';
-      },
-      error: (err) => {
-        return err.message || 'Failed to update property';
-      },
-    });
+    // toast.promise(mutateAsync(data), {
+    //   loading: 'Updating property...',
+    //   success: () => {
+    //     form.reset();
+    //     return 'Property updated successfully';
+    //   },
+    //   error: (err) => {
+    //     return err.message || 'Failed to update property';
+    //   },
+    // });
   };
 
   return (
     <div className={'relative'}>
-      <div className='w-full max-w-lg mx-auto py-6'>
+      <div className='mx-auto py-6 w-full max-w-lg'>
         <form onSubmit={form.handleSubmit(onSubmit, onError)}>
           <FieldGroup className={'gap-4'}>
             <FieldSet className={'gap-4'} disabled={isPending}>
@@ -350,7 +349,7 @@ export default function UpdatePropertyForm({
                   <Textarea
                     id='property-description'
                     placeholder='Write a detailed description of your property, including its unique features and nearby attractions.'
-                    className='resize-none placeholder:text-xs'
+                    className='placeholder:text-xs resize-none'
                   />
                 </Field>
 
@@ -382,8 +381,8 @@ export default function UpdatePropertyForm({
       </div>
 
       <div className={'absolute top-0 right-0 w-96 h-96'}>
-        <h2 className='text-lg font-semibold mb-2'>Preview</h2>
-        <pre className='bg-gray-100 p-4 rounded-md overflow-x-auto text-xs font-sans'>
+        <h2 className='mb-2 font-semibold text-lg'>Preview</h2>
+        <pre className='bg-gray-100 p-4 rounded-md overflow-x-auto font-sans text-xs'>
           {JSON.stringify(watchAll, null, 2)}
         </pre>
       </div>

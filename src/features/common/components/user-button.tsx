@@ -32,11 +32,11 @@ export default function UserButton() {
     <>
       {isPending ? (
         <li>
-          <Skeleton className='size-8 rounded-md' />
+          <Skeleton className='rounded-md size-8' />
         </li>
       ) : isRefetching ? (
         <li>
-          <Skeleton className='size-8 rounded-md' />
+          <Skeleton className='rounded-md size-8' />
         </li>
       ) : !data ? (
         <>
@@ -46,8 +46,7 @@ export default function UserButton() {
               className={buttonVariants({
                 variant: 'outline',
                 className: 'rounded-full!',
-              })}
-            >
+              })}>
               Continue to Login
             </Link>
           </li>
@@ -56,8 +55,7 @@ export default function UserButton() {
               href={'/sign-up'}
               className={buttonVariants({
                 className: 'rounded-full!',
-              })}
-            >
+              })}>
               Get Started
             </Link>
           </li>
@@ -77,8 +75,7 @@ export default function UserButton() {
                   variant={'ghost'}
                   size={'icon-sm'}
                   className={'rounded-full h-full mt-1.5'}
-                  aria-label={`${data.user.name} account menu`}
-                >
+                  aria-label={`${data.user.name} account menu`}>
                   <Avatar className={'size-8'}>
                     <AvatarImage
                       src={data.user.image ?? undefined}
@@ -95,7 +92,7 @@ export default function UserButton() {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className='min-w-60 w-full' align='end'>
+              <DropdownMenuContent className='w-full min-w-60' align='end'>
                 <DropdownMenuGroup>
                   <DropdownMenuLabel className='space-x-1'>
                     <Badge variant='outline' className='capitalize'>
@@ -129,8 +126,7 @@ export default function UserButton() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => authClient.customer.portal()}
-                  >
+                    onClick={() => authClient.customer.portal()}>
                     Billing
                     <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
                   </DropdownMenuItem>
@@ -156,7 +152,7 @@ export default function UserButton() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href={'#'} className='w-full'>
+                    <Link href={'/favourite-properties'} className='w-full'>
                       Favourite Properties
                       <DropdownMenuShortcut>⌘F</DropdownMenuShortcut>
                     </Link>
@@ -196,8 +192,7 @@ export default function UserButton() {
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     variant='destructive'
-                    onSelect={() => signOut()}
-                  >
+                    onSelect={() => signOut()}>
                     Log out
                     <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
                   </DropdownMenuItem>

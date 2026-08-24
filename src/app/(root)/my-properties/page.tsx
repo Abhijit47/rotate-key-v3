@@ -1,14 +1,29 @@
+import { SearchParams } from 'nuqs/server';
 import { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { MyPropertyListings } from '@/features/property/components/property-listings';
+import { PropertyFilterProvider } from '@/contexts/property-filter-context';
+import MyPropertyListings from '@/features/property/components/my-properties';
+import { loadBasicFilterAndPaginateParams } from '@/features/property/searchParams';
 import { prefetchUserProperties } from '@/features/property/server/prefetch';
 import { requireAuth } from '@/lib/requireAuth';
 import { HydrateClient } from '@/trpc/server';
 
-export default async function MyPropertiesPage() {
+type PageProps = {
+  searchParams: Promise<SearchParams>;
+};
+
+export default async function MyPropertiesPage({ searchParams }: PageProps) {
   await requireAuth();
-  prefetchUserProperties();
+
+  // console.log("searchparams", await searchParams);
+
+  const { offset, limit, sort } =
+    await loadBasicFilterAndPaginateParams(searchParams);
+
+  // console.log("PAGE", { offset, limit, sort });
+
+  prefetchUserProperties({ offset, limit, sort });
 
   return (
     <HydrateClient>
@@ -24,7 +39,9 @@ export default async function MyPropertiesPage() {
 
           <section>
             <Suspense fallback={<div>Loading Listings...</div>}>
-              <MyPropertyListings />
+              <PropertyFilterProvider>
+                <MyPropertyListings />
+              </PropertyFilterProvider>
             </Suspense>
           </section>
         </main>

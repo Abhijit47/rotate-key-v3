@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useQueryStates } from 'nuqs';
 
 import {
   AccordionContent,
@@ -6,23 +6,34 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
-
 import { Label } from '@/components/ui/label';
 import { propertyAccessibilities } from '@/constants/property-assets';
-
-const isDev = process.env.NODE_ENV === 'development' ? true : false;
+import { AccessibilitiesLateral } from '@/constants/property-assets-types';
+import { usePropertyFilter } from '@/contexts/property-filter-context';
+import { advancedFilterParams } from '../../searchParams';
 
 export default function AccessibilitiesFilter({ itemNo }: { itemNo: string }) {
-  const [accessibilities, setAccessibilities] = useState(() => {
-    return isDev
-      ? [
-          propertyAccessibilities[0].categoryTypes[0].name,
-          propertyAccessibilities[0].categoryTypes[1].name,
-          propertyAccessibilities[0].categoryTypes[2].name,
-          propertyAccessibilities[0].categoryTypes[3].name,
-        ]
-      : [];
-  });
+  const { startTransition } = usePropertyFilter();
+  const [{ accessibilities }, setValues] = useQueryStates(
+    advancedFilterParams,
+    {
+      shallow: false,
+      history: 'replace',
+      startTransition,
+      limitUrlUpdates: {
+        method: 'throttle',
+        timeMs: 300,
+      },
+    },
+  );
+
+  // const items = accessibilities;
+
+  // const [accessibilities, setAccessibilities] = useState<
+  //   AccessibilitiesLateral[]
+  // >(() => {
+  //   return isDev ? ['adjustable bed', 'braille signage', 'grab bars'] : [];
+  // });
 
   return (
     <AccordionItem value={`item-${itemNo}`}>
@@ -39,25 +50,44 @@ export default function AccessibilitiesFilter({ itemNo }: { itemNo: string }) {
                   (accessibility) => (
                     <div
                       key={accessibility.id}
-                      className='flex items-center space-x-2'
-                    >
+                      className='flex items-center space-x-2'>
                       <Checkbox
                         id={accessibility.name.toLowerCase()}
-                        checked={accessibilities.includes(accessibility.name)}
+                        checked={accessibilities?.includes(
+                          accessibility.name.toLowerCase() as AccessibilitiesLateral,
+                        )}
                         onCheckedChange={(checked) => {
-                          setAccessibilities((prev) =>
-                            checked
-                              ? [...prev, accessibility.name]
-                              : prev.filter(
-                                  (item) => item !== accessibility.name,
+                          // setAccessibilities((prev) =>
+                          //   checked
+                          //     ? [
+                          //         ...prev,
+                          //         accessibility.name.toLowerCase() as AccessibilitiesLateral,
+                          //       ]
+                          //     : prev.filter(
+                          //         (item) =>
+                          //           (item.toLowerCase() as AccessibilitiesLateral) !==
+                          //           (accessibility.name.toLowerCase() as AccessibilitiesLateral),
+                          //       ),
+                          // );
+
+                          setValues((prev) => ({
+                            ...prev,
+                            accessibilities: checked
+                              ? [
+                                  ...(prev.accessibilities || []),
+                                  accessibility.name.toLowerCase() as AccessibilitiesLateral,
+                                ]
+                              : (prev.accessibilities || []).filter(
+                                  (item) =>
+                                    (item.toLowerCase() as AccessibilitiesLateral) !==
+                                    (accessibility.name.toLowerCase() as AccessibilitiesLateral),
                                 ),
-                          );
+                          }));
                         }}
                       />
                       <Label
                         htmlFor={accessibility.name.toLowerCase()}
-                        className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-                      >
+                        className='peer-disabled:opacity-70 font-medium text-sm leading-none peer-disabled:cursor-not-allowed'>
                         {accessibility.name}
                       </Label>
                     </div>
