@@ -38,13 +38,18 @@ export default function SurroundingFilter({ itemNo }: { itemNo: string }) {
                 key={idx}
                 className={'cursor-pointer'}
                 variant={surrounding === type ? 'default' : 'outline'}
-                onClick={() => {
-                  setValues((prev) => ({
-                    ...prev,
-                    surrounding: type === surrounding ? null : type,
-                  }));
-                }}>
-                {titleCaseSkipSpecial(type)}
+                asChild>
+                <button
+                  aria-pressed={surrounding === type}
+                  type='button'
+                  onClick={() => {
+                    setValues((prev) => ({
+                      ...prev,
+                      surrounding: type === surrounding ? null : type,
+                    }));
+                  }}>
+                  {titleCaseSkipSpecial(type)}
+                </button>
               </Badge>
             );
           })}

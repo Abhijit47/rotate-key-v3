@@ -366,38 +366,60 @@ export const engagementRouter = createTRPCRouter({
               favoriteBy: user.id,
               favoriteAt: new Date(),
             })
+            .onConflictDoNothing()
             .returning();
 
-          const excludedFavorites = sql.raw(
-            `excluded.${propertyStats.favorites.name}`,
-          );
+          let updatedStats: {
+            id: string;
+            favorites: number;
+          }[] = [];
+          if (favorite) {
+            updatedStats = await trx
+              .insert(propertyStats)
+              .values({
+                propertyId: existingProperty.id,
+                favorites: 1,
+              })
+              .onConflictDoUpdate({
+                target: propertyStats.propertyId,
+                set: { favorites: sql`${propertyStats.favorites} + 1` },
+              })
+              .returning({
+                id: propertyStats.propertyId,
+                favorites: propertyStats.favorites,
+              });
+          }
 
-          // add a stat record
-          const [updatedStats] = await trx
-            .insert(propertyStats)
-            .values({
-              propertyId: existingProperty.id,
-              favorites: 1,
-            })
-            .onConflictDoUpdate({
-              target: propertyStats.propertyId,
-              set: {
-                favorites: sql`${propertyStats.favorites} + 1`,
-              },
-              setWhere: or(
-                sql`${propertyStats.favorites} != ${excludedFavorites}`,
-              ),
-            })
-            .returning({
-              id: propertyStats.propertyId,
-              favorites: propertyStats.favorites,
-            });
+          // const excludedFavorites = sql.raw(
+          //   `excluded.${propertyStats.favorites.name}`,
+          // );
+
+          // // add a stat record
+          // const [updatedStats] = await trx
+          //   .insert(propertyStats)
+          //   .values({
+          //     propertyId: existingProperty.id,
+          //     favorites: 1,
+          //   })
+          //   .onConflictDoUpdate({
+          //     target: propertyStats.propertyId,
+          //     set: {
+          //       favorites: sql`${propertyStats.favorites} + 1`,
+          //     },
+          //     setWhere: or(
+          //       sql`${propertyStats.favorites} != ${excludedFavorites}`,
+          //     ),
+          //   })
+          //   .returning({
+          //     id: propertyStats.propertyId,
+          //     favorites: propertyStats.favorites,
+          //   });
 
           return {
             success: true,
             message: 'Property on favorite',
             favorite,
-            updatedStats,
+            updatedStats: updatedStats[0],
           };
         });
         return commited;
@@ -439,37 +461,55 @@ export const engagementRouter = createTRPCRouter({
           }
 
           // check if a stats record exists for this property
-          const existingStats = await trx.query.propertyStats.findFirst({
-            where: (stats, { eq }) => eq(stats.propertyId, existingProperty.id),
-          });
+          // const existingStats = await trx.query.propertyStats.findFirst({
+          //   where: (stats, { eq }) => eq(stats.propertyId, existingProperty.id),
+          // });
 
-          let updatedStats: {
-            id: string;
-            views: number;
-          }[] = [];
-          if (existingStats) {
-            updatedStats = await trx
-              .update(propertyStats)
-              .set({
+          // let updatedStats: {
+          //   id: string;
+          //   views: number;
+          // }[] = [];
+          // if (existingStats) {
+          //   updatedStats = await trx
+          //     .update(propertyStats)
+          //     .set({
+          //       views: sql`${propertyStats.views} + 1`,
+          //     })
+          //     .where(eq(propertyStats.propertyId, existingProperty.id))
+          //     .returning({
+          //       id: propertyStats.propertyId,
+          //       views: propertyStats.views,
+          //     });
+          // } else {
+          //   updatedStats = await trx
+          //     .insert(propertyStats)
+          //     .values({
+          //       propertyId: existingProperty.id,
+          //       views: 1,
+          //     })
+          //     .returning({
+          //       id: propertyStats.propertyId,
+          //       views: propertyStats.views,
+          //     });
+          // }
+
+          // Atomic upsert avoids race on first concurrent views.
+          const [updatedStats] = await trx
+            .insert(propertyStats)
+            .values({
+              propertyId: existingProperty.id,
+              views: 1,
+            })
+            .onConflictDoUpdate({
+              target: propertyStats.propertyId,
+              set: {
                 views: sql`${propertyStats.views} + 1`,
-              })
-              .where(eq(propertyStats.propertyId, existingProperty.id))
-              .returning({
-                id: propertyStats.propertyId,
-                views: propertyStats.views,
-              });
-          } else {
-            updatedStats = await trx
-              .insert(propertyStats)
-              .values({
-                propertyId: existingProperty.id,
-                views: 1,
-              })
-              .returning({
-                id: propertyStats.propertyId,
-                views: propertyStats.views,
-              });
-          }
+              },
+            })
+            .returning({
+              id: propertyStats.propertyId,
+              views: propertyStats.views,
+            });
 
           return {
             success: true,

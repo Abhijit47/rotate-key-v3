@@ -451,16 +451,21 @@ export const propertyRouter = createTRPCRouter({
 
       // console.log("server:", { offset, limit, sort });
 
-      // const pageNumber = Math.max(1, parseInt(offset || "1", 10) || 1);
-      // const pageSize = Math.max(1, parseInt(limit || "20", 10) || 20);
-      // const dbOffset = (pageNumber - 1) * pageSize;
+      const pageNumber = Math.max(1, parseInt(offset || '1', 10) || 1);
+      const pageSize = Math.max(1, parseInt(limit || '20', 10) || 20);
+      const dbOffset = (pageNumber - 1) * pageSize;
 
       try {
         // TODO: make a pagination with count
         const totalProperties = await db
           .select({ count: count() })
           .from(PropertyTable)
-          .where(eq(PropertyTable.authorId, user.id));
+          .where(
+            and(
+              eq(PropertyTable.authorId, user.id),
+              eq(PropertyTable.isAvailable, true),
+            ),
+          );
 
         // get all user properties
         const properties = await db.query.property.findMany({
@@ -492,10 +497,10 @@ export const propertyRouter = createTRPCRouter({
             sort === 'desc'
               ? desc(property.createdAt)
               : asc(property.createdAt),
-          // limit: pageSize,
-          // offset: dbOffset,
-          limit: Number(limit),
-          offset: Number(offset),
+          limit: pageSize,
+          offset: dbOffset,
+          // limit: Number(limit),
+          // offset: Number(offset),
 
           // extras(fields, operators) {
           //   const { sql } = operators;
@@ -605,7 +610,7 @@ export const propertyRouter = createTRPCRouter({
       const dbOffset = (pageNumber - 1) * pageSize;
 
       try {
-        const p1 = db
+        const totalCount = await db
           .select({ count: count() })
           .from(PropertyTable)
           .where(
@@ -614,8 +619,7 @@ export const propertyRouter = createTRPCRouter({
               not(eq(PropertyTable.authorId, user.id)),
               ...filters,
             ),
-          )
-          .prepare('total_properties_count_by_filters');
+          );
 
         const properties = await db.query.property.findMany({
           with: {
@@ -657,17 +661,21 @@ export const propertyRouter = createTRPCRouter({
           // 2. Use the parsed pageSize and calculated dbOffset here
           limit: pageSize,
           offset: dbOffset,
+          extras: (fields, {}) => ({
+            totalProperties:
+              sql<number>`(select count(*) from ${PropertyTable})`.as(
+                'totalProperties',
+              ),
+          }),
         });
 
-        // const [totalProperties] = await Promise.all([
-        //   p1.execute(),
-        // ]);
+        // const [] = await Promise.all([
 
-        const totalProperties = await p1.execute();
+        // ]);
 
         return {
           properties,
-          totalProperties: totalProperties[0]?.count ?? 0,
+          totalProperties: totalCount[0]?.count ?? 0,
         };
       } catch (err) {
         console.log({ err });

@@ -46,21 +46,21 @@ export function FavoritePropertyListings() {
     },
   });
 
-  const [{ offset, limit }] = queryStates;
+  const [{ offset, limit, sort }] = queryStates;
 
   const {
     data: { properties, totalCount },
   } = useGetUserFavouriteProperties({
     offset: offset ?? '1',
     limit: limit ?? '10',
-    sort: 'asc',
+    sort: sort ?? 'asc',
   });
 
   const pagination = usePagination({
     type: 'button',
     count: totalCount,
-    defaultPage: Number(offset),
-    pageSize: Number(limit),
+    page: Number(offset ?? '1'),
+    pageSize: Number(limit ?? '10'),
     siblingCount: 2,
     boundaryCount: 1,
   });

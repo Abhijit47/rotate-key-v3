@@ -53,14 +53,14 @@ export default function MyPropertyListings() {
     },
   });
 
-  const [{ offset, limit }] = queryStates;
+  const [{ offset, limit, sort }] = queryStates;
 
   const {
     data: { properties, totalProperties },
   } = useUserProperties({
     offset: offset ?? '1',
     limit: limit ?? '10',
-    sort: 'asc',
+    sort: sort ?? 'asc',
   });
   const { mutateAsync, isPending } = useDeleteProperty();
   const { data } = useSession();
@@ -68,8 +68,8 @@ export default function MyPropertyListings() {
   const pagination = usePagination({
     type: 'button',
     count: totalProperties,
-    defaultPage: Number(offset),
-    pageSize: Number(limit),
+    page: Number(offset ?? '1'),
+    pageSize: Number(limit ?? '10'),
     siblingCount: 2,
     boundaryCount: 1,
   });

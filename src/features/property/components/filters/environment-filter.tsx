@@ -38,13 +38,18 @@ export default function EnvironmentFilter({ itemNo }: { itemNo: string }) {
                 key={idx}
                 className={'cursor-pointer'}
                 variant={environment === type ? 'default' : 'outline'}
-                onClick={() => {
-                  setValues((prev) => ({
-                    ...prev,
-                    environment: type === environment ? null : type,
-                  }));
-                }}>
-                {titleCaseSkipSpecial(type)}
+                asChild>
+                <button
+                  aria-pressed={environment === type}
+                  type='button'
+                  onClick={() => {
+                    setValues((prev) => ({
+                      ...prev,
+                      environment: type === environment ? null : type,
+                    }));
+                  }}>
+                  {titleCaseSkipSpecial(type)}
+                </button>
               </Badge>
             );
           })}

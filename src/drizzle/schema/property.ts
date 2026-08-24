@@ -8,6 +8,8 @@ import {
   pgEnum,
   pgTable,
   timestamp,
+  unique,
+  uniqueIndex,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
@@ -213,21 +215,31 @@ export const propertyHold = pgTable('propertyHold', {
   expiredAt: timestamp('expired_at').$onUpdate(() => new Date()),
 });
 
-export const propertyFavorite = pgTable('propertyFavorite', {
-  id: uuid('id').defaultRandom().primaryKey().unique().notNull(),
+export const propertyFavorite = pgTable(
+  'propertyFavorite',
+  {
+    id: uuid('id').defaultRandom().primaryKey().unique().notNull(),
 
-  propertyId: uuid('property_id')
-    .references(() => property.id, { onDelete: 'cascade' })
-    .notNull(),
+    propertyId: uuid('property_id')
+      .references(() => property.id, { onDelete: 'cascade' })
+      .notNull(),
 
-  favoriteBy: uuid('favorite_by')
-    .references(() => user.id, { onDelete: 'cascade' })
-    .notNull(),
+    favoriteBy: uuid('favorite_by')
+      .references(() => user.id, { onDelete: 'cascade' })
+      .notNull(),
 
-  favoriteAt: timestamp('favorite_at')
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
+    favoriteAt: timestamp('favorite_at')
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    unique('property_favorite_unique').on(t.propertyId, t.favoriteBy),
+    // Add a composite unique constraint on (property_id, favorite_by).
+    uniqueIndex('property_favorite_unique_idx').on(
+      sql`${t.propertyId}, ${t.favoriteBy}`,
+    ),
+  ],
+);
 
 export const propertyStats = pgTable('propertyStats', {
   id: uuid('id').defaultRandom().primaryKey().unique().notNull(),

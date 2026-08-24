@@ -134,7 +134,7 @@ export function SwapingsPropertyListings() {
   });
 
   function handleLikeProperty(propertyId: string) {
-    toast.promise(likeProperty({ propertyId: propertyId, path: 'swapings' }), {
+    toast.promise(likeProperty({ propertyId: propertyId, path: '/swapings' }), {
       loading: 'In progress...',
       success: (data) => {
         // router.push(`/property/${propertyId}` as Route);
@@ -868,16 +868,18 @@ export function SwappingCarousel() {
                 key={property.id}
                 className='relative cursor-grab select-none'>
                 <div className='relative w-full h-full aspect-square sm:aspect-video md:aspect-video lg:aspect-20/9'>
-                  <Image
-                    src={property.images[0]}
-                    alt={crypto.randomUUID()}
-                    className={
-                      'object-cover w-full h-full rounded-lg brightness-45'
-                    }
-                    width={500}
-                    height={300}
-                    priority={true}
-                  />
+                  {property.images[0] ? (
+                    <Image
+                      src={property.images[0]}
+                      alt={`${property.roomType} in ${property.state.name}`}
+                      className={
+                        'object-cover w-full h-full rounded-lg brightness-45'
+                      }
+                      width={500}
+                      height={300}
+                      priority={true}
+                    />
+                  ) : null}
                   {/* <CarouselOverlay /> */}
                 </div>
                 <CarouselDetails

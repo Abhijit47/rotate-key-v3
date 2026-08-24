@@ -66,7 +66,7 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
   }),
   propertyStats: one(propertyStats, {
     fields: [property.id],
-    references: [propertyStats.id],
+    references: [propertyStats.propertyId],
     relationName: 'propertyStats',
   }),
 }));

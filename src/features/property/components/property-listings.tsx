@@ -37,8 +37,6 @@ import {
   basicFilterAndPaginateParams,
 } from '../searchParams';
 
-const isDev = process.env.NODE_ENV === 'development';
-
 export function EmptyPropertiesState() {
   return (
     <Empty className='mx-auto border border-dashed min-w-sm'>
@@ -201,15 +199,11 @@ export function Paginate(props: PaginateProps) {
 
   const [{ offset }, setValues] = queryStates;
 
-  const disablePrevTrigger = pagination.page === 1 || isPending;
-  const disableNextTrigger =
-    pagination.page === pagination.totalPages || isPending;
-  const disablePageTrigger = (pageValue: number) =>
-    pageValue === Number(offset);
+  const currentOffset = Number(offset) || 1;
 
-  // if (pagination.page === 1) {
-  //   return null;
-  // }
+  const disablePrevTrigger = currentOffset <= 1 || isPending;
+  const disableNextTrigger =
+    currentOffset >= pagination.totalPages || isPending;
 
   return (
     <div className={'w-full flex items-center justify-center'}>
@@ -221,9 +215,10 @@ export function Paginate(props: PaginateProps) {
               variant={disablePrevTrigger ? 'ghost' : 'outline'}
               onClick={() => {
                 setValues((prev) => {
+                  const nextOffset = Math.max(1, Number(prev.offset) - 1);
                   return {
                     ...prev,
-                    offset: String(Number(prev.offset) - 1),
+                    offset: String(nextOffset),
                   };
                 });
               }}>
@@ -235,9 +230,7 @@ export function Paginate(props: PaginateProps) {
             page.type === 'page' ? (
               <Pagination.Item key={index} {...page} asChild>
                 <Button
-                  variant={
-                    page.value === Number(offset) ? 'default' : 'outline'
-                  }
+                  variant={page.value === currentOffset ? 'default' : 'outline'}
                   onClick={() => {
                     setValues((prev) => {
                       return { ...prev, offset: String(page.value) };
@@ -262,9 +255,13 @@ export function Paginate(props: PaginateProps) {
               onClick={() => {
                 setValues((prev) => {
                   // we can go pagination.totalPages upto
+                  const nextOffset = Math.min(
+                    pagination.totalPages,
+                    Number(prev.offset || 1) + 1,
+                  );
                   return {
                     ...prev,
-                    offset: String(Number(prev.offset) + 1),
+                    offset: String(nextOffset),
                   };
                 });
               }}>
