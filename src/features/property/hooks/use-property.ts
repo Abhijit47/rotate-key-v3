@@ -7,22 +7,31 @@ import {
 } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
+import {
+  BasicFilterAddonValues,
+  BasicFilterValues,
+} from '@/lib/validators/property-filter-sort-query-schema';
+
 //=== Public Hooks for properties ===//
 /**
  * Hooks for getting public properties.
  */
-export function usePublicProperties() {
+export function usePublicProperties(filters: BasicFilterAddonValues) {
   const trpc = useTRPC();
 
-  return useSuspenseQuery(trpc.property.getPublicProperties.queryOptions());
+  return useSuspenseQuery(
+    trpc.property.getPublicProperties.queryOptions(filters),
+  );
 }
 
 /**
  * Hook for getting my properties.
  */
-export function useUserProperties() {
+export function useUserProperties(filters: BasicFilterValues) {
   const trpc = useTRPC();
-  return useSuspenseQuery(trpc.property.getUserProperties.queryOptions());
+  return useSuspenseQuery(
+    trpc.property.getUserProperties.queryOptions(filters),
+  );
 }
 
 /**
@@ -37,7 +46,7 @@ export function useCreateProperty() {
     trpc.property.createProperty.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.property.getPublicProperties.queryOptions(),
+          trpc.property.getPublicProperties.queryOptions({}),
         );
         router.push('/swapings');
       },
@@ -64,7 +73,7 @@ export function useUpdateProperty() {
     trpc.property.updateProperty.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.property.getPublicProperties.queryOptions(),
+          trpc.property.getPublicProperties.queryOptions({}),
         );
         router.push('/my-properties');
       },
@@ -88,7 +97,7 @@ export function useDeleteProperty() {
     trpc.property.deleteProperty.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.property.getPublicProperties.queryOptions(),
+          trpc.property.getPublicProperties.queryOptions({}),
         );
         // router.push('/swapings');
       },
@@ -164,7 +173,7 @@ export function useLikeProperty() {
     trpc.property.addLikeToProperty.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.property.getPublicProperties.queryOptions(),
+          trpc.property.getPublicProperties.queryOptions({}),
         );
       },
       onError: (err) => {

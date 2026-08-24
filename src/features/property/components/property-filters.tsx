@@ -1,3 +1,5 @@
+import { useQueryStates } from 'nuqs';
+
 // EXTERNAL IMPORTS
 import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
@@ -6,6 +8,7 @@ import { DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 // INTERNAL IMPORTS
+import { advancedFilterParams } from '../searchParams';
 import AccessibilitiesFilter from './filters/accessibilities-filter';
 import AccomodationFilter from './filters/accomodation-filter';
 import AmmenitiesFilter from './filters/ammenities-filter';
@@ -15,21 +18,39 @@ import OwnershipTypeFilter from './filters/ownership-type-filter';
 import RentalPeriodFilter from './filters/rental-period-filter';
 import RulesFilter from './filters/rules-filter';
 import SurroundingFilter from './filters/surrounding-filter';
-import SwappingTypeFilter from './filters/swapping-type-filter';
+import SwapingTypeFilter from './filters/swaping-type-filter';
+
+import { usePropertyFilter } from '@/contexts/property-filter-context';
 
 export default function PropertyFilters() {
+  const { isTransition, startTransition } = usePropertyFilter();
+  const [_, setValues] = useQueryStates(advancedFilterParams, {
+    shallow: false,
+    throttleMs: 300,
+    history: 'replace',
+    startTransition: startTransition,
+  });
+
+  function handleClearAllFilters() {
+    setValues(null);
+  }
+
   return (
     <div>
-      <ScrollArea className='h-75 md:h-125 w-full rounded-md border p-4'>
+      <ScrollArea className='p-4 border rounded-md w-full h-75 md:h-125'>
         {/* Dates */}
         <MoveInAndOutFilter />
 
-        <Accordion type='single' collapsible className='w-full'>
+        <Accordion
+          type='single'
+          collapsible
+          className='w-full'
+          disabled={isTransition}>
           {/* Ownerships */}
           <OwnershipTypeFilter itemNo={'1'} />
 
           {/* Swappings */}
-          <SwappingTypeFilter itemNo={'2'} />
+          <SwapingTypeFilter itemNo={'2'} />
 
           {/* Rental */}
           <RentalPeriodFilter itemNo={'3'} />
@@ -58,7 +79,11 @@ export default function PropertyFilters() {
             <DialogFooter
               className={'justify-between sm:justify-between flex-wrap gap-2'}>
               <DialogTrigger asChild>
-                <Button size={'sm'} variant={'outline'}>
+                <Button
+                  size={'sm'}
+                  variant={'outline'}
+                  type='button'
+                  onClick={handleClearAllFilters}>
                   Clear All
                 </Button>
               </DialogTrigger>

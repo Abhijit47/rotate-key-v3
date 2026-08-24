@@ -35,7 +35,27 @@ export const addLikeToPropertySchema = z.object({
   path: z.string(),
 });
 
+export const addHoldToAProperty = z.object({
+  propertyId: z.uuid(),
+  path: z.string(),
+});
+
+export const addPropertyToFavoriteList = z.object({
+  propertyId: z.uuid(),
+  path: z.string(),
+});
+
+export const addViewsToAProperty = z.object({
+  propertyId: z.uuid(),
+  path: z.string(),
+});
+
 export type PropertyValues = z.infer<typeof propertySchema>;
 export type UpdatePropertyValues = z.infer<typeof updatePropertySchema>;
 export type DeletePropertyValues = z.infer<typeof deletePropertySchema>;
 export type AddLikeToPropertyValues = z.infer<typeof addLikeToPropertySchema>;
+export type AddHoldToAPropertyValues = z.infer<typeof addHoldToAProperty>;
+export type AddPropertyToFavoriteListValues = z.infer<
+  typeof addPropertyToFavoriteList
+>;
+export type AddViewsToAPropertyValues = z.infer<typeof addViewsToAProperty>;

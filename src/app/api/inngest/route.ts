@@ -10,6 +10,7 @@ import {
   createChannelBetweenMatchedUsers,
   helloWorld,
   oauthSignUpComplete,
+  propertyHoldingExpiryCheck,
   userCreated,
   userDeleted,
   userOnboardingComplete,
@@ -28,6 +29,7 @@ export const { GET, POST, PUT } = serve({
     userCreated,
     userDeleted,
     createChannelBetweenMatchedUsers,
+    propertyHoldingExpiryCheck,
 
     // for development/testing purposes only
     // deletePolarUsers,

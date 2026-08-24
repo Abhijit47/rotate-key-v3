@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX "property_favorite_unique_idx" ON "propertyFavorite" USING btree ("property_id", "favorite_by");--> statement-breakpoint
+ALTER TABLE "propertyFavorite" ADD CONSTRAINT "property_favorite_unique" UNIQUE("property_id","favorite_by");

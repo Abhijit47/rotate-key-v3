@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IconPhoto, IconRefresh } from '@tabler/icons-react';
+import { TRPCClientError } from '@trpc/client';
 import {
   Controller,
   SubmitErrorHandler,
@@ -10,11 +11,6 @@ import {
   useWatch,
 } from 'react-hook-form';
 import { toast } from 'sonner';
-
-import {
-  propertySchema,
-  PropertyValues,
-} from '@/lib/validators/property-schema';
 
 import { MultiSelect } from '@/components/extends/multi-select';
 import { Button } from '@/components/ui/button';
@@ -47,7 +43,10 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useUpgradeModal } from '@/features/common/hooks/use-upgrade-modal';
-import { TRPCClientError } from '@trpc/client';
+import {
+  propertySchema,
+  PropertyValues,
+} from '@/lib/validators/property-schema';
 import { useCreateProperty, useTestPremium } from '../hooks/use-property';
 
 const propertyTypes = [
@@ -129,25 +128,25 @@ export default function NewPropertyForm() {
 
   const onSubmit: SubmitHandler<PropertyValues> = (data) => {
     // console.log({ data });
-    toast.promise(mutateAsync(data), {
-      loading: 'Creating property...',
-      success: () => {
-        form.reset();
-        return 'Property created successfully';
-      },
-      error: (err) => {
-        if (err instanceof TRPCClientError) {
-          handleError(err);
-        }
-        return err.message || 'Failed to create property';
-      },
-    });
+    // toast.promise(mutateAsync(data), {
+    //   loading: 'Creating property...',
+    //   success: () => {
+    //     form.reset();
+    //     return 'Property created successfully';
+    //   },
+    //   error: (err) => {
+    //     if (err instanceof TRPCClientError) {
+    //       handleError(err);
+    //     }
+    //     return err.message || 'Failed to create property';
+    //   },
+    // });
   };
 
   return (
     <div className={'relative'}>
       {modal}
-      <div className='w-full max-w-lg mx-auto py-6'>
+      <div className='mx-auto py-6 w-full max-w-lg'>
         <form onSubmit={form.handleSubmit(onSubmit, onError)}>
           <FieldGroup className={'gap-4'}>
             <FieldSet className={'gap-4'} disabled={isPending}>
@@ -344,7 +343,7 @@ export default function NewPropertyForm() {
                   <Textarea
                     id='property-description'
                     placeholder='Write a detailed description of your property, including its unique features and nearby attractions.'
-                    className='resize-none placeholder:text-xs'
+                    className='placeholder:text-xs resize-none'
                   />
                 </Field>
 
@@ -398,8 +397,8 @@ export default function NewPropertyForm() {
       </div>
 
       <div className={'absolute top-0 right-0 w-96 h-96'}>
-        <h2 className='text-lg font-semibold mb-2'>Preview</h2>
-        <pre className='bg-gray-100 p-4 rounded-md overflow-x-auto text-xs font-sans'>
+        <h2 className='mb-2 font-semibold text-lg'>Preview</h2>
+        <pre className='bg-gray-100 p-4 rounded-md overflow-x-auto font-sans text-xs'>
           {JSON.stringify(watchAll, null, 2)}
         </pre>
       </div>

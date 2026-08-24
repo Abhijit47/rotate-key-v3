@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import { TRPCError } from '@trpc/server';
-import { and, eq } from 'drizzle-orm';
+import { SQL, and, count, eq, gte, not, sql } from 'drizzle-orm';
 import { StepError } from 'inngest';
 import { revalidatePath } from 'next/cache';
 
@@ -11,6 +11,10 @@ import { match as MatchTable } from '@/drizzle/schema/match';
 import { inngest } from '@/inngest/client';
 import { auth } from '@/lib/auth';
 import { paymentPolicyCheckProcedure } from '@/lib/property-actions';
+import {
+  basicFilterAddonSchema,
+  basicFilterSchema,
+} from '@/lib/validators/property-filter-sort-query-schema';
 import {
   addLikeToPropertySchema,
   deletePropertySchema,
@@ -438,66 +442,249 @@ export const propertyRouter = createTRPCRouter({
       return rest;
     }),
 
-  getUserProperties: protectedProcedure.query(async ({ ctx }) => {
-    const { user } = ctx.auth;
-    // get all user properties
-    const properties = await db.query.property.findMany({
-      with: {
-        author: {
-          columns: {
-            id: true,
-            name: true,
+  getUserProperties: protectedProcedure
+    .input(basicFilterSchema)
+    .query(async ({ input, ctx }) => {
+      const { user } = ctx.auth;
+
+      const { offset, limit, sort } = input;
+
+      // console.log("server:", { offset, limit, sort });
+
+      const pageNumber = Math.max(1, parseInt(offset || '1', 10) || 1);
+      const pageSize = Math.max(1, parseInt(limit || '20', 10) || 20);
+      const dbOffset = (pageNumber - 1) * pageSize;
+
+      try {
+        // TODO: make a pagination with count
+        const totalProperties = await db
+          .select({ count: count() })
+          .from(PropertyTable)
+          .where(
+            and(
+              eq(PropertyTable.authorId, user.id),
+              eq(PropertyTable.isAvailable, true),
+            ),
+          );
+
+        // get all user properties
+        const properties = await db.query.property.findMany({
+          with: {
+            author: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+            // // property not created/owned by me and i held those records
+            // // property.authorId !== user.id &&
+            // propertyHolds: {
+            //   where(fields, { eq, not }) {
+            //     return and(
+            //       not(eq(PropertyTable.authorId, user.id)),
+            //       eq(fields.holdBy, user.id),
+            //     );
+            //   },
+            // },
           },
-        },
-      },
-      where: (property, { eq, and }) => {
-        return and(
-          eq(property.isAvailable, true),
-          eq(property.authorId, user.id),
+          where: (property, { eq, and }) => {
+            return and(
+              eq(property.isAvailable, true),
+              eq(property.authorId, user.id),
+            );
+          },
+          orderBy: (property, { asc, desc }) =>
+            sort === 'desc'
+              ? desc(property.createdAt)
+              : asc(property.createdAt),
+          limit: pageSize,
+          offset: dbOffset,
+          // limit: Number(limit),
+          // offset: Number(offset),
+
+          // extras(fields, operators) {
+          //   const { sql } = operators;
+          //   // return the count of each property id associated with this user
+          //   return {
+          //     likesReceivedCount: sql`(
+          //       SELECT COUNT(*)
+          //       FROM "Like" l
+          //       WHERE l."propertyId" = "Property"."id"
+          //         AND l."isDeleted" = false
+          //     )` as any,
+          //     likesGivenCount: sql`(
+          //       SELECT COUNT(*)
+          //       FROM "Like" l
+          //       WHERE l."fromUserId" = ${user.id}
+          //         AND l."isDeleted" = false
+          //     )` as any,
+          //   };
+          // },
+        });
+
+        // if (!properties) {
+        //   throw new TRPCError({
+        //     code: "NOT_FOUND",
+        //     message: "Properties not found",
+        //   });
+        // }
+
+        return { properties, totalProperties: totalProperties[0]?.count };
+      } catch (err) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Something went wrong loading your properties.',
+        });
+      }
+    }),
+
+  // get all properties that was not created by the current user and is available
+  getPublicProperties: protectedProcedure
+    .input(basicFilterAddonSchema)
+    .query(async ({ input, ctx }) => {
+      const { user } = ctx.auth;
+      const { goto, roomType, offset, limit, sort, from, to } = input;
+
+      // console.log({ goto, roomType, offset, limit, sort, from, to });
+
+      const filters: SQL[] = [];
+
+      // await db.query.users.findFirst({
+      //  where: sql`myData->'a'->>'b' = ${value}`
+      // });
+
+      /*
+      SELECT doc->'site_name' FROM websites
+        WHERE doc @> '{"tags":[{"term":"paris"}, {"term":"food"}]}';
+      */
+
+      /*
+        example:
+        CREATE TABLE user_profiles (
+          id SERIAL PRIMARY KEY,
+          profile JSONB NOT NULL
         );
-      },
-      orderBy: (property, { desc }) => desc(property.createdAt),
-    });
 
-    if (!properties) {
-      return [];
-    }
+      INSERT INTO user_profiles (profile)
+        VALUES
+        ('{"name": "Alice", "age": 30, "interests": ["music", "travel"], "settings": {"privacy": "public", "notifications": true, "theme": "light"}}'),
+        ('{"name": "Bob", "age": 25, "interests": ["photography", "cooking"], "settings": {"privacy": "private", "notifications": false}, "city": "NYC"}'),
+        ('{"name": "Charlie", "interests": ["music", "cooking"], "settings": {"privacy": "private", "notifications": true, "language": "English"}}');
 
-    return properties;
-  }),
+    /* 
+    With JSONB, we can directly query and manipulate elements within the JSON structure. For example, to find all the users interested in music, we can run the query:
+    */
 
-  getPublicProperties: protectedProcedure.query(async ({ ctx }) => {
-    const { user } = ctx.auth;
-    // get all properties
-    const properties = await db.query.property.findMany({
-      with: {
-        author: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        receivedLikes: {
-          columns: {
-            fromUserId: true,
-          },
-        },
-      },
-      where: (property, { eq, and, not }) => {
-        return and(
-          eq(property.isAvailable, true),
-          not(eq(property.authorId, user.id)),
+      /*
+    SELECT
+    id,
+    profile -> 'name' as name,
+    profile -> 'interests' as interests
+    FROM user_profiles
+    WHERE profile @> '{"interests":["music"]}'::JSONB;
+      */
+
+      if (goto) {
+        // Extracts "name" from the country JSONB column and compares it lowercased
+        // filters.push(
+        //   sql`lower(${PropertyTable.country}->>'name') = lower(${goto})`,
+        // );
+
+        // Uses the PostgreSQL ILIKE operator to match the country name partially and case-insensitively
+        filters.push(
+          sql`${PropertyTable.country}->>'name' ilike ${`%${goto}%`}`,
         );
-      },
-      orderBy: (property, { desc }) => desc(property.createdAt),
-    });
+      }
 
-    if (!properties) {
-      return [];
-    }
+      // if (goto)
+      //   filters.push(sql`lower("country"->>'name') = lower(${goto})` as SQL);
 
-    return properties;
-  }),
+      if (roomType) filters.push(eq(PropertyTable.roomType, roomType));
+
+      if (from && to)
+        filters.push(gte(PropertyTable.staysDateRange, { from, to }));
+
+      // 1. Safe parsing of pagination parameters
+      const pageNumber = Math.max(1, parseInt(offset || '1', 10) || 1);
+      const pageSize = Math.max(1, parseInt(limit || '20', 10) || 20);
+      const dbOffset = (pageNumber - 1) * pageSize;
+
+      try {
+        const totalCount = await db
+          .select({ count: count() })
+          .from(PropertyTable)
+          .where(
+            and(
+              eq(PropertyTable.isAvailable, true),
+              not(eq(PropertyTable.authorId, user.id)),
+              ...filters,
+            ),
+          );
+
+        const properties = await db.query.property.findMany({
+          with: {
+            author: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+            receivedLikes: {
+              columns: {
+                fromUserId: true,
+              },
+            },
+            propertyHolds: {
+              // if i hold alreary dont show the add hold button
+              where(fields, operators) {
+                return operators.eq(fields.holdBy, user.id);
+              },
+            },
+
+            propertyFavorites: {
+              where(fields, operators) {
+                return operators.eq(fields.favoriteBy, user.id);
+              },
+            },
+          },
+          where: (property, { eq, and, not }) => {
+            return and(
+              eq(property.isAvailable, true),
+              not(eq(property.authorId, user.id)),
+              ...filters,
+            );
+          },
+          orderBy: (property, { asc, desc }) =>
+            sort === 'desc'
+              ? desc(property.createdAt)
+              : asc(property.createdAt),
+          // 2. Use the parsed pageSize and calculated dbOffset here
+          limit: pageSize,
+          offset: dbOffset,
+          extras: (fields, {}) => ({
+            totalProperties:
+              sql<number>`(select count(*) from ${PropertyTable})`.as(
+                'totalProperties',
+              ),
+          }),
+        });
+
+        // const [] = await Promise.all([
+
+        // ]);
+
+        return {
+          properties,
+          totalProperties: totalCount[0]?.count ?? 0,
+        };
+      } catch (err) {
+        console.log({ err });
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Something went wrong loading public properties.',
+        });
+      }
+    }),
 
   // TODO: this is just for testing, will remove later, we can use this to gate any premium features in the future
   testPremium: premiumProcedure.mutation(async () => {

@@ -1,18 +1,32 @@
+import { inngest as inngestFn } from '@/inngest/client';
 import * as Sentry from '@sentry/nextjs';
 import { TRPCError } from '@trpc/server';
-import { and, eq } from 'drizzle-orm';
+import { addDays, addMinutes } from 'date-fns';
+import { and, eq, or, sql } from 'drizzle-orm';
 import { StepError } from 'inngest';
-import { inngest as inngestFn } from '@/inngest/client';
 import { revalidatePath } from 'next/cache';
 
 import { db } from '@/drizzle/db';
-import { property as PropertyTable } from '@/drizzle/schema';
+import {
+  property as PropertyTable,
+  propertyFavorite,
+  propertyHold,
+  propertyStats,
+} from '@/drizzle/schema';
 import { like as LikeTable } from '@/drizzle/schema/like';
 import { match as MatchTable } from '@/drizzle/schema/match';
 import { paymentPolicyCheckProcedure } from '@/lib/property-actions';
-import { addLikeToPropertySchema } from '@/lib/validators/property-schema';
-import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
+import { basicFilterSchema } from '@/lib/validators/property-filter-sort-query-schema';
+import {
+  addHoldToAProperty,
+  addLikeToPropertySchema,
+  addPropertyToFavoriteList,
+  addViewsToAProperty,
+} from '@/lib/validators/property-schema';
 import { sendInAppNotification } from '@/novu/functions';
+import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
+
+const isDev = process.env.NODE_ENV === 'development';
 
 export const engagementRouter = createTRPCRouter({
   addLikeToProperty: protectedProcedure
@@ -88,13 +102,13 @@ export const engagementRouter = createTRPCRouter({
               .returning();
             if (newLike) {
               // Only sent notification to the owner, currentUser hit the like button, no heavy calculation required.
-              const address = `${ownerProperty.streetAddress}, ${ownerProperty.city}, ${ownerProperty.state}, ${ownerProperty.zipCode}`;
+              const completeAddress = `${ownerProperty.region.name}, ${ownerProperty.country.name}, ${ownerProperty.state.name}, ${ownerProperty.city.name}, ${ownerProperty.streetAddress}, ${ownerProperty.zipcode}`;
               const novuPayload = {
                 workflowType: 'liked-property' as WorkflowTypes,
                 user: user,
                 propertyOwnerId: ownerId,
-                propertyType: ownerProperty.type,
-                propertyAddress: address,
+                propertyType: ownerProperty.roomType,
+                propertyAddress: completeAddress,
               };
               await sendInAppNotification({ payload: novuPayload });
             }
@@ -235,5 +249,435 @@ export const engagementRouter = createTRPCRouter({
           message: checkEngagementLimit.message,
         });
       }
+    }),
+
+  // holding a property for 7 days
+  addHoldToAProperty: protectedProcedure
+    .input(addHoldToAProperty)
+    .mutation(async ({ input, ctx }) => {
+      const { user } = ctx.auth;
+
+      const { propertyId, path } = input;
+
+      const commited = await db.transaction(async (trx) => {
+        const existingProperty = await trx.query.property.findFirst({
+          where: and(
+            eq(PropertyTable.id, propertyId),
+            eq(PropertyTable.isAvailable, true),
+          ),
+        });
+        if (!existingProperty) {
+          return {
+            success: false,
+            message: 'Property not available',
+          };
+        }
+
+        const expiryTime = isDev
+          ? addMinutes(new Date(), 2) // for 2 minutes for testing purpose
+          : addDays(new Date(), 7); // 7 days for production
+
+        const hold = await trx
+          .insert(propertyHold)
+          .values({
+            propertyId,
+            holdBy: user.id,
+            holdStatus: 'active',
+            isActiveHold: true,
+            holdDate: new Date(),
+            expiredAt: expiryTime,
+          })
+          .returning();
+
+        const excludedHolds = sql.raw(`excluded.${propertyStats.holds.name}`);
+
+        // add a stat record
+        const [updatedStats] = await trx
+          .insert(propertyStats)
+          .values({
+            propertyId: existingProperty.id,
+            holds: 1,
+          })
+          .onConflictDoUpdate({
+            target: propertyStats.propertyId,
+            set: {
+              holds: sql`${propertyStats.holds} + 1`,
+            },
+            setWhere: or(sql`${propertyStats.holds} != ${excludedHolds}`),
+          })
+          .returning({
+            id: propertyStats.propertyId,
+            holds: propertyStats.holds,
+          });
+
+        return {
+          success: true,
+          message: 'Property on hold for 7 days',
+          hold,
+          updatedStats,
+        };
+      });
+
+      if (commited.success) {
+        try {
+          await inngestFn.send({
+            name: 'property/hold-expiry-check',
+            data: { propertyId },
+          });
+        } catch (error) {
+          console.error('Error in holding property:', error);
+        } finally {
+          if (path) {
+            const finalPath = `/(root)/${path}`;
+            revalidatePath(finalPath, 'page');
+          } else {
+            revalidatePath('/(root)/swapings', 'page');
+          }
+        }
+      }
+
+      return commited;
+    }),
+
+  // mark favorite / unfavorite a property
+  addPropertyToFavorite: protectedProcedure
+    .input(addPropertyToFavoriteList)
+    .mutation(async ({ input, ctx }) => {
+      const { user } = ctx.auth;
+
+      const { propertyId, path } = input;
+
+      try {
+        const commited = await db.transaction(async (trx) => {
+          const existingProperty = await trx.query.property.findFirst({
+            where: eq(PropertyTable.id, propertyId),
+          });
+          if (!existingProperty) {
+            return {
+              success: false,
+              message: 'Property not available',
+            };
+          }
+
+          const [favorite] = await trx
+            .insert(propertyFavorite)
+            .values({
+              propertyId,
+              favoriteBy: user.id,
+              favoriteAt: new Date(),
+            })
+            .onConflictDoNothing()
+            .returning();
+
+          let updatedStats: {
+            id: string;
+            favorites: number;
+          }[] = [];
+          if (favorite) {
+            updatedStats = await trx
+              .insert(propertyStats)
+              .values({
+                propertyId: existingProperty.id,
+                favorites: 1,
+              })
+              .onConflictDoUpdate({
+                target: propertyStats.propertyId,
+                set: { favorites: sql`${propertyStats.favorites} + 1` },
+              })
+              .returning({
+                id: propertyStats.propertyId,
+                favorites: propertyStats.favorites,
+              });
+          }
+
+          // const excludedFavorites = sql.raw(
+          //   `excluded.${propertyStats.favorites.name}`,
+          // );
+
+          // // add a stat record
+          // const [updatedStats] = await trx
+          //   .insert(propertyStats)
+          //   .values({
+          //     propertyId: existingProperty.id,
+          //     favorites: 1,
+          //   })
+          //   .onConflictDoUpdate({
+          //     target: propertyStats.propertyId,
+          //     set: {
+          //       favorites: sql`${propertyStats.favorites} + 1`,
+          //     },
+          //     setWhere: or(
+          //       sql`${propertyStats.favorites} != ${excludedFavorites}`,
+          //     ),
+          //   })
+          //   .returning({
+          //     id: propertyStats.propertyId,
+          //     favorites: propertyStats.favorites,
+          //   });
+
+          return {
+            success: true,
+            message: 'Property on favorite',
+            favorite,
+            updatedStats: updatedStats[0],
+          };
+        });
+        return commited;
+      } catch (err) {
+        console.log('error in adding to favorite', err);
+        Sentry.captureException(err);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to favorite property',
+        });
+      } finally {
+        if (path) {
+          const finalPath = `/(root)/${path}`;
+          revalidatePath(finalPath, 'page');
+        } else {
+          revalidatePath('/(root)/swapings', 'page');
+        }
+      }
+    }),
+
+  // add views to propertyStats table on every visit
+  addViewsToProperty: protectedProcedure
+    .input(addViewsToAProperty)
+    .mutation(async ({ input, ctx }) => {
+      const { propertyId, path } = input;
+      const { user } = ctx.auth;
+
+      try {
+        const commited = await db.transaction(async (trx) => {
+          const existingProperty = await trx.query.property.findFirst({
+            where: eq(PropertyTable.id, propertyId),
+          });
+
+          if (!existingProperty) {
+            return {
+              success: false,
+              message: 'Property not available',
+            };
+          }
+
+          // check if a stats record exists for this property
+          // const existingStats = await trx.query.propertyStats.findFirst({
+          //   where: (stats, { eq }) => eq(stats.propertyId, existingProperty.id),
+          // });
+
+          // let updatedStats: {
+          //   id: string;
+          //   views: number;
+          // }[] = [];
+          // if (existingStats) {
+          //   updatedStats = await trx
+          //     .update(propertyStats)
+          //     .set({
+          //       views: sql`${propertyStats.views} + 1`,
+          //     })
+          //     .where(eq(propertyStats.propertyId, existingProperty.id))
+          //     .returning({
+          //       id: propertyStats.propertyId,
+          //       views: propertyStats.views,
+          //     });
+          // } else {
+          //   updatedStats = await trx
+          //     .insert(propertyStats)
+          //     .values({
+          //       propertyId: existingProperty.id,
+          //       views: 1,
+          //     })
+          //     .returning({
+          //       id: propertyStats.propertyId,
+          //       views: propertyStats.views,
+          //     });
+          // }
+
+          // Atomic upsert avoids race on first concurrent views.
+          const [updatedStats] = await trx
+            .insert(propertyStats)
+            .values({
+              propertyId: existingProperty.id,
+              views: 1,
+            })
+            .onConflictDoUpdate({
+              target: propertyStats.propertyId,
+              set: {
+                views: sql`${propertyStats.views} + 1`,
+              },
+            })
+            .returning({
+              id: propertyStats.propertyId,
+              views: propertyStats.views,
+            });
+
+          return {
+            success: true,
+            message: 'Property views updated',
+            updatedStats,
+          };
+
+          // const excludedViews = sql.raw(`excluded.${propertyStats.views.name}`);
+
+          // add a stat record
+          // const [updatedStats] = await trx
+          //   .insert(propertyStats)
+          //   .values({
+          //     propertyId: existingProperty.id,
+          //     views: 1,
+          //   })
+          //   .onConflictDoUpdate({
+          //     target: propertyStats.propertyId,
+          //     set: {
+          //       views: sql`${propertyStats.views} + 1`,
+          //     },
+          //     setWhere: or(sql`${propertyStats.views} != ${excludedViews}`),
+          //   })
+          //   .returning({
+          //     id: propertyStats.propertyId,
+          //     views: propertyStats.views,
+          //   });
+
+          // return {
+          //   success: true,
+          //   message: "Property views updated",
+          //   updatedStats,
+          // };
+        });
+        return commited;
+      } catch (err) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to add views to property',
+        });
+      }
+    }),
+
+  getHoldedProperties: protectedProcedure.query(async ({ ctx }) => {
+    const { user } = ctx.auth;
+
+    const holdedProperties = await db.query.propertyHold.findMany({
+      with: {
+        property: {
+          columns: {
+            id: true,
+            region: true,
+            country: true,
+            state: true,
+            city: true,
+            images: true,
+            roomType: true,
+            streetAddress: true,
+            zipcode: true,
+          },
+        },
+        holdBy: {
+          columns: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+      },
+      where(propertyHoldTable, { eq, not, and }) {
+        return eq(propertyHoldTable.holdBy, user.id);
+      },
+    });
+
+    return holdedProperties;
+  }),
+
+  getLikedProperties: protectedProcedure.query(async ({ ctx }) => {
+    const { user } = ctx.auth;
+
+    const likedProperties = await db.query.like.findMany({
+      where(likeTable, { eq, not, and }) {
+        return eq(likeTable.fromUserId, user.id);
+      },
+      with: {
+        property: {
+          columns: {
+            id: true,
+            region: true,
+            country: true,
+            state: true,
+            city: true,
+            images: true,
+            roomType: true,
+            streetAddress: true,
+            zipcode: true,
+          },
+        },
+      },
+    });
+    return likedProperties;
+  }),
+
+  getUserFavouriteProperties: protectedProcedure
+    .input(basicFilterSchema)
+    .query(async ({ ctx, input }) => {
+      const { user } = ctx.auth;
+
+      const { offset, limit, sort } = input;
+
+      const pageNumber = Math.max(1, parseInt(offset || '1', 10) || 1);
+      const pageSize = Math.max(1, parseInt(limit || '20', 10) || 20);
+      const dbOffset = (pageNumber - 1) * pageSize;
+
+      const totalCount = await db.$count(
+        propertyFavorite,
+        eq(propertyFavorite.favoriteBy, user.id),
+      );
+
+      const favoriteProperties = await db.query.propertyFavorite.findMany({
+        where(propertyFavoriteTable, { eq }) {
+          return eq(propertyFavoriteTable.favoriteBy, user.id);
+        },
+        with: {
+          property: {
+            columns: {
+              id: true,
+              roomType: true,
+              amenities: true,
+              images: true,
+              country: true,
+              state: true,
+              city: true,
+              region: true,
+              streetAddress: true,
+              zipcode: true,
+            },
+            with: {
+              author: {
+                columns: {
+                  id: true,
+                  name: true,
+                  image: true,
+                },
+              },
+            },
+          },
+          favoriteBy: {
+            columns: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+        limit: pageSize,
+        offset: dbOffset,
+        orderBy: (propertyFavoriteTable, { asc, desc }) => {
+          if (sort === 'asc') {
+            return asc(propertyFavoriteTable.favoriteAt);
+          }
+          return desc(propertyFavoriteTable.favoriteAt);
+        },
+      });
+
+      // console.log("favoriteProperties", favoriteProperties.length); // 2
+      // console.log("totalCount", totalCount); // 3
+
+      return { properties: favoriteProperties, totalCount };
     }),
 });

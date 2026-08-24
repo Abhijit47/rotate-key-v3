@@ -9,8 +9,8 @@ import { bookings as BookingTable } from '@/drizzle/schema/booking';
 import { like as LikeTable } from '@/drizzle/schema/like';
 import { match as MatchTable } from '@/drizzle/schema/match';
 import { type InsertSwap, SwapsTable } from '@/drizzle/schema/swap';
-import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
 import { sendInAppNotification } from '@/novu/functions';
+import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
 
 const createSwapSchema = z
   .object({
@@ -190,13 +190,15 @@ export const swapRouter = createTRPCRouter({
               property: {
                 columns: {
                   id: true,
-                  type: true,
+                  roomType: true,
                   isAvailable: true,
                   authorId: true,
-                  streetAddress: true,
-                  city: true,
+                  region: true,
+                  country: true,
                   state: true,
-                  zipCode: true,
+                  city: true,
+                  streetAddress: true,
+                  zipcode: true,
                 },
               },
             },

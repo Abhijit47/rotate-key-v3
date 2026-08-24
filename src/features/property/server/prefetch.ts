@@ -14,8 +14,26 @@ export function prefetchPublicProperties(params: PropertiesInput) {
  * Prefetch user properties with params
  * @param params
  */
-export function prefetchUserProperties(params: PropertiesInput) {
+type MyPropertiesBasicFilterInput = inferInput<
+  typeof trpc.property.getUserProperties
+>;
+export function prefetchUserProperties(params: MyPropertiesBasicFilterInput) {
   return prefetch(trpc.property.getUserProperties.queryOptions(params));
+}
+
+/**
+ * Prefetch user's favourite properties with params
+ * @param params
+ */
+type MyFavouritePropertiesBasicFilterInput = inferInput<
+  typeof trpc.engagement.getUserFavouriteProperties
+>;
+export function prefetchUserFavouriteProperties(
+  params: MyFavouritePropertiesBasicFilterInput,
+) {
+  return prefetch(
+    trpc.engagement.getUserFavouriteProperties.queryOptions(params),
+  );
 }
 
 /**

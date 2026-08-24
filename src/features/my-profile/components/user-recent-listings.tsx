@@ -1,9 +1,17 @@
 'use client';
 
-import Link from 'next/link';
-import Image from 'next/image';
 import { formatDistanceToNow } from 'date-fns';
+import Image from 'next/image';
+import Link from 'next/link';
 
+import { buttonVariants } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   Item,
   ItemContent,
@@ -12,47 +20,57 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/components/ui/item';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { buttonVariants } from '@/components/ui/button';
 import { useUserProperties } from '@/features/property/hooks/use-property';
+import { titleCaseSkipSpecial } from '@/lib/utils';
 
 export default function UserRecentListings() {
-  const { data } = useUserProperties();
+  const {
+    data: { properties, totalProperties },
+  } = useUserProperties({
+    limit: '5',
+    offset: '1',
+    sort: 'desc',
+  });
+
   return (
     <Card className={'gap-3 py-4'}>
       <CardHeader>
-        <CardTitle>Recent Listening</CardTitle>
+        <CardTitle>Recent Listening ({totalProperties})</CardTitle>
       </CardHeader>
       <CardContent className={''}>
-        <div className='flex w-full flex-col gap-6'>
+        <div className='flex flex-col gap-6 w-full'>
           <ItemGroup className='gap-4'>
-            {data.map((item) => (
+            {properties.map((item) => (
               <Item key={item.id} variant='outline' asChild role='listitem'>
                 <Link href='#'>
                   <ItemMedia variant='image'>
                     <Image
                       // src={`https://avatar.vercel.sh/${item.type}`}
                       src={item.images[0]}
-                      alt={item.type}
+                      alt={item.roomType}
                       width={32}
                       height={32}
-                      className='object-cover grayscale'
+                      className='grayscale object-cover'
                     />
                   </ItemMedia>
                   <ItemContent>
-                    <ItemTitle className='line-clamp-1'>
-                      {item.type} -{' '}
-                      <span className='text-muted-foreground'>
-                        {item.author.name}
+                    <ItemTitle className='flex items-center gap-1'>
+                      {titleCaseSkipSpecial(item.roomType)} -{' '}
+                      <span className=''>
+                        {item.country.flag ? (
+                          <img
+                            src={item.country.flag}
+                            alt={item.country.name}
+                            width={20}
+                            height={20}
+                          />
+                        ) : null}
                       </span>
                     </ItemTitle>
-                    <ItemDescription>{item.streetAddress}</ItemDescription>
+                    <ItemDescription className='line-clamp-1'>
+                      {item.region.name}, {item.country.name}, {item.state.name}
+                      , {item.city.name},{item.streetAddress}, {item.zipcode}
+                    </ItemDescription>
                   </ItemContent>
                   <ItemContent className='flex-none text-center'>
                     <ItemDescription>
@@ -75,8 +93,7 @@ export default function UserRecentListings() {
             variant: 'link',
             size: 'sm',
             className: 'w-full',
-          })}
-        >
+          })}>
           View More
         </Link>
       </CardFooter>
