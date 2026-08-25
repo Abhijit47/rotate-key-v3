@@ -1,8 +1,11 @@
 'use client';
 
 import { Pagination, usePagination } from '@ark-ui/react/pagination';
-import { ArrowUpRightFromSquareIcon, CheckCheckIcon } from 'lucide-react';
-import Image from 'next/image';
+import {
+  ArrowUpRightFromSquareIcon,
+  CheckCheckIcon,
+  PlusCircleIcon,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useQueryStates } from 'nuqs';
 
@@ -17,11 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from '@/components/ui/carousel';
 import { Separator } from '@/components/ui/separator';
 import { usePropertyFilter } from '@/contexts/property-filter-context';
 import { useGetUserFavouriteProperties } from '@/features/engagement/hooks/use-engagements';
@@ -30,6 +28,7 @@ import { basicFilterAndPaginateParams } from '../searchParams';
 import {
   EmptyPropertiesState,
   Paginate,
+  PropertyCardCarousel,
   SortAndLimitFilter,
 } from './property-listings';
 
@@ -68,7 +67,13 @@ export function FavoritePropertyListings() {
   return (
     <div>
       {properties?.length === 0 ? (
-        <EmptyPropertiesState />
+        <EmptyPropertiesState
+          title='No Favorites Found'
+          description="You haven't made any favorites yet. Click the button below to start making favorites."
+          buttonText='Make Favorite'
+          buttonLink='/swapings'
+          buttonIcon={<PlusCircleIcon size={20} />}
+        />
       ) : (
         <Pagination.RootProvider value={pagination} className={''}>
           <div className='space-y-8'>
@@ -87,29 +92,11 @@ export function FavoritePropertyListings() {
               {properties?.map((item) => {
                 return (
                   <Card key={item.id} className={'py-4 gap-4'}>
-                    <CardContent className={'px-4'}>
-                      <Carousel>
-                        <CarouselContent>
-                          {item.property.images.map((image, index) => (
-                            <CarouselItem
-                              key={index}
-                              className='w-full h-full aspect-video'>
-                              <Image
-                                src={image}
-                                alt={`Property Image ${index + 1}`}
-                                className={
-                                  'w-full h-full object-cover rounded-md'
-                                }
-                                width={400}
-                                height={300}
-                                sizes='(min-width: 1280px) 100vw, 80vw'
-                                priority={false}
-                              />
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                      </Carousel>
-                    </CardContent>
+                    <PropertyCardCarousel
+                      images={item.property.images}
+                      type='propertyCard'
+                    />
+
                     <Separator />
                     <CardHeader className={'px-4'}>
                       <CardTitle className={'capitalize'}>

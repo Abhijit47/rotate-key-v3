@@ -2,15 +2,31 @@
 
 import { Pagination, UsePaginationReturn } from '@ark-ui/react/pagination';
 import { IconHomePlus } from '@tabler/icons-react';
+import AutoPlay from 'embla-carousel-autoplay';
 import {
+  AlertCircleIcon,
+  ArrowLeftRightIcon,
   ArrowUpRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from 'lucide-react';
+import { Route } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { UseQueryStatesReturn } from 'nuqs';
+import { ErrorBoundary, getErrorMessage } from 'react-error-boundary';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 import {
   Empty,
   EmptyContent,
@@ -31,31 +47,43 @@ import {
 } from '@/components/ui/select';
 import { sortOrderEnum } from '@/constants/property-assets-enums';
 import { cn } from '@/lib/utils';
-import { useProperty } from '../hooks/use-property';
 import {
   basicFilterAddonParams,
   basicFilterAndPaginateParams,
 } from '../searchParams';
 
-export function EmptyPropertiesState() {
+const isDev = process.env.NODE_ENV === 'development';
+
+interface EmptyPropertiesProps {
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonLink: Route;
+  buttonIcon: React.ReactNode;
+}
+
+export function EmptyPropertiesState(props: EmptyPropertiesProps) {
+  const { title, description, buttonText, buttonLink, buttonIcon } = props;
   return (
     <Empty className='mx-auto border border-dashed min-w-sm'>
       <EmptyHeader>
         <EmptyMedia variant='icon'>
           <IconHomePlus />
         </EmptyMedia>
-        <EmptyTitle>No Properties Yet</EmptyTitle>
-        <EmptyDescription>
-          You haven&apos;t created any properties yet. Get started by creating
-          your first property listing.
-        </EmptyDescription>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>{description}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent className='flex-wrap justify-center items-center gap-2'>
-        <Button asChild>
-          <Link href='/property/new'>Create Property</Link>
+        <Button asChild size={'sm'}>
+          <Link href={buttonLink}>
+            {buttonIcon}
+            {buttonText}
+          </Link>
         </Button>
-        <Button variant='outline' asChild>
-          <Link href='/swapings'>Explore Swapings</Link>
+        <Button variant='outline' asChild size={'sm'}>
+          <Link href='/swapings'>
+            Explore Swapings <ArrowLeftRightIcon />
+          </Link>
         </Button>
       </EmptyContent>
       <Button
@@ -278,7 +306,161 @@ export function Paginate(props: PaginateProps) {
   );
 }
 
-export function PropertyListing({ propertyId }: { propertyId: string }) {
-  const { data: property } = useProperty(propertyId);
-  return <div>{JSON.stringify(property, null, 2)}</div>;
+type PropertyErrorBoundaryProps = {
+  children: React.ReactNode;
+  fallBackText?: string;
+};
+
+export function PropertyErrorBoundary(props: PropertyErrorBoundaryProps) {
+  const { children, fallBackText } = props;
+  const router = useRouter();
+
+  return (
+    <ErrorBoundary
+      fallbackRender={({ error, resetErrorBoundary }) => {
+        console.log('err', getErrorMessage(error));
+        return (
+          <div className='flex justify-center items-center w-full h-dvh'>
+            <Alert variant='destructive' className='mx-auto max-w-lg'>
+              <AlertCircleIcon />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                {fallBackText || 'Something went wrong.'}
+              </AlertDescription>
+
+              <AlertDescription>
+                <pre className='font-sans text-sm'>
+                  Something went wrong. Please try again later.
+                </pre>
+              </AlertDescription>
+              <div className='mt-4 w-full'>
+                <Button
+                  size='sm'
+                  variant='outline'
+                  onClick={() => {
+                    resetErrorBoundary();
+                    router.refresh();
+                  }}>
+                  Try again
+                </Button>
+              </div>
+            </Alert>
+          </div>
+        );
+      }}
+      onError={(error, info) => {
+        // Log the error to your error reporting service
+        console.error('Profile Error:', error);
+      }}
+      onReset={() => {
+        // Reset any state that may have caused the error
+        router.refresh();
+      }}>
+      {/* Components protected by this boundary */}
+      {children}
+    </ErrorBoundary>
+  );
+}
+
+type PropertyCardCarouselProps = {
+  images: string[];
+  type: 'propertyCard' | 'propertyDeatils';
+};
+
+export function PropertyCardCarousel(props: PropertyCardCarouselProps) {
+  const { images, type } = props;
+
+  switch (type) {
+    case 'propertyCard':
+      if (images.length === 0) {
+        return (
+          <CardContent className={'px-4'}>
+            <div className={'aspect-video w-full h-full'}>
+              <Image
+                src={'https://placehold.co/600x600/png?text=No+Image'}
+                alt='no-image-available'
+                width={500}
+                height={500}
+                className={'w-full h-full object-cover'}
+              />
+            </div>
+          </CardContent>
+        );
+      }
+      return (
+        <CardContent className={'px-4'}>
+          <Carousel
+            plugins={isDev ? undefined : [AutoPlay({ delay: 3000 })]}
+            opts={{
+              loop: true,
+              direction: 'ltr',
+              dragFree: true,
+              dragThreshold: 10,
+              duration: 500,
+              startIndex: 0,
+              slidesToScroll: 'auto',
+            }}>
+            <CarouselContent>
+              {images.map((image, index) => (
+                <CarouselItem key={index} className='aspect-video'>
+                  <Image
+                    src={image}
+                    alt={`Property Image ${index + 1}`}
+                    className={'w-full h-full object-cover rounded-md'}
+                    width={400}
+                    height={300}
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        </CardContent>
+      );
+
+    case 'propertyDeatils':
+      if (images.length === 0) {
+        return (
+          <div className={'aspect-20/9 object-cover w-full h-full'}>
+            <Card className={'w-full h-full'}>No images available</Card>
+          </div>
+        );
+      }
+      return (
+        <Carousel
+          plugins={isDev ? undefined : [AutoPlay({ delay: 3000 })]}
+          opts={{
+            loop: true,
+            direction: 'ltr',
+            dragFree: true,
+            dragThreshold: 10,
+            duration: 200,
+            startIndex: 0,
+            slidesToScroll: 'auto',
+          }}>
+          <CarouselContent className={'aspect-video w-full h-full'}>
+            {images.map((image, index) => (
+              <CarouselItem key={index}>
+                <Image
+                  src={image}
+                  alt={`Carousel Image for property index ${index}`}
+                  className={'object-cover w-full h-full rounded-lg'}
+                  width={500}
+                  height={300}
+                  priority={true}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className='-left-2' />
+          <CarouselNext className='-right-px' />
+        </Carousel>
+      );
+
+    default:
+      return (
+        <div>
+          <Card className={'w-full h-full'}>No images available</Card>
+        </div>
+      );
+  }
 }

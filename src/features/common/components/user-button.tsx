@@ -1,5 +1,10 @@
 'use client';
 
+import Link from 'next/link';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,13 +19,8 @@ import {
   // DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button, buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { authClient, signOut, useSession } from '@/lib/auth-client';
-import Link from 'next/link';
 import NotificationInbox from './notification-inbox';
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -94,7 +94,7 @@ export default function UserButton() {
               </DropdownMenuTrigger>
               <DropdownMenuContent className='w-full min-w-60' align='end'>
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel className='space-x-1'>
+                  <DropdownMenuLabel className='flex justify-between items-center'>
                     <Badge variant='outline' className='capitalize'>
                       {data.user.name}
                     </Badge>
@@ -130,12 +130,12 @@ export default function UserButton() {
                     Billing
                     <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href={'#'} className='w-full'>
+                  {/* <DropdownMenuItem asChild>
+                    <Link href={"#"} className="w-full">
                       Settings
                       <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
                     </Link>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
@@ -148,7 +148,7 @@ export default function UserButton() {
                   <DropdownMenuItem asChild>
                     <Link href={'/swapings'} className='w-full' prefetch>
                       Swapings
-                      <DropdownMenuShortcut>⌘W</DropdownMenuShortcut>
+                      <DropdownMenuShortcut>⇧⌘S</DropdownMenuShortcut>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -160,10 +160,16 @@ export default function UserButton() {
                   <DropdownMenuItem asChild>
                     <Link href={'/my-properties'} className='w-full'>
                       My Properties
-                      <DropdownMenuShortcut>⌘M</DropdownMenuShortcut>
+                      <DropdownMenuShortcut>⌘P</DropdownMenuShortcut>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>Team</DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href={'/my-exchanges'} className='w-full'>
+                      My Exchanges
+                      <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
+                    </Link>
+                  </DropdownMenuItem>
+                  {/* <DropdownMenuItem>Team</DropdownMenuItem> */}
                   {/* <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
                       Invite users

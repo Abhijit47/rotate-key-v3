@@ -1,8 +1,8 @@
 import { SearchParams } from 'nuqs/server';
 import { Suspense, ViewTransition } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 
 import { PropertyFilterProvider } from '@/contexts/property-filter-context';
+import { PropertyErrorBoundary } from '@/features/property/components/property-listings';
 import {
   SwapingsPropertyListings,
   SwappingBanner,
@@ -31,8 +31,7 @@ export default async function Swapings({ searchParams }: PageProps) {
 
   return (
     <HydrateClient>
-      <ErrorBoundary
-        fallback={<div>Something went wrong loading the properties.</div>}>
+      <PropertyErrorBoundary fallBackText='Something went wrong loading the swaping properties.'>
         <main
           className={
             'max-w-(--breakpoint-xl) mx-auto px-4 2xl:px-0 space-y-8 py-8'
@@ -71,7 +70,7 @@ export default async function Swapings({ searchParams }: PageProps) {
             </Suspense>
           </section>
         </main>
-      </ErrorBoundary>
+      </PropertyErrorBoundary>
     </HydrateClient>
   );
 }
