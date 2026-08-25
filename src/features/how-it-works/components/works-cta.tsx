@@ -20,7 +20,8 @@ export default function WorksCTA() {
                 // fill
                 // sizes='(max-width: 768px) 100vw, 768px'
                 className={
-                  'w-full h-full object-cover object-center absolute inset-0 brightness-40'
+                  // 'w-full h-full object-cover object-center absolute inset-0 brightness-40'
+                  'z-0 w-full h-full object-cover object-center absolute inset-0 brightness-40'
                 }
                 placeholder='blur'
                 blurDataURL={HOWITWORKSCTABG.blurDataURL}
@@ -31,9 +32,10 @@ export default function WorksCTA() {
                 }
               ></div> */}
             </div>
-            <div className='-z-10 absolute inset-0 bg-linear-to-t from-emerald-600 via-primary-500 to-emerald-600 w-full h-full aspect-square [clip-path:polygon(70%_0%,100%_0%,100%_100%,50%_100%)]'>
+            {/* <div className='-z-10 absolute inset-0 bg-linear-to-t from-emerald-600 via-primary-500 to-emerald-600 w-full h-full aspect-square [clip-path:polygon(70%_0%,100%_0%,100%_100%,50%_100%)]'>
               &nbsp;
-            </div>
+            </div> */}
+            <div className='z-1 absolute inset-0 bg-linear-to-t from-emerald-600 via-primary-500 to-emerald-600 w-full h-full aspect-square [clip-path:polygon(70%_0%,100%_0%,100%_100%,50%_100%)]'></div>
 
             <div className='z-10 absolute content-center place-items-center gap-2 lg:gap-4 grid grid-cols-3 w-full h-full text-center'>
               <div className={'col-span-3 lg:col-span-1'}>

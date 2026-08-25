@@ -1,36 +1,36 @@
-import { inngest as inngestFn } from "@/inngest/client";
-import * as Sentry from "@sentry/nextjs";
-import { TRPCError } from "@trpc/server";
-import { addDays, addMinutes } from "date-fns";
-import { and, eq, or, sql } from "drizzle-orm";
-import { StepError } from "inngest";
-import { revalidatePath } from "next/cache";
+import { inngest as inngestFn } from '@/inngest/client';
+import * as Sentry from '@sentry/nextjs';
+import { TRPCError } from '@trpc/server';
+import { addDays, addMinutes } from 'date-fns';
+import { and, desc, eq, gte, or, sql } from 'drizzle-orm';
+import { StepError } from 'inngest';
+import { revalidatePath } from 'next/cache';
 
-import { db } from "@/drizzle/db";
+import { db } from '@/drizzle/db';
 import {
   property as PropertyTable,
   propertyFavorite,
   propertyHold,
   propertyStats,
-} from "@/drizzle/schema";
-import { like as LikeTable } from "@/drizzle/schema/like";
-import { match as MatchTable } from "@/drizzle/schema/match";
-import { paymentPolicyCheckProcedure } from "@/lib/property-actions";
-import { basicFilterSchema } from "@/lib/validators/property-filter-sort-query-schema";
+} from '@/drizzle/schema';
+import { like as LikeTable } from '@/drizzle/schema/like';
+import { match as MatchTable } from '@/drizzle/schema/match';
+import { paymentPolicyCheckProcedure } from '@/lib/property-actions';
+import { basicFilterSchema } from '@/lib/validators/property-filter-sort-query-schema';
 import {
   addHoldToAProperty,
   addLikeToPropertySchema,
   addPropertyToFavoriteList,
   addViewsToAProperty,
-} from "@/lib/validators/property-schema";
-import { sendInAppNotification } from "@/novu/functions";
+} from '@/lib/validators/property-schema';
+import { sendInAppNotification } from '@/novu/functions';
 import {
   baseProcedure,
   createTRPCRouter,
   protectedProcedure,
-} from "@/trpc/init";
+} from '@/trpc/init';
 
-const isDev = process.env.NODE_ENV === "development";
+const isDev = process.env.NODE_ENV === 'development';
 
 export const engagementRouter = createTRPCRouter({
   addLikeToProperty: protectedProcedure
@@ -43,7 +43,7 @@ export const engagementRouter = createTRPCRouter({
       const fromUserId = user.id;
 
       const checkEngagementLimit = await paymentPolicyCheckProcedure({
-        type: "propertyEngagement",
+        type: 'propertyEngagement',
       });
       // console.log('Engagement limit check result:', checkEngagementLimit);
       if (checkEngagementLimit.success) {
@@ -60,7 +60,7 @@ export const engagementRouter = createTRPCRouter({
               return {
                 success: false,
                 isMatch: false,
-                message: "You already liked this property.",
+                message: 'You already liked this property.',
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -78,7 +78,7 @@ export const engagementRouter = createTRPCRouter({
               return {
                 success: false,
                 isMatch: false,
-                message: "Property not available.",
+                message: 'Property not available.',
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -92,7 +92,7 @@ export const engagementRouter = createTRPCRouter({
               return {
                 success: true,
                 isMatch: false,
-                message: "Like recorded (self-like, no match possible).",
+                message: 'Like recorded (self-like, no match possible).',
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -108,7 +108,7 @@ export const engagementRouter = createTRPCRouter({
               // Only sent notification to the owner, currentUser hit the like button, no heavy calculation required.
               const completeAddress = `${ownerProperty.region.name}, ${ownerProperty.country.name}, ${ownerProperty.state.name}, ${ownerProperty.city.name}, ${ownerProperty.streetAddress}, ${ownerProperty.zipcode}`;
               const novuPayload = {
-                workflowType: "liked-property" as WorkflowTypes,
+                workflowType: 'liked-property' as WorkflowTypes,
                 user: user,
                 propertyOwnerId: ownerId,
                 propertyType: ownerProperty.roomType,
@@ -135,7 +135,7 @@ export const engagementRouter = createTRPCRouter({
                 success: true,
                 isMatch: false,
                 message:
-                  "Like recorded, already matched with this user before.",
+                  'Like recorded, already matched with this user before.',
                 user1Id: undefined,
                 user2Id: undefined,
                 newMatchId: undefined,
@@ -168,7 +168,7 @@ export const engagementRouter = createTRPCRouter({
                     property1Id,
                     property2Id,
                     isActive: true,
-                    channelType: "messaging",
+                    channelType: 'messaging',
                   })
                   .returning({ id: MatchTable.id });
 
@@ -187,7 +187,7 @@ export const engagementRouter = createTRPCRouter({
             return {
               success: true,
               isMatch: false,
-              message: "Like recorded, no match yet.",
+              message: 'Like recorded, no match yet.',
               user1Id: undefined,
               user2Id: undefined,
               newMatchId: undefined,
@@ -205,7 +205,7 @@ export const engagementRouter = createTRPCRouter({
             try {
               // heavy lifting take over by inngest
               await inngestFn.send({
-                name: "matched/create-channel",
+                name: 'matched/create-channel',
                 data: {
                   user1Id: commited.user1Id,
                   user2Id: commited.user2Id,
@@ -230,11 +230,11 @@ export const engagementRouter = createTRPCRouter({
             message: commited.message,
           };
         } catch (error) {
-          console.error("Error in likePropertyAndMaybeMatch:", error);
+          console.error('Error in likePropertyAndMaybeMatch:', error);
           return {
             success: false,
             isMatch: false,
-            message: "Internal server error",
+            message: 'Internal server error',
             user1Id: undefined,
             user2Id: undefined,
             newMatchId: undefined,
@@ -242,14 +242,14 @@ export const engagementRouter = createTRPCRouter({
         } finally {
           if (path) {
             const finalPath = `/(root)/${path}`;
-            revalidatePath(finalPath, "page");
+            revalidatePath(finalPath, 'page');
           } else {
-            revalidatePath("/(root)/swapings", "page");
+            revalidatePath('/(root)/swapings', 'page');
           }
         }
       } else {
         throw new TRPCError({
-          code: "FORBIDDEN",
+          code: 'FORBIDDEN',
           message: checkEngagementLimit.message,
         });
       }
@@ -273,7 +273,7 @@ export const engagementRouter = createTRPCRouter({
         if (!existingProperty) {
           return {
             success: false,
-            message: "Property not available",
+            message: 'Property not available',
           };
         }
 
@@ -286,7 +286,7 @@ export const engagementRouter = createTRPCRouter({
           .values({
             propertyId,
             holdBy: user.id,
-            holdStatus: "active",
+            holdStatus: 'active',
             isActiveHold: true,
             holdDate: new Date(),
             expiredAt: expiryTime,
@@ -316,7 +316,7 @@ export const engagementRouter = createTRPCRouter({
 
         return {
           success: true,
-          message: "Property on hold for 7 days",
+          message: 'Property on hold for 7 days',
           hold,
           updatedStats,
         };
@@ -325,17 +325,17 @@ export const engagementRouter = createTRPCRouter({
       if (commited.success) {
         try {
           await inngestFn.send({
-            name: "property/hold-expiry-check",
+            name: 'property/hold-expiry-check',
             data: { propertyId },
           });
         } catch (error) {
-          console.error("Error in holding property:", error);
+          console.error('Error in holding property:', error);
         } finally {
           if (path) {
             const finalPath = `/(root)/${path}`;
-            revalidatePath(finalPath, "page");
+            revalidatePath(finalPath, 'page');
           } else {
-            revalidatePath("/(root)/swapings", "page");
+            revalidatePath('/(root)/swapings', 'page');
           }
         }
       }
@@ -359,7 +359,7 @@ export const engagementRouter = createTRPCRouter({
           if (!existingProperty) {
             return {
               success: false,
-              message: "Property not available",
+              message: 'Property not available',
             };
           }
 
@@ -421,25 +421,25 @@ export const engagementRouter = createTRPCRouter({
 
           return {
             success: true,
-            message: "Property on favorite",
+            message: 'Property on favorite',
             favorite,
             updatedStats: updatedStats[0],
           };
         });
         return commited;
       } catch (err) {
-        console.log("error in adding to favorite", err);
+        console.log('error in adding to favorite', err);
         Sentry.captureException(err);
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to favorite property",
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to favorite property',
         });
       } finally {
         if (path) {
           const finalPath = `/(root)/${path}`;
-          revalidatePath(finalPath, "page");
+          revalidatePath(finalPath, 'page');
         } else {
-          revalidatePath("/(root)/swapings", "page");
+          revalidatePath('/(root)/swapings', 'page');
         }
       }
     }),
@@ -460,7 +460,7 @@ export const engagementRouter = createTRPCRouter({
           if (!existingProperty) {
             return {
               success: false,
-              message: "Property not available",
+              message: 'Property not available',
             };
           }
 
@@ -517,7 +517,7 @@ export const engagementRouter = createTRPCRouter({
 
           return {
             success: true,
-            message: "Property views updated",
+            message: 'Property views updated',
             updatedStats,
           };
 
@@ -551,8 +551,8 @@ export const engagementRouter = createTRPCRouter({
         return commited;
       } catch (err) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to add views to property",
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to add views to property',
         });
       }
     }),
@@ -624,8 +624,8 @@ export const engagementRouter = createTRPCRouter({
 
       const { offset, limit, sort } = input;
 
-      const pageNumber = Math.max(1, parseInt(offset || "1", 10) || 1);
-      const pageSize = Math.max(1, parseInt(limit || "20", 10) || 20);
+      const pageNumber = Math.max(1, parseInt(offset || '1', 10) || 1);
+      const pageSize = Math.max(1, parseInt(limit || '20', 10) || 20);
       const dbOffset = (pageNumber - 1) * pageSize;
 
       const totalCount = await db.$count(
@@ -672,7 +672,7 @@ export const engagementRouter = createTRPCRouter({
         limit: pageSize,
         offset: dbOffset,
         orderBy: (propertyFavoriteTable, { asc, desc }) => {
-          if (sort === "asc") {
+          if (sort === 'asc') {
             return asc(propertyFavoriteTable.favoriteAt);
           }
           return desc(propertyFavoriteTable.favoriteAt);
@@ -686,35 +686,94 @@ export const engagementRouter = createTRPCRouter({
     }),
 
   getTrendingProperties: baseProcedure.query(async () => {
-    const mostViewed = await db.query.propertyStats.findMany({
-      columns: {
-        id: true,
-        propertyId: true,
-        views: true,
-      },
-      with: {
-        property: {
-          columns: {
-            id: true,
-            roomType: true,
-            images: true,
-            country: true,
-            state: true,
-            city: true,
-            region: true,
-            streetAddress: true,
-            zipcode: true,
-          },
-        },
-      },
-      where(fields, { gte }) {
-        return gte(fields.views, 1);
-      },
+    // const mostViewed = await db.query.propertyStats.findMany({
+    //   columns: {
+    //     id: true,
+    //     propertyId: true,
+    //     views: true,
+    //   },
+    //   with: {
+    //     property: {
+    //       columns: {
+    //         id: true,
+    //         roomType: true,
+    //         images: true,
+    //         country: true,
+    //         state: true,
+    //         city: true,
+    //         region: true,
+    //         streetAddress: true,
+    //         zipcode: true,
+    //       },
+    //     },
+    //   },
+    //   where(fields, { and, gte, eq }) {
+    //     const isAvailable = eq(PropertyTable.isAvailable, true);
+    //     // return gte(fields.views, 1);
+    //     return and(isAvailable, gte(fields.views, 1));
+    //   },
 
-      orderBy: (propertys, { desc }) => [desc(propertys.views)],
-      limit: 12,
-    });
+    //   orderBy: (propertys, { desc }) => [desc(propertys.views)],
+    //   limit: 12,
+    // });
+
+    /* Option 1: Standard Join (Recommended)*/
+    const mostViewed = await db
+      .select({
+        id: propertyStats.id,
+        propertyId: propertyStats.propertyId,
+        views: propertyStats.views,
+        property: {
+          id: PropertyTable.id,
+          roomType: PropertyTable.roomType,
+          images: PropertyTable.images,
+          country: PropertyTable.country,
+          state: PropertyTable.state,
+          city: PropertyTable.city,
+          region: PropertyTable.region,
+          streetAddress: PropertyTable.streetAddress,
+          zipcode: PropertyTable.zipcode,
+        },
+      })
+      .from(propertyStats)
+      .innerJoin(PropertyTable, eq(propertyStats.propertyId, PropertyTable.id))
+      .where(
+        and(eq(PropertyTable.isAvailable, true), gte(propertyStats.views, 1)),
+      )
+      .orderBy(desc(propertyStats.views))
+      .limit(12);
 
     return mostViewed;
+
+    /* Option 2: Standard Join with raw SQL order (Zero Import Changes) */
+
+    // const mostViewed = await db
+    //   .select({
+    //     id: propertyStats.id,
+    //     propertyId: propertyStats.propertyId,
+    //     views: propertyStats.views,
+    //     property: {
+    //       id: PropertyTable.id,
+    //       roomType: PropertyTable.roomType,
+    //       images: PropertyTable.images,
+    //       country: PropertyTable.country,
+    //       state: PropertyTable.state,
+    //       city: PropertyTable.city,
+    //       region: PropertyTable.region,
+    //       streetAddress: PropertyTable.streetAddress,
+    //       zipcode: PropertyTable.zipcode,
+    //     },
+    //   })
+    //   .from(propertyStats)
+    //   .innerJoin(PropertyTable, eq(propertyStats.propertyId, PropertyTable.id))
+    //   .where(
+    //     and(
+    //       eq(PropertyTable.isAvailable, true),
+    //       gte(propertyStats.views, 1)
+    //     )
+    //   )
+    //   .orderBy(sql`${propertyStats.views} DESC`)
+    //   .limit(12);
+    // return mostViewed;
   }),
 });

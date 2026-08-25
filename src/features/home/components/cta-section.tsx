@@ -68,7 +68,7 @@ export default function CTASection() {
             <Link
               href='/sign-up'
               className={buttonVariants({ variant: 'default', size: 'lg' })}>
-              Get Started-It&apos;s Free
+              Get Started - It&apos;s Free
             </Link>
           </div>
         </div>

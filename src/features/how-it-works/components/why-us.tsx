@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 
 export default function WhyUs() {
   return (
-    <section className={'py-8 sm:py-12 md:py-16 lg-py-20'}>
+    <section className={'py-8 sm:py-12 md:py-16 lg:py-20'}>
       <SectionWrapper className={'space-y-8 md:space-y-12 lg:space-y-16'}>
         <div className={'space-y-4 md:space-y-6 lg:space-y-8'}>
           <SectionBadge align='center' className={'bg-muted'}>

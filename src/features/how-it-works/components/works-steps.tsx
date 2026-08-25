@@ -16,7 +16,7 @@ export default function WorksSteps() {
   return (
     <section className={''}>
       <SectionWrapper>
-        <Card className='space-y-8 md:space-y-12 lg:space-y-16 bg-primary/30 dark:bg-primary/20 lg-py-12 py-8 md:py-10'>
+        <Card className='space-y-8 md:space-y-12 lg:space-y-16 bg-primary/30 dark:bg-primary/20 lg:py-12 xl:py-20 py-8 md:py-10'>
           <div className='space-y-4 md:space-y-6 lg:space-y-8'>
             <SectionBadge
               align='center'

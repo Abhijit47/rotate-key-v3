@@ -52,7 +52,8 @@ export default function HeroSearch() {
           <InputGroupInput
             placeholder='Search for your room type...'
             name='roomType'
-            defaultValue={inputValue.toLowerCase()}
+            value={inputValue.toLowerCase()}
+            readOnly
             className='cursor-pointer'
             onClick={() => setOpen(true)}
           />

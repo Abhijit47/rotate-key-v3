@@ -44,7 +44,8 @@ export default function Testimonials() {
 
     api.on('slidesInView', () => {
       // console.log('slidesInView', api.selectedScrollSnap());
-      setCurrentSlide(api.selectedScrollSnap() + 1);
+      setCurrentSlide(api.selectedScrollSnap());
+      // setCurrentSlide(api.selectedScrollSnap() + 1);
       // setCurrent(api.selectedScrollSnap() + 1);
     });
 
