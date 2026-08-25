@@ -99,7 +99,7 @@ export default function NavPropertyHold() {
               <div className='flex justify-center items-center'>
                 <Button variant='outline' size={'xs'} asChild>
                   <Link href='/swapings' prefetch>
-                    No Hold properties
+                    Find properties to hold
                   </Link>
                 </Button>
               </div>

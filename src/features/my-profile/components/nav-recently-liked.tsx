@@ -101,7 +101,7 @@ export default function NavRecentlyLiked() {
               <div className='flex justify-center items-center'>
                 <Button variant='outline' size={'xs'} asChild>
                   <Link href='/swapings' prefetch>
-                    No Liked properties
+                    Explore properties
                   </Link>
                 </Button>
               </div>

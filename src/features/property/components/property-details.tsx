@@ -162,7 +162,7 @@ export function PropertyDetails({ propertyId }: { propertyId: string }) {
                     'flex items-center gap-2 ring-muted-foreground ring-1 rounded-full px-3 py-0.5 w-fit text-xs font-semibold'
                   }>
                   <RulerIcon className={'size-4'} />
-                  {property.area} sqft
+                  {property.area} {property.areaUnit}
                 </p>
                 <p
                   className={
@@ -203,6 +203,7 @@ export function PropertyDetails({ propertyId }: { propertyId: string }) {
           <CardContent>
             <WhatWeOffered property={property} />
           </CardContent>
+          {/* TODO: Not planned yet */}
           {/* <CardFooter className="justify-end">
             <ReviewDrawer propertyId={property.id} />
           </CardFooter> */}

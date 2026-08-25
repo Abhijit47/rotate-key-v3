@@ -317,32 +317,37 @@ export function PropertyErrorBoundary(props: PropertyErrorBoundaryProps) {
 
   return (
     <ErrorBoundary
-      fallbackRender={({ error, resetErrorBoundary }) => (
-        <div className='flex justify-center items-center w-full h-dvh'>
-          <Alert variant='destructive' className='mx-auto max-w-lg'>
-            <AlertCircleIcon />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              {fallBackText || 'Something went wrong.'}
-            </AlertDescription>
+      fallbackRender={({ error, resetErrorBoundary }) => {
+        console.log('err', getErrorMessage(error));
+        return (
+          <div className='flex justify-center items-center w-full h-dvh'>
+            <Alert variant='destructive' className='mx-auto max-w-lg'>
+              <AlertCircleIcon />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                {fallBackText || 'Something went wrong.'}
+              </AlertDescription>
 
-            <AlertDescription>
-              <pre className='font-sans text-sm'>{getErrorMessage(error)}</pre>
-            </AlertDescription>
-            <div className='mt-4 w-full'>
-              <Button
-                size='sm'
-                variant='outline'
-                onClick={() => {
-                  resetErrorBoundary();
-                  router.refresh();
-                }}>
-                Try again
-              </Button>
-            </div>
-          </Alert>
-        </div>
-      )}
+              <AlertDescription>
+                <pre className='font-sans text-sm'>
+                  Something went wrong. Please try again later.
+                </pre>
+              </AlertDescription>
+              <div className='mt-4 w-full'>
+                <Button
+                  size='sm'
+                  variant='outline'
+                  onClick={() => {
+                    resetErrorBoundary();
+                    router.refresh();
+                  }}>
+                  Try again
+                </Button>
+              </div>
+            </Alert>
+          </div>
+        );
+      }}
       onError={(error, info) => {
         // Log the error to your error reporting service
         console.error('Profile Error:', error);

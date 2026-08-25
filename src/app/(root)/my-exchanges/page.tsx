@@ -11,6 +11,7 @@ export default function MyExchangesPage() {
       <section>
         <h1 className={'text-3xl font-bold mb-4'}>My Exchanges</h1>
       </section>
+      {/* TODO: Getting the successfull exchanges data will future coming */}
       <EmptyPropertiesState
         title='No Exchanges Found'
         description="You haven't made any exchanges yet. Click the button below to start making exchanges."

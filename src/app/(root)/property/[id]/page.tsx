@@ -67,7 +67,7 @@ export default async function PropertyPage(props: PageProps<'/property/[id]'>) {
               <form
                 action={async () => {
                   'use server';
-                  await clearCache(`property-${propertyId}`);
+                  await clearCache(`/(root)/property/${propertyId}`, 'page');
                 }}>
                 <Button size={'xs'} variant={'destructive'}>
                   Clear cache
