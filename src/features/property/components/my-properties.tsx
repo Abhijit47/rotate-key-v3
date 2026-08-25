@@ -5,9 +5,9 @@ import {
   ArrowUpRightFromSquareIcon,
   CheckCheckIcon,
   PenLineIcon,
+  PlusCircleIcon,
 } from 'lucide-react';
 import type { Route } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useQueryStates } from 'nuqs';
 import { toast } from 'sonner';
@@ -23,11 +23,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from '@/components/ui/carousel';
 import { Separator } from '@/components/ui/separator';
 import { usePropertyFilter } from '@/contexts/property-filter-context';
 import { useSession } from '@/lib/auth-client';
@@ -37,6 +32,7 @@ import { basicFilterAndPaginateParams } from '../searchParams';
 import {
   EmptyPropertiesState,
   Paginate,
+  PropertyCardCarousel,
   SortAndLimitFilter,
 } from './property-listings';
 
@@ -95,7 +91,13 @@ export default function MyPropertyListings() {
   return (
     <div>
       {properties?.length === 0 ? (
-        <EmptyPropertiesState />
+        <EmptyPropertiesState
+          title='No Properties Found'
+          description="Click 'Create Property' button below to create your first property and start making swapings."
+          buttonText='Create Property'
+          buttonLink='/property/new'
+          buttonIcon={<PlusCircleIcon size={20} />}
+        />
       ) : (
         <Pagination.RootProvider value={pagination} className={''}>
           <div className='space-y-8'>
@@ -114,29 +116,11 @@ export default function MyPropertyListings() {
               {properties?.map((property) => {
                 return (
                   <Card key={property.id} className={'py-4 gap-4'}>
-                    <CardContent className={'px-4'}>
-                      <Carousel>
-                        <CarouselContent>
-                          {property.images.map((image, index) => (
-                            <CarouselItem
-                              key={index}
-                              className='w-full h-full aspect-video'>
-                              <Image
-                                src={image}
-                                alt={`Property Image ${index + 1}`}
-                                className={
-                                  'w-full h-full object-cover rounded-md'
-                                }
-                                width={400}
-                                height={300}
-                                sizes='(min-width: 1280px) 100vw, 80vw'
-                                priority={false}
-                              />
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                      </Carousel>
-                    </CardContent>
+                    <PropertyCardCarousel
+                      images={property.images}
+                      type='propertyCard'
+                    />
+
                     <Separator />
                     <CardHeader className={'px-4'}>
                       <CardTitle className={'capitalize'}>

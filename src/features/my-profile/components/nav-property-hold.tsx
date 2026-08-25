@@ -93,7 +93,9 @@ export default function NavPropertyHold() {
                   View All
                 </Button>
               </div>
-            ) : (
+            ) : null}
+
+            {data.length === 0 ? (
               <div className='flex justify-center items-center'>
                 <Button variant='outline' size={'xs'} asChild>
                   <Link href='/swapings' prefetch>
@@ -101,7 +103,7 @@ export default function NavPropertyHold() {
                   </Link>
                 </Button>
               </div>
-            )}
+            ) : null}
           </SidebarGroupContent>
         </>
       )}

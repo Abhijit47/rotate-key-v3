@@ -9,7 +9,9 @@ import {
   CheckCheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  EyeIcon,
   HeartIcon,
+  PlusCircleIcon,
   Settings2Icon,
   ThumbsDownIcon,
   ThumbsUpIcon,
@@ -85,6 +87,7 @@ import PropertyFilters from './property-filters';
 import {
   EmptyPropertiesState,
   Paginate,
+  PropertyCardCarousel,
   SortAndLimitFilter,
 } from './property-listings';
 
@@ -172,7 +175,13 @@ export function SwapingsPropertyListings() {
     <div>
       {modal}
       {properties?.length === 0 ? (
-        <EmptyPropertiesState />
+        <EmptyPropertiesState
+          title='No Swapings Found'
+          description="Click 'Create Property' button below to create your first property and start making swapings."
+          buttonText='Create Property'
+          buttonLink='/property/new'
+          buttonIcon={<PlusCircleIcon size={20} />}
+        />
       ) : (
         <Pagination.RootProvider value={pagination} className=''>
           <div className={'space-y-6'}>
@@ -202,25 +211,15 @@ export function SwapingsPropertyListings() {
                       </span>
                     ) : null}
 
-                    <CardContent className={'px-4'}>
-                      <Carousel>
-                        <CarouselContent>
-                          {property.images.map((image, index) => (
-                            <CarouselItem key={index} className='aspect-video'>
-                              <Image
-                                src={image}
-                                alt={`Property Image ${index + 1}`}
-                                className={
-                                  'w-full h-full object-cover rounded-md'
-                                }
-                                width={400}
-                                height={300}
-                              />
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                      </Carousel>
-                    </CardContent>
+                    <Badge className='top-4 right-4 z-10 absolute'>
+                      <EyeIcon /> {property?.propertyStats?.views ?? 0}
+                    </Badge>
+
+                    <PropertyCardCarousel
+                      images={property.images}
+                      type='propertyCard'
+                    />
+
                     <Separator />
                     <CardHeader className={'px-4'}>
                       <CardTitle className={'capitalize'}>

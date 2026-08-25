@@ -354,6 +354,13 @@ export const propertyRouter = createTRPCRouter({
 
       const existingProperty = await db.query.property.findFirst({
         where: eq(PropertyTable.id, id),
+        with: {
+          propertyStats: {
+            columns: {
+              views: true,
+            },
+          },
+        },
       });
 
       if (!existingProperty) {
@@ -644,6 +651,12 @@ export const propertyRouter = createTRPCRouter({
             propertyFavorites: {
               where(fields, operators) {
                 return operators.eq(fields.favoriteBy, user.id);
+              },
+            },
+
+            propertyStats: {
+              columns: {
+                views: true,
               },
             },
           },

@@ -1,13 +1,13 @@
-import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import { SearchParams } from "nuqs/server";
+import { SearchParams } from 'nuqs/server';
+import { Suspense } from 'react';
 
-import { prefetchUserFavouriteProperties } from "@/features/property/server/prefetch";
-import { requireAuth } from "@/lib/requireAuth";
-import { HydrateClient } from "@/trpc/server";
-import { loadBasicFilterAndPaginateParams } from "@/features/property/searchParams";
-import { PropertyFilterProvider } from "@/contexts/property-filter-context";
-import { FavoritePropertyListings } from "@/features/property/components/favorite-properties";
+import { PropertyFilterProvider } from '@/contexts/property-filter-context';
+import { FavoritePropertyListings } from '@/features/property/components/favorite-properties';
+import { PropertyErrorBoundary } from '@/features/property/components/property-listings';
+import { loadBasicFilterAndPaginateParams } from '@/features/property/searchParams';
+import { prefetchUserFavouriteProperties } from '@/features/property/server/prefetch';
+import { requireAuth } from '@/lib/requireAuth';
+import { HydrateClient } from '@/trpc/server';
 
 type PageProps = {
   searchParams: Promise<SearchParams>;
@@ -29,16 +29,13 @@ export default async function FavouritePropertiesPage({
 
   return (
     <HydrateClient>
-      <ErrorBoundary
-        fallback={<div>Something went wrong loading favorite properties.</div>}
-      >
+      <PropertyErrorBoundary fallBackText='Something went wrong loading favorite properties.'>
         <main
           className={
-            "max-w-(--breakpoint-xl) mx-auto px-4 2xl:px-0 space-y-8 py-8"
-          }
-        >
+            'max-w-(--breakpoint-xl) mx-auto px-4 2xl:px-0 space-y-8 py-8'
+          }>
           <section>
-            <h1 className={"text-3xl font-bold mb-4"}>Favorite Properties</h1>
+            <h1 className={'text-3xl font-bold mb-4'}>Favorite Properties</h1>
           </section>
 
           <section>
@@ -49,7 +46,7 @@ export default async function FavouritePropertiesPage({
             </Suspense>
           </section>
         </main>
-      </ErrorBoundary>
+      </PropertyErrorBoundary>
     </HydrateClient>
   );
 }

@@ -1,9 +1,9 @@
 import { SearchParams } from 'nuqs/server';
 import { Suspense } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 
 import { PropertyFilterProvider } from '@/contexts/property-filter-context';
 import MyPropertyListings from '@/features/property/components/my-properties';
+import { PropertyErrorBoundary } from '@/features/property/components/property-listings';
 import { loadBasicFilterAndPaginateParams } from '@/features/property/searchParams';
 import { prefetchUserProperties } from '@/features/property/server/prefetch';
 import { requireAuth } from '@/lib/requireAuth';
@@ -27,8 +27,7 @@ export default async function MyPropertiesPage({ searchParams }: PageProps) {
 
   return (
     <HydrateClient>
-      <ErrorBoundary
-        fallback={<div>Something went wrong loading my properties.</div>}>
+      <PropertyErrorBoundary fallBackText='Something went wrong loading my properties.'>
         <main
           className={
             'max-w-(--breakpoint-xl) mx-auto px-4 2xl:px-0 space-y-8 py-8'
@@ -45,7 +44,7 @@ export default async function MyPropertiesPage({ searchParams }: PageProps) {
             </Suspense>
           </section>
         </main>
-      </ErrorBoundary>
+      </PropertyErrorBoundary>
     </HydrateClient>
   );
 }
