@@ -1,3 +1,4 @@
+import { useTRPC } from '@/trpc/client';
 import {
   useMutation,
   useQueryClient,
@@ -5,7 +6,6 @@ import {
 } from '@tanstack/react-query';
 
 import { BasicFilterValues } from '@/lib/validators/property-filter-sort-query-schema';
-import { useTRPC } from '@/trpc/client';
 
 /**
  * Hook for Adding a like to a property
@@ -100,4 +100,13 @@ export function useGetUserFavouriteProperties(params: BasicFilterValues) {
   return useSuspenseQuery(
     trpc.engagement.getUserFavouriteProperties.queryOptions(params),
   );
+}
+
+/**
+ * Hook for get most viewed properties
+ */
+export function useGetTrendingProperties() {
+  const trpc = useTRPC();
+
+  return useSuspenseQuery(trpc.engagement.getTrendingProperties.queryOptions());
 }

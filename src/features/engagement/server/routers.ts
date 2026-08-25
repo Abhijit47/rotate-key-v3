@@ -2,7 +2,7 @@ import { inngest as inngestFn } from '@/inngest/client';
 import * as Sentry from '@sentry/nextjs';
 import { TRPCError } from '@trpc/server';
 import { addDays, addMinutes } from 'date-fns';
-import { and, eq, or, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, or, sql } from 'drizzle-orm';
 import { StepError } from 'inngest';
 import { revalidatePath } from 'next/cache';
 
@@ -24,7 +24,11 @@ import {
   addViewsToAProperty,
 } from '@/lib/validators/property-schema';
 import { sendInAppNotification } from '@/novu/functions';
-import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
+import {
+  baseProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+} from '@/trpc/init';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -680,4 +684,96 @@ export const engagementRouter = createTRPCRouter({
 
       return { properties: favoriteProperties, totalCount };
     }),
+
+  getTrendingProperties: baseProcedure.query(async () => {
+    // const mostViewed = await db.query.propertyStats.findMany({
+    //   columns: {
+    //     id: true,
+    //     propertyId: true,
+    //     views: true,
+    //   },
+    //   with: {
+    //     property: {
+    //       columns: {
+    //         id: true,
+    //         roomType: true,
+    //         images: true,
+    //         country: true,
+    //         state: true,
+    //         city: true,
+    //         region: true,
+    //         streetAddress: true,
+    //         zipcode: true,
+    //       },
+    //     },
+    //   },
+    //   where(fields, { and, gte, eq }) {
+    //     const isAvailable = eq(PropertyTable.isAvailable, true);
+    //     // return gte(fields.views, 1);
+    //     return and(isAvailable, gte(fields.views, 1));
+    //   },
+
+    //   orderBy: (propertys, { desc }) => [desc(propertys.views)],
+    //   limit: 12,
+    // });
+
+    /* Option 1: Standard Join (Recommended)*/
+    const mostViewed = await db
+      .select({
+        id: propertyStats.id,
+        propertyId: propertyStats.propertyId,
+        views: propertyStats.views,
+        property: {
+          id: PropertyTable.id,
+          roomType: PropertyTable.roomType,
+          images: PropertyTable.images,
+          country: PropertyTable.country,
+          state: PropertyTable.state,
+          city: PropertyTable.city,
+          region: PropertyTable.region,
+          streetAddress: PropertyTable.streetAddress,
+          zipcode: PropertyTable.zipcode,
+        },
+      })
+      .from(propertyStats)
+      .innerJoin(PropertyTable, eq(propertyStats.propertyId, PropertyTable.id))
+      .where(
+        and(eq(PropertyTable.isAvailable, true), gte(propertyStats.views, 1)),
+      )
+      .orderBy(desc(propertyStats.views))
+      .limit(12);
+
+    return mostViewed;
+
+    /* Option 2: Standard Join with raw SQL order (Zero Import Changes) */
+
+    // const mostViewed = await db
+    //   .select({
+    //     id: propertyStats.id,
+    //     propertyId: propertyStats.propertyId,
+    //     views: propertyStats.views,
+    //     property: {
+    //       id: PropertyTable.id,
+    //       roomType: PropertyTable.roomType,
+    //       images: PropertyTable.images,
+    //       country: PropertyTable.country,
+    //       state: PropertyTable.state,
+    //       city: PropertyTable.city,
+    //       region: PropertyTable.region,
+    //       streetAddress: PropertyTable.streetAddress,
+    //       zipcode: PropertyTable.zipcode,
+    //     },
+    //   })
+    //   .from(propertyStats)
+    //   .innerJoin(PropertyTable, eq(propertyStats.propertyId, PropertyTable.id))
+    //   .where(
+    //     and(
+    //       eq(PropertyTable.isAvailable, true),
+    //       gte(propertyStats.views, 1)
+    //     )
+    //   )
+    //   .orderBy(sql`${propertyStats.views} DESC`)
+    //   .limit(12);
+    // return mostViewed;
+  }),
 });
