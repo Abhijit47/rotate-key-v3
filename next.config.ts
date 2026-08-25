@@ -25,7 +25,19 @@ const nextConfig: NextConfig = {
   images: {
     localPatterns: [
       {
+        pathname: '/logos/**',
+      },
+      {
+        pathname: '/home/**',
+      },
+      {
         pathname: '/swaping/**',
+      },
+      {
+        pathname: '/teams/**',
+      },
+      {
+        pathname: '/how-it-works/**',
       },
       {
         pathname: '/api/avatar/**',
