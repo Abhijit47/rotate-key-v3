@@ -1,7 +1,9 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { IconReload } from '@tabler/icons-react';
+import { TRPCClientError } from '@trpc/client';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import {
   Controller,
   FormProvider,
@@ -10,19 +12,16 @@ import {
   useForm,
 } from 'react-hook-form';
 import { toast } from 'sonner';
-import Image from 'next/image';
-import { TRPCClientError } from '@trpc/client';
-import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldLegend,
   FieldSeparator,
   FieldSet,
-  FieldError,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
@@ -30,19 +29,19 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
-  SelectLabel,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useCountries } from '../hooks/use-countries';
+import { useUpdatePersonalInformation } from '@/features/users/hooks/use-user';
+import { ClientSession } from '@/lib/auth-client';
 import {
   personalInformationSchema,
   type PersonalInformationClientValues,
 } from '@/lib/validators/profile-schemas';
+import { useCountries } from '../hooks/use-countries';
 import { AvatarUpload } from './avatar-upload';
-import { ClientSession } from '@/lib/auth-client';
-import { useUpdatePersonalInformation } from '@/features/users/hooks/use-user';
 
 const languages = {
   'ar-SA': 'Arabic (Saudi Arabia)',
@@ -184,8 +183,7 @@ export default function PersonalInformationForm(
                     <Field
                       className='gap-2'
                       data-invalid={fieldState.invalid}
-                      aria-invalid={fieldState.invalid}
-                    >
+                      aria-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor='firstName'>First Name</FieldLabel>
                       <Input
                         id='firstName'
@@ -210,8 +208,7 @@ export default function PersonalInformationForm(
                     <Field
                       className='gap-2'
                       data-invalid={fieldState.invalid}
-                      aria-invalid={fieldState.invalid}
-                    >
+                      aria-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor='lastName'>Last Name</FieldLabel>
                       <Input
                         id='lastName'
@@ -233,7 +230,7 @@ export default function PersonalInformationForm(
               </FieldGroup>
             </FieldGroup>
 
-            <div className='grid grid-cols-2 gap-4'>
+            <div className='gap-4 grid grid-cols-2'>
               <Controller
                 name='spokenLanguages'
                 control={form.control}
@@ -241,23 +238,20 @@ export default function PersonalInformationForm(
                   <Field
                     className='gap-2'
                     data-invalid={fieldState.invalid}
-                    aria-invalid={fieldState.invalid}
-                  >
+                    aria-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor='spokenLanguages'>
                       Spoken Languages
                     </FieldLabel>
                     <Select
                       name={field.name}
                       value={field?.value?.length ? field.value[0] : ''}
-                      onValueChange={(e) => field.onChange([e])}
-                    >
+                      onValueChange={(e) => field.onChange([e])}>
                       <SelectTrigger
                         id='spokenLanguages'
-                        aria-invalid={fieldState.invalid}
-                      >
+                        aria-invalid={fieldState.invalid}>
                         <SelectValue placeholder='Ex. Hindi(India)' />
                       </SelectTrigger>
-                      <SelectContent id='spokenLanguages'>
+                      <SelectContent position='popper' id='spokenLanguages'>
                         <SelectGroup>
                           <SelectLabel>Preferred language</SelectLabel>
                           {Object.entries(languages).map(([key, value]) => {
@@ -288,35 +282,31 @@ export default function PersonalInformationForm(
                   <Field
                     className='gap-2'
                     data-invalid={fieldState.invalid}
-                    aria-invalid={fieldState.invalid}
-                  >
+                    aria-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor='country'>Country</FieldLabel>
                     <Select
                       name={field.name}
                       value={field?.value?.length ? field.value : ''}
-                      onValueChange={(e) => field.onChange(e)}
-                    >
+                      onValueChange={(e) => field.onChange(e)}>
                       <SelectTrigger
                         id='country'
-                        aria-invalid={fieldState.invalid}
-                      >
+                        aria-invalid={fieldState.invalid}>
                         <SelectValue placeholder='India' />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position='popper'>
                         <SelectGroup>
                           <SelectLabel>Choose a country</SelectLabel>
                           {countries.map((country) => {
                             return (
                               <SelectItem
                                 key={country.iso2}
-                                value={country.name}
-                              >
+                                value={country.name}>
                                 <Image
                                   src={country.flag}
                                   alt={country.name}
                                   height={32}
                                   width={32}
-                                  className='size-4 rounded-full'
+                                  className='rounded-full size-4'
                                 />
                                 {country.name} ({country.native})
                               </SelectItem>
@@ -343,13 +333,12 @@ export default function PersonalInformationForm(
                 <Field
                   className='gap-2'
                   data-invalid={fieldState.invalid}
-                  aria-invalid={fieldState.invalid}
-                >
+                  aria-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='about'>About me</FieldLabel>
                   <Textarea
                     id='about'
                     placeholder='Write a short description about yourself...'
-                    className='resize-y min-h-22'
+                    className='min-h-22 resize-y'
                     {...field}
                     value={field?.value?.length ? field.value : ''}
                     aria-invalid={fieldState.invalid}
@@ -374,8 +363,7 @@ export default function PersonalInformationForm(
                 variant='outline'
                 type='button'
                 size={'sm'}
-                disabled={isPending}
-              >
+                disabled={isPending}>
                 Cancel
               </Button>
             </Field>

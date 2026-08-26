@@ -1,24 +1,40 @@
+import { ArrowLeftCircle } from 'lucide-react';
 import Link from 'next/link';
 
-import Logo from '@/components/shared/logo';
+import { buttonVariants } from '@/components/ui/button';
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import LoginForm from '@/features/auth/components/login-form';
+import ThemeToggler from '@/features/common/components/theme-toggler';
+
+const isDev = process.env.NODE_ENV === 'development';
 
 export default function LoginPage() {
   return (
-    <Card className='z-1 w-full gap-3 border-none shadow-md sm:max-w-lg'>
+    <Card className='z-1 relative gap-3 shadow-md border-none w-full sm:max-w-lg'>
+      {isDev ? (
+        <span className='top-2 right-2 absolute'>
+          <ThemeToggler />
+        </span>
+      ) : null}
       <CardHeader className='gap-6'>
-        <Logo className='gap-3' />
+        <CardAction className='justify-self-start col-start-1 row-span-1'>
+          <Link
+            href={'/'}
+            className={buttonVariants({ variant: 'outline', size: 'icon-xs' })}>
+            <ArrowLeftCircle />
+          </Link>
+        </CardAction>
 
-        <div>
+        <div className='flex flex-col col-start-1 row-start-1 ml-8'>
           <CardTitle className='mb-1.5 text-2xl'>
-            <h1 className='text-2xl font-bold'>Login to your account</h1>
+            <h1 className='font-bold text-2xl'>Login to your account</h1>
           </CardTitle>
           <CardDescription className='text-base'>
             <p className='text-muted-foreground text-sm text-balance'>
@@ -29,7 +45,7 @@ export default function LoginPage() {
       </CardHeader>
 
       <CardContent>
-        <p className='text-muted-foreground mb-6'>
+        <p className='mb-6 text-muted-foreground'>
           Login with{' '}
           <Link href='#' className='text-card-foreground hover:underline'>
             Magic Link

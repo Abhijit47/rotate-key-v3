@@ -1,4 +1,4 @@
-import { ChevronRightCircle } from 'lucide-react';
+import { ArrowRightLeftIcon, ChevronRightCircle } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,7 +20,7 @@ export default function ReadyToSwap() {
   return (
     <section
       className={
-        'bg-black dark:bg-background py-8 md:py-10 lg:py-12 xl:py-16 relative'
+        'bg-foreground dark:bg-background py-8 md:py-10 lg:py-12 xl:py-16 relative'
       }>
       <SectionWrapper className={''}>
         <div className='gap-4 grid grid-cols-1 md:grid-cols-2'>
@@ -36,9 +36,12 @@ export default function ReadyToSwap() {
             />
           </div>
 
-          <div className='inline-grid content-center gap-y-8 py-8 sm:py-12 md:py-16 lg:py-0 w-full h-full z-10'>
-            <SectionBadge align='left'>
+          <div className='inline-grid z-10 content-center gap-y-8 py-8 sm:py-12 md:py-16 lg:py-0 w-full h-full'>
+            <SectionBadge
+              align='left'
+              className='flex justify-start items-center gap-2 bg-background dark:bg-foreground w-fit text-foreground dark:text-background'>
               The smart way to Exchange Houses
+              <ArrowRightLeftIcon className='stroke-primary' />
             </SectionBadge>
 
             <SectionHeadingGroup
@@ -49,7 +52,7 @@ export default function ReadyToSwap() {
                 </span>
               </SectionHeading>
 
-              <SectionDescription className={'text-muted-foreground'}>
+              <SectionDescription className={'text-muted-foreground font-body'}>
                 Become part of a community that values trust, diversity, and
                 unforgettable experiences. Find your perfect match with detailed
                 profiles and customizable search filters.

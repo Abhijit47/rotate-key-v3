@@ -1,3 +1,4 @@
+import { ArrowRightLeftIcon, ChevronRightCircleIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -16,7 +17,7 @@ import GridGraphicSVG from '../../../../public/home/Grid.svg';
 
 export default function CTASection() {
   return (
-    <section className={'bg-black dark:bg-background relative'}>
+    <section className={'bg-foreground dark:bg-background relative'}>
       <div className={'absolute left-0 top-0 hidden lg:block'}>
         <div className={'w-full h-full'}>
           <Image
@@ -45,16 +46,19 @@ export default function CTASection() {
       </div>
       <SectionWrapper>
         <div className='content-center gap-4 sm:gap-6 md:gap-8 lg:gap-10 grid py-16 md:py-20 lg:py-24 xl:py-28 text-center'>
-          <SectionBadge>Smarter Way to Exchange Houses</SectionBadge>
+          <SectionBadge className='flex justify-center items-center gap-2 bg-background dark:bg-foreground mx-auto w-fit text-foreground dark:text-background'>
+            Smarter Way to Exchange Houses
+            <ArrowRightLeftIcon className='stroke-primary' />
+          </SectionBadge>
 
           <SectionHeadingGroup className={'space-y-2 lg:space-y-4 z-10'}>
-            <SectionHeading>
+            <SectionHeading className='text-background dark:text-foreground'>
               <span className={'block'}>
                 Be Part of the Rotatekey Global Network
               </span>
             </SectionHeading>
 
-            <p className='mx-auto w-8/12 text-secondary-50 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-center'>
+            <p className='mx-auto w-8/12 text-muted-foreground text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-center'>
               Rotatekey brings together a growing community of users who believe
               in smarter property usage and flexible living. Our platform gives
               members access to a wide network of properties for exchange,
@@ -68,7 +72,8 @@ export default function CTASection() {
             <Link
               href='/sign-up'
               className={buttonVariants({ variant: 'default', size: 'lg' })}>
-              Get Started - It&apos;s Free
+              Get Started - It&apos;s Free{' '}
+              <ChevronRightCircleIcon className='size-4' />
             </Link>
           </div>
         </div>

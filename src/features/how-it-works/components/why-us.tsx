@@ -20,15 +20,17 @@ export default function WhyUs() {
     <section className={'py-8 sm:py-12 md:py-16 lg:py-20'}>
       <SectionWrapper className={'space-y-8 md:space-y-12 lg:space-y-16'}>
         <div className={'space-y-4 md:space-y-6 lg:space-y-8'}>
-          <SectionBadge align='center' className={'bg-muted'}>
+          <SectionBadge
+            align='center'
+            className={'bg-muted dark:bg-foreground/10 dark:text-foreground'}>
             Uniqueness of Us
           </SectionBadge>
           <Marker variant='separator' className='mx-auto w-full max-w-3xl'>
             <MarkerContent>
               <h2
                 className={cn(
-                  'text-muted-foreground',
-                  'text-center col-span-3 2xl:col-span-1 text-xl xs:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-medium xs:font-semibold lg:font-bold',
+                  'font-display font-bold text-foreground',
+                  'text-center col-span-3 2xl:col-span-1 text-xl xs:text-2xl md:text-3xl lg:text-4xl xl:text-5xl',
                 )}>
                 Why <span className={'inline-block text-primary'}>R</span>
                 otate <span className={'inline-block text-primary'}>K</span>

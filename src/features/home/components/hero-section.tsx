@@ -37,7 +37,7 @@ export default function HeroSection() {
             </h1>
             <SectionDescription
               align='left'
-              className={'dark:text-muted-foreground'}>
+              className={'dark:text-muted-foreground font-body'}>
               Rotate Keys is not just a platform; it&apos;s a community of
               like-minded individuals sharing the joy of exploration and
               discovery. Your dream house swap is just a click away.

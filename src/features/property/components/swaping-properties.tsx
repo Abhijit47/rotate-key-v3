@@ -1,7 +1,12 @@
 'use client';
 
 import { Pagination, usePagination } from '@ark-ui/react/pagination';
-import { IconBath, IconBedFlat, IconHome } from '@tabler/icons-react';
+import {
+  IconBath,
+  IconBedFlat,
+  IconHome,
+  IconUsers,
+} from '@tabler/icons-react';
 import { TRPCClientError } from '@trpc/client';
 import AutoPlay from 'embla-carousel-autoplay';
 import {
@@ -23,7 +28,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryStates } from 'nuqs';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { IconUser } from 'stream-chat-react';
 
 import SwappingBannerBG from '../../../../public/swaping/banner.jpg';
 
@@ -318,7 +322,7 @@ export function SwapingsPropertyListings() {
                         </p>
                         <p className='inline-flex items-center gap-2'>
                           <span className='bg-muted p-1 rounded-full'>
-                            <IconUser className={'size-4 stroke-primary'} />
+                            <IconUsers className={'size-4 stroke-primary'} />
                           </span>
                           <span className={'text-xs text-muted-foreground'}>
                             {property.guests} Guest
@@ -394,7 +398,9 @@ export function SwappingBannerHeading() {
       }>
       <SectionHeading
         align='center'
-        className={'text-primary backdrop-blur-xs'}>
+        className={
+          'text-primary-foreground dark:text-accent-foreground font-display'
+        }>
         DISCOVER YOUR DESIRED HOUSE
       </SectionHeading>
       <SectionDescription
@@ -417,7 +423,7 @@ export function SwappingBanner() {
     >
       <div
         className={
-          'bg-secondary-950 relative w-full h-100 sm:h-110 lg:h-120 ring-2 ring-primary overflow-hidden rounded-2xl'
+          'bg-secondary/5 relative w-full h-100 sm:h-110 lg:h-120 ring-2 ring-primary overflow-hidden rounded-2xl'
         }>
         <Image
           src={SwappingBannerBG}
@@ -510,7 +516,10 @@ export function SwappingFilter() {
               <FieldLabel htmlFor='search-by-date' className='sr-only'>
                 Search by date
               </FieldLabel>
-              <DatePickerWithRangeSelect id={'search-by-date'} />
+              <DatePickerWithRangeSelect
+                id={'search-by-date'}
+                className='lg:rounded-full'
+              />
             </Field>
 
             <Button
@@ -628,13 +637,16 @@ export function SwappingFilterByType() {
           size='sm'
           onClick={() => {
             setValues(null);
-          }}>
+          }}
+          disabled={
+            isTransition || Array.from(searchParams.keys()).length === 0
+          }>
           <Trash2Icon /> Clear All ({Array.from(searchParams.keys()).length})
         </Button>
       </div>
 
       <div className={'flex items-center gap-4'}>
-        <Card className={'p-2 gap-2 w-full'}>
+        <Card className={'p-0 gap-2 w-full bg-transparent border-none'}>
           <Carousel
             plugins={isDev ? undefined : [AutoPlay({ delay: 3000 })]}
             opts={{
@@ -652,18 +664,18 @@ export function SwappingFilterByType() {
               {types.map((type, index) => (
                 <CarouselItem
                   key={index}
-                  className='group pl-4 basis-6/12 sm:basis-3/12 lg:basis-2/12'>
+                  className='group my-auto pl-4 h-full basis-6/12 sm:basis-3/12 lg:basis-2/12'>
                   <Button
                     disabled={isTransition}
                     variant={
                       selectedType === type.name.toLowerCase()
                         ? 'default'
-                        : 'outline'
+                        : 'ghost'
                     }
                     // defaultChecked={type.name.toLowerCase() === selectedType}
                     value={type.name}
                     className={cn(
-                      'flex flex-col items-center gap-1 disabled:opacity-50 px-3 ring-1 ring-primary-500 group-hover:ring-1 group-hover:ring-primary-500 w-full h-full transition-all duration-200 ease-in-out disabled:cursor-not-allowed',
+                      'flex flex-col items-center gap-1 disabled:opacity-50 px-3 ring-1 ring-primary group-hover:ring-1 group-hover:ring-primary w-full h-fit transition-all duration-200 ease-in-out hover:cursor-pointer disabled:cursor-not-allowed',
                     )}
                     onClick={() => {
                       startTransition(() => {
@@ -683,9 +695,9 @@ export function SwappingFilterByType() {
                         {
                           <type.icon
                             className={cn(
-                              'size-8 text-muted-foreground',
+                              'stroke-primary size-8',
                               selectedType === type.name.toLowerCase() &&
-                                'text-white',
+                                'text-accent stroke-accent dark:stroke-accent-foreground',
                             )}
                           />
                         }
@@ -694,7 +706,7 @@ export function SwappingFilterByType() {
 
                     <span
                       className={cn(
-                        'font-medium text-primary-500 dark:group-hover:text-primary-100 text-xs text-clip text-wrap',
+                        'font-medium text-primary text-xs text-clip text-wrap dark:group-hover:text-accent-foreground',
                         selectedType === type.name.toLowerCase() &&
                           'font-semibold text-white',
                       )}>

@@ -5,11 +5,16 @@ import { NextRequest, NextResponse } from 'next/server';
 // Public routes that don't require authentication
 const publicRoutes: Route[] = [
   '/',
+  '/about',
+  '/how-it-works',
   '/login',
   '/sign-up',
   '/forgot-password',
   '/reset-password',
   '/verify-otp',
+  '/pricing',
+  '/privacy-policy',
+  '/terms-and-conditions',
 ];
 
 // API routes that should always be accessible (no redirects)

@@ -55,3 +55,9 @@ declare type WorkflowTypes =
   | 'liked-property'
   | 'matched'
   | 'incoming-swap-request';
+
+declare type FooterLink = {
+  id: string;
+  title: string;
+  link: string;
+};

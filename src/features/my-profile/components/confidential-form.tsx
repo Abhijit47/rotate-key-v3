@@ -1,6 +1,9 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { TRPCClientError } from '@trpc/client';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import {
   Controller,
   FormProvider,
@@ -10,19 +13,16 @@ import {
   useWatch,
 } from 'react-hook-form';
 import { toast } from 'sonner';
-import { IconReload } from '@tabler/icons-react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { TRPCClientError } from '@trpc/client';
 
+import { PhoneInput } from '@/components/extends/phone-input';
 import { Button } from '@/components/ui/button';
 import {
   Field,
+  FieldError,
   FieldLabel,
   FieldLegend,
   FieldSeparator,
   FieldSet,
-  FieldError,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
@@ -34,20 +34,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { PhoneInput } from '@/components/extends/phone-input';
-import VerifyPhoneOTP from './verify-phone-otp';
-
+import { useUpdateConfidentialInformation } from '@/features/users/hooks/use-user';
+import { ClientSession } from '@/lib/auth-client';
 import { generateBirthYears } from '@/lib/utils';
 import {
   confidentialInformationSchema,
   type ConfidentialInformationClientValues,
 } from '@/lib/validators/profile-schemas';
-import { useUpdateConfidentialInformation } from '@/features/users/hooks/use-user';
-import { ClientSession } from '@/lib/auth-client';
 import {
   LazyPreviewProfileDocument,
   LazyUploadProfileDocumentDialog,
 } from './lazy';
+import VerifyPhoneOTP from './verify-phone-otp';
 
 type ConfidentialInformationFormProps = {
   confidentialInformation: Pick<
@@ -134,34 +132,30 @@ export default function ConfidentialForm(
     <FormProvider {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit, onError)}
-        className='w-full h-full'
-      >
+        className='w-full h-full'>
         <FieldSet className={'gap-3'}>
           <FieldLegend>Confidential Information</FieldLegend>
           <FieldSeparator />
 
-          <div className='grid grid-cols-2 gap-4'>
+          <div className='gap-4 grid grid-cols-2'>
             <Controller
               name='yearOfBirth'
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field
                   data-invalid={fieldState.invalid}
-                  aria-invalid={fieldState.invalid}
-                >
+                  aria-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='yearOfBirth'>Year of Birth</FieldLabel>
                   <Select
                     name={field.name}
                     value={field.value ?? ''}
-                    onValueChange={(e) => field.onChange(e)}
-                  >
+                    onValueChange={(e) => field.onChange(e)}>
                     <SelectTrigger
                       id='yearOfBirth'
-                      aria-invalid={fieldState.invalid}
-                    >
+                      aria-invalid={fieldState.invalid}>
                       <SelectValue placeholder='YYYY' />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position='popper' popover='hint'>
                       <SelectGroup>
                         <SelectLabel>Choose your birth year</SelectLabel>
                         {generateBirthYears().map((year) => {
@@ -185,8 +179,7 @@ export default function ConfidentialForm(
                 <Field
                   className='gap-2'
                   data-invalid={fieldState.invalid}
-                  aria-invalid={fieldState.invalid}
-                >
+                  aria-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='contactNumber'>
                     Contact Number
                   </FieldLabel>
@@ -225,8 +218,7 @@ export default function ConfidentialForm(
               <Field
                 className='gap-2'
                 data-invalid={fieldState.invalid}
-                aria-invalid={fieldState.invalid}
-              >
+                aria-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor='email'>Email</FieldLabel>
                 <Input
                   id='email'
@@ -242,7 +234,7 @@ export default function ConfidentialForm(
             )}
           />
 
-          <div className='grid grid-cols-2 gap-4'>
+          <div className='gap-4 grid grid-cols-2'>
             <Controller
               name='password'
               control={form.control}
@@ -250,8 +242,7 @@ export default function ConfidentialForm(
                 <Field
                   className='gap-2'
                   data-invalid={fieldState.invalid}
-                  aria-invalid={fieldState.invalid}
-                >
+                  aria-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='password'>Password</FieldLabel>
                   <Input
                     id='password'
@@ -278,8 +269,7 @@ export default function ConfidentialForm(
                 <Field
                   className='gap-2'
                   data-invalid={fieldState.invalid}
-                  aria-invalid={fieldState.invalid}
-                >
+                  aria-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='confirmPassword'>
                     Confirm Password
                   </FieldLabel>
@@ -318,8 +308,7 @@ export default function ConfidentialForm(
               variant='outline'
               type='button'
               size={'sm'}
-              disabled={isPending}
-            >
+              disabled={isPending}>
               Cancel
             </Button>
           </Field>

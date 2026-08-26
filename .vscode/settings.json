@@ -9,6 +9,7 @@
   "i18n-ally.editor.preferEditor": true,
   "i18n-ally.fullReloadOnChanged": true,
   "i18n-ally.showFlags": true,
+  "typescript.tsdk": "node_modules\\typescript\\lib",
   // "i18n-ally.localeCountryMap": {
   //   "en": "en-IN",
   //   "bn-IN": "bn-IN"

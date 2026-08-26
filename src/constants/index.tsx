@@ -28,7 +28,7 @@ export const navlinks: Navlink[] = [
   },
   {
     name: 'Pricing',
-    href: '#',
+    href: '/pricing',
   },
 ];
 
@@ -308,3 +308,107 @@ export const teams = [
     image: '/teams/team-4.jpg',
   },
 ];
+
+export const footerLinks: { [key: string]: FooterLink[] } = {
+  'quick-links': [
+    {
+      id: crypto.randomUUID(),
+      title: 'Home',
+      link: '/',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'About',
+      link: '/about',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'How It Works?',
+      link: '/how-it-works',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Swaping Places',
+      link: '/swapings',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Notifications',
+      link: '/notifications',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'My Properties',
+      link: '/my-properties',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Favorite Properties',
+      link: '/favorite-properties',
+    },
+  ],
+  'important-links': [
+    {
+      id: crypto.randomUUID(),
+      title: 'Privacy Policy',
+      link: '/privacy-policy',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Terms & Conditions',
+      link: '/terms-and-conditions',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Help & Support',
+      link: '/#',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'FAQs',
+      link: '/#',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Career',
+      link: '#',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Login',
+      link: '/login',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Register',
+      link: '/sign-up',
+    },
+  ],
+  'social-media': [
+    {
+      id: crypto.randomUUID(),
+      title: 'Instragram',
+      link: 'https://www.instagram.com/rotatekey',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Twitter(X)',
+      link: '/#',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Facebook',
+      link: 'https://www.facebook.com/Rotatekey',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Linkedin',
+      link: 'https://www.linkedin.com/company/rotatekey-com',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Reddit',
+      link: '/#',
+    },
+  ],
+};

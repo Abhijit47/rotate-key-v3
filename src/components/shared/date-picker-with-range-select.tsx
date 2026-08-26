@@ -167,6 +167,7 @@ export default function DatePickerWithRangeSelect(
           className={cn(
             'justify-start w-full md:w-75 font-normal text-left',
             !selectedDt && 'text-muted-foreground',
+            className ? className : '',
           )}>
           <CalendarIcon className='mr-2 w-4 h-4' />
           {selectedDt?.from ? (

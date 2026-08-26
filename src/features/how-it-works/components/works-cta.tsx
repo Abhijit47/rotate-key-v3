@@ -50,7 +50,7 @@ export default function WorksCTA() {
                 </div>
                 <p
                   className={
-                    'font-tertiary text-xl sm:text-2xl md:text-3xl lg:text-4xl text-right font-normal sm:font-medium md:font-semibold lg:font-bold text-primary mr-2'
+                    'font-mono text-xl sm:text-2xl md:text-3xl lg:text-4xl text-right font-normal sm:font-medium md:font-semibold lg:font-bold text-primary dark:text-primary-foreground mr-2'
                   }>
                   money efficient
                 </p>
@@ -66,10 +66,12 @@ export default function WorksCTA() {
                 <Link
                   prefetch
                   href={'/swapings'}
-                  className='group font-semibold text-primary text-sm md:text-base lg:text-lg'>
+                  className='group font-semibold text-accent text-sm md:text-base lg:text-lg'>
                   <span className={'block'}>Discover</span>
                   <span className={'inline-flex items-center gap-2'}>
-                    <span className={'italic block'}>Money Efficient</span>
+                    <span className={'italic block font-mono'}>
+                      Money Efficient
+                    </span>
                     <span>
                       <ArrowRightIcon
                         className={

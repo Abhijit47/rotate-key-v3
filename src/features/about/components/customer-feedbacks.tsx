@@ -6,9 +6,9 @@ export default function CustomerFeedbacks() {
   return (
     <SectionWrapper
       className={'space-y-4 md:space-y-6 lg:space-y-8 xl:space-y-12'}>
-      <SectionHeading>
-        <span className={'text-muted-foreground'}>Customer</span>{' '}
-        <span className={'text-primary'}>Feedback</span>
+      <SectionHeading className='font-display'>
+        <span className={'text-foreground'}>Customer</span>{' '}
+        <span className={'text-primary dark:text-primary'}>Feedback</span>
       </SectionHeading>
 
       <CustomerFeedbackTestimonials />

@@ -11,9 +11,11 @@ export default function FAQSection() {
     <section
       className={'bg-primary/15 dark:bg-primary/10 py-8 md:py-12 lg:py-16'}>
       <SectionWrapper>
-        <SectionHeading>
+        <SectionHeading className='font-display'>
           <span className={'block text-foreground'}>Fequently</span>{' '}
-          <span className={'block text-primary-500'}>asked questions</span>
+          <span className={'block text-primary dark:text-primary'}>
+            asked questions
+          </span>
         </SectionHeading>
 
         <div
@@ -29,7 +31,7 @@ export default function FAQSection() {
               <div className={'space-y-2 md:space-y-4 lg:space-y-6'}>
                 <h4
                   className={
-                    'text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-primary-500'
+                    'text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-primary'
                   }>
                   How we can help you?
                 </h4>

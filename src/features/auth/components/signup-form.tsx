@@ -150,11 +150,11 @@ export default function SignupForm({
 
   return (
     <form
-      className={cn('flex flex-col gap-6', className)}
+      className={cn('flex flex-col gap-3', className)}
       {...props}
       onSubmit={form.handleSubmit(onSubmit, onError)}>
       <FieldSet disabled={disabledState}>
-        <FieldGroup className='gap-4'>
+        <FieldGroup className='gap-3'>
           <Controller
             name='fullName'
             control={form.control}
@@ -275,14 +275,14 @@ export default function SignupForm({
                   <FieldLabel htmlFor='privacyAndTerms' className='font-normal'>
                     I agree to the{' '}
                     <Link
-                      href='#'
-                      className='underline-offset-4 hover:underline'>
+                      href='/privacy-policy'
+                      className='hover:underline underline-offset-4'>
                       Privacy Policy
                     </Link>{' '}
                     and{' '}
                     <Link
-                      href='#'
-                      className='underline-offset-4 hover:underline'>
+                      href='/terms-and-conditions'
+                      className='hover:underline underline-offset-4'>
                       Terms of Service
                     </Link>
                   </FieldLabel>

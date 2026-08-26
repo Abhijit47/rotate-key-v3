@@ -105,14 +105,14 @@ export function UpdatePlanDialog(props: UpdatePlanDialogProps) {
         </DialogTrigger>
         <DialogContent
           className={cn(
-            'text-foreground flex max-h-[95vh] flex-col gap-3 sm:max-h-[90vh] sm:gap-4',
+            'flex flex-col gap-3 sm:gap-4 max-h-[95vh] sm:max-h-[90vh] text-foreground',
             'w-[calc(100vw-2rem)] max-w-2xl sm:w-full',
             'p-4 sm:p-6',
             className,
           )}
           // style={themeStyles}
         >
-          <DialogTitle className='text-lg font-semibold sm:text-xl'>
+          <DialogTitle className='font-semibold text-lg sm:text-xl'>
             {title || 'Upgrade Plan'}
           </DialogTitle>
           <DialogDescription>Loading customer information...</DialogDescription>
@@ -128,13 +128,13 @@ export function UpdatePlanDialog(props: UpdatePlanDialogProps) {
       </DialogTrigger>
       <DialogContent
         className={cn(
-          'text-foreground flex max-h-[95vh] flex-col gap-3 sm:max-h-[90vh] sm:gap-4',
+          'flex flex-col gap-3 sm:gap-4 max-h-[95vh] sm:max-h-[90vh] text-foreground',
           'w-[calc(100vw-2rem)] max-w-2xl sm:w-full',
           'p-4 sm:p-6',
           className,
         )}>
         <DialogHeader className=''>
-          <DialogTitle className='text-lg font-semibold sm:text-xl'>
+          <DialogTitle className='font-semibold text-lg sm:text-xl'>
             {title || 'Upgrade Plan'}
           </DialogTitle>
 
@@ -166,37 +166,37 @@ export function UpdatePlanDialog(props: UpdatePlanDialogProps) {
         </ToggleGroup>
 
         <Separator />
-        {/* <div className='flex items-center gap-1.5 text-sm sm:gap-2'>
+        {/* <div className='flex items-center gap-1.5 sm:gap-2 text-sm'>
           <Toggle
             size='sm'
             pressed={!isYearly}
             onPressedChange={(pressed) => setIsYearly(!pressed)}
-            className='h-9 px-3 text-xs sm:h-10 sm:px-4 sm:text-sm'>
+            className='px-3 sm:px-4 h-9 sm:h-10 text-xs sm:text-sm'>
             Monthly
           </Toggle>
           <Toggle
             size='sm'
             pressed={isYearly}
             onPressedChange={(pressed) => setIsYearly(pressed)}
-            className='h-9 px-3 text-xs sm:h-10 sm:px-4 sm:text-sm'>
+            className='px-3 sm:px-4 h-9 sm:h-10 text-xs sm:text-sm'>
             Yearly
           </Toggle>
         </div> */}
         <div
-          className='[&::-webkit-scrollbar-thumb]:bg-muted hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 -mx-4 min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 sm:-mx-6 sm:px-6 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent'
+          className='flex-1 [&::-webkit-scrollbar-thumb]:bg-muted [&::-webkit-scrollbar-track]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 -mx-4 sm:-mx-6 px-4 sm:px-6 [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar]:w-2 min-h-0 overflow-x-hidden overflow-y-auto'
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: 'hsl(var(--muted)) transparent',
           }}>
           {filteredPlan.length === 0 ? (
-            <div className='flex items-center justify-center py-12 text-center'>
+            <div className='flex justify-center items-center py-12 text-center'>
               <p className='text-muted-foreground text-sm'>
                 No plans available
               </p>
             </div>
           ) : (
             <RadioGroup value={selectedPlan} onValueChange={handlePlanChange}>
-              <div className='space-y-2.5 pr-0.5 pb-2 sm:space-y-3'>
+              <div className='space-y-2.5 sm:space-y-3 pr-0.5 pb-2'>
                 {filteredPlan.map((plan, index) => (
                   <motion.div
                     key={plan.id}
@@ -223,36 +223,36 @@ export function UpdatePlanDialog(props: UpdatePlanDialogProps) {
                     tabIndex={0}
                     aria-pressed={selectedPlan === plan.id}
                     className={cn(
-                      'relative cursor-pointer overflow-hidden rounded-lg border transition-all duration-200 sm:rounded-xl',
+                      'relative border rounded-lg sm:rounded-xl overflow-hidden transition-all duration-200 cursor-pointer',
                       'focus-visible:ring-primary touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
                       selectedPlan === plan.id
                         ? 'border-primary from-muted/60 to-muted/30 bg-linear-to-br shadow-sm'
                         : 'border-border hover:border-primary/50',
                     )}>
                     <motion.div layout='position' className='p-3 sm:p-4'>
-                      <div className='flex items-start justify-between gap-2 sm:gap-3'>
-                        <div className='flex min-w-0 flex-1 gap-2 sm:gap-3'>
+                      <div className='flex justify-between items-start gap-2 sm:gap-3'>
+                        <div className='flex flex-1 gap-2 sm:gap-3 min-w-0'>
                           <RadioGroupItem
                             value={plan.id}
                             id={plan.id}
-                            className='pointer-events-none mt-0.5 shrink-0 sm:mt-1'
+                            className='mt-0.5 sm:mt-1 pointer-events-none shrink-0'
                           />
-                          <div className='min-w-0 flex-1'>
+                          <div className='flex-1 min-w-0'>
                             <div className='flex flex-wrap items-center gap-1.5 sm:gap-2'>
                               <Label
                                 htmlFor={plan.id}
-                                className='cursor-pointer text-sm leading-tight font-semibold sm:text-base sm:font-medium'>
+                                className='sm:font-medium font-semibold text-sm sm:text-base leading-tight cursor-pointer'>
                                 {plan.name}
                               </Label>
                               {plan.popular && (
                                 <Badge
                                   variant='secondary'
-                                  className='h-5 shrink-0 px-1.5 py-0 text-[10px] sm:h-auto sm:px-2 sm:py-0.5 sm:text-xs'>
+                                  className='px-1.5 sm:px-2 py-0 sm:py-0.5 h-5 sm:h-auto text-[10px] sm:text-xs shrink-0'>
                                   Most Popular
                                 </Badge>
                               )}
                             </div>
-                            <p className='text-muted-foreground mt-1 text-[11px] leading-relaxed sm:text-xs'>
+                            <p className='mt-1 text-[11px] text-muted-foreground sm:text-xs leading-relaxed'>
                               {plan.description}
                             </p>
                             {plan.benefits.length > 0 && (
@@ -262,9 +262,9 @@ export function UpdatePlanDialog(props: UpdatePlanDialogProps) {
                                     (feature, featureIndex) => (
                                       <div
                                         key={featureIndex}
-                                        className='bg-muted/20 border-border/30 flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-1 sm:gap-2 sm:rounded-lg'>
-                                        <div className='bg-primary h-1 w-1 shrink-0 rounded-full sm:h-1.5 sm:w-1.5' />
-                                        <span className='text-muted-foreground text-[10px] leading-none whitespace-nowrap sm:text-xs'>
+                                        className='flex items-center gap-1.5 sm:gap-2 bg-muted/20 px-2 py-1 border border-border/30 rounded-md sm:rounded-lg shrink-0'>
+                                        <div className='bg-primary rounded-full w-1 sm:w-1.5 h-1 sm:h-1.5 shrink-0' />
+                                        <span className='text-[10px] text-muted-foreground sm:text-xs leading-none whitespace-nowrap'>
                                           {feature.description}
                                         </span>
                                       </div>
@@ -275,14 +275,14 @@ export function UpdatePlanDialog(props: UpdatePlanDialogProps) {
                             )}
                           </div>
                         </div>
-                        <div className='min-w-15 shrink-0 text-right sm:min-w-20'>
-                          <div className='text-base leading-tight font-bold sm:text-xl sm:font-semibold'>
+                        <div className='min-w-15 sm:min-w-20 text-right shrink-0'>
+                          <div className='sm:font-semibold font-bold text-base sm:text-xl leading-tight'>
                             {/* {parseFloat(getCurrentPrice(plan)) >= 0
                               ? `${plan.currency}${getCurrentPrice(plan)}`
                               : getCurrentPrice(plan)} */}
                             {getCurrentPrice(plan)}
                           </div>
-                          <div className='text-muted-foreground mt-0.5 text-[10px] sm:text-xs'>
+                          <div className='mt-0.5 text-[10px] text-muted-foreground sm:text-xs'>
                             /{isYearly ? 'year' : 'month'}
                           </div>
                         </div>
@@ -325,9 +325,9 @@ export function UpdatePlanDialog(props: UpdatePlanDialogProps) {
                               },
                             }}
                             exit={{ y: -8 }}
-                            className='px-3 pb-3 sm:px-4 sm:pb-4'>
+                            className='px-3 sm:px-4 pb-3 sm:pb-4'>
                             <Button
-                              className='w-full touch-manipulation text-sm font-medium sm:text-base'
+                              className='w-full font-medium text-sm sm:text-base touch-manipulation'
                               disabled={
                                 selectedPlan === subscriptions[0]?.product?.id
                               }

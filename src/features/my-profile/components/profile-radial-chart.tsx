@@ -12,7 +12,6 @@ import {
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ChartContainer, type ChartConfig } from '@/components/ui/chart';
 import { useUserProfileCompletionRatio } from '@/features/users/hooks/use-user';
-import { Skeleton } from '@/components/ui/skeleton';
 
 export const description = 'A radial chart with text';
 
@@ -33,31 +32,32 @@ const chartConfig = {
 export default function ProfileRadialChart() {
   const { data } = useUserProfileCompletionRatio();
 
+  // const fakePercentage = 100;
+
   return (
     <Card className='flex flex-col justify-center h-full'>
       {/* <CardHeader className='items-center pb-0'>
         <CardTitle>Radial Chart - Text</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
       </CardHeader> */}
-      <CardContent className='flex-1 pb-0 flex justify-center'>
+      <CardContent className='flex flex-1 justify-center pb-0'>
         <ChartContainer
           config={chartConfig}
-          className='h-full w-full aspect-square'
-        >
+          className='w-full h-full aspect-square'>
           <RadialBarChart
             data={chartData}
             startAngle={0}
             endAngle={(data.percentage / 100) * 360}
+            // endAngle={(fakePercentage / 100) * 360}
             // outerRadius={90}
             // innerRadius={80}
             outerRadius={110}
-            innerRadius={100}
-          >
+            innerRadius={100}>
             <PolarGrid
               gridType='circle'
               radialLines={false}
               stroke='none'
-              className='first:fill-muted last:fill-background bg-accent'
+              className='first:fill-primary/30'
               polarRadius={[110, 120]}
             />
             <RadialBar
@@ -75,20 +75,17 @@ export default function ProfileRadialChart() {
                         x={viewBox.cx}
                         y={viewBox.cy}
                         textAnchor='middle'
-                        dominantBaseline='middle'
-                      >
+                        dominantBaseline='middle'>
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className='fill-foreground text-4xl font-bold'
-                        >
-                          {data.percentage} %
+                          className='fill-primary dark:fill-primary-foreground font-bold text-4xl'>
+                          {data.percentage} %{/* {fakePercentage} % */}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
-                          className='fill-muted-foreground'
-                        >
+                          className='fill-primary dark:fill-primary-foreground'>
                           Completed
                         </tspan>
                       </text>
@@ -101,10 +98,10 @@ export default function ProfileRadialChart() {
         </ChartContainer>
       </CardContent>
       <CardFooter className='flex-col gap-2 text-sm'>
-        <div className='flex items-center gap-2 leading-none font-medium'>
-          Trending up by 5.2% this month <TrendingUp className='h-4 w-4' />
+        <div className='flex items-center gap-2 font-medium leading-none'>
+          Trending up by 5.2% this month <TrendingUp className='w-4 h-4' />
         </div>
-        <div className='leading-none text-muted-foreground'>
+        <div className='text-muted-foreground leading-none'>
           No of visitors (This week): 850
         </div>
       </CardFooter>

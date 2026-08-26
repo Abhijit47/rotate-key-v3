@@ -14,8 +14,11 @@ export default function AboutPage() {
         description='"From Registration to Adventure - A Seamless Experience Awaits You"'
         buttonText='Create your account for free'
         buttonLink='/sign-up'>
-        <span className={'text-primary-500'}>Rotate Keys</span>
-        <span className={'text-tertiary-50'}> : About Us</span>
+        <span className={'text-primary'}>Rotate Keys</span>
+        <span className={'text-muted dark:text-accent-foreground'}>
+          {' '}
+          : About Us
+        </span>
       </SectionBanner>
 
       <AboutInfo />

@@ -67,12 +67,12 @@ export default function TreandingHomeCarousel() {
                       // 'hidden group-hover:inline-flex translate-y-1 transition-all duration-300 delay-150 ease-in-out w-full items-center justify-between gap-1 lg:gap-2 absolute left-0 bottom-0 backdrop-blur-xl bg-background/10 px-4 py-4 rounded-bl-xl rounded-br-xl'
                     }>
                     <div className={'flex flex-col gap-y-1'}>
-                      <h3 className='font-semibold text-background text-sm line-clamp-1'>
+                      <h3 className='font-semibold text-background dark:text-foreground text-sm line-clamp-1'>
                         {titleCaseSkipSpecial(item.property.roomType)}
                       </h3>
                       <p
                         className={
-                          'text-background/80 text-xs inline-flex items-center gap-2'
+                          'text-background/80 dark:text-foreground/80 text-xs inline-flex items-center gap-2'
                         }>
                         {item.property.country.flag ? (
                           <img

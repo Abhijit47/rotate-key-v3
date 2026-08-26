@@ -16,14 +16,16 @@ export default function WorksSteps() {
   return (
     <section className={''}>
       <SectionWrapper>
-        <Card className='space-y-8 md:space-y-12 lg:space-y-16 bg-primary/30 dark:bg-primary/20 lg:py-12 xl:py-20 py-8 md:py-10'>
+        <Card className='space-y-8 md:space-y-12 lg:space-y-16 bg-primary/15 dark:bg-primary/10 py-8 md:py-10 lg:py-12 xl:py-20'>
           <div className='space-y-4 md:space-y-6 lg:space-y-8'>
             <SectionBadge
               align='center'
-              className={'bg-primary dark:bg-primary/30 text-background'}>
+              className={
+                'bg-primary text-background dark:bg-primary/50 dark:text-foreground'
+              }>
               How to begin your journey?
             </SectionBadge>
-            <h2 className='font-semibold text-foreground text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-center'>
+            <h2 className='font-display font-semibold text-foreground text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-center'>
               Steps to House Swaping
             </h2>
           </div>
@@ -37,7 +39,7 @@ export default function WorksSteps() {
                 }>
                 <span>
                   <SquareArrowOutUpRightIcon
-                    className={'size-4 md:size-6 lg:size-8'}
+                    className={'size-4 md:size-6 lg:size-8 stroke-primary'}
                   />
                 </span>
                 <span className='px-2 font-medium text-primary-500 text-sm md:text-base lg:text-lg'>
@@ -88,7 +90,7 @@ export default function WorksSteps() {
                             <span>
                               <CheckCircle2Icon
                                 className={
-                                  'inline-block stroke-primary-500 size-4 md:size-6'
+                                  'inline-block stroke-primary size-4 md:size-6'
                                 }
                               />
                             </span>

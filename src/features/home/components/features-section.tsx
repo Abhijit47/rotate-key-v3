@@ -14,7 +14,7 @@ import { features } from '@/constants';
 
 export default function FeaturesSection() {
   return (
-    <section className='bg-primary/50 dark:bg-primary/70'>
+    <section className=''>
       <SectionWrapper
         className={
           'space-y-6 lg:space-y-8 xl:space-y-12 py-8 lg:py-12 xl:py-16'
@@ -25,7 +25,7 @@ export default function FeaturesSection() {
 
         <h2
           className={
-            'text-xl sm:text-2xl md:text-3xl lg:text-5xl xl:text-6xl font-bold text-center font-primary bg-linear-to-t bg-clip-text text-transparent from-primary/60 to-primary/30'
+            'text-xl sm:text-2xl md:text-3xl lg:text-5xl xl:text-6xl font-bold text-center font-display bg-linear-to-t bg-clip-text text-transparent from-primary to-primary/50'
           }>
           Features That Set Us Apart
         </h2>

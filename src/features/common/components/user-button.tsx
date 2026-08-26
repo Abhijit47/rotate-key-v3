@@ -42,16 +42,6 @@ export default function UserButton() {
         <>
           <li>
             <Link
-              href={'/login'}
-              className={buttonVariants({
-                variant: 'outline',
-                className: 'rounded-full!',
-              })}>
-              Continue to Login
-            </Link>
-          </li>
-          <li>
-            <Link
               href={'/sign-up'}
               className={buttonVariants({
                 className: 'rounded-full!',

@@ -39,14 +39,18 @@ export default function LikedProperty() {
                   className={'space-y-4 lg:space-y-6 xl:space-y-8'}>
                   <SectionHeading
                     align='left'
-                    className={'text-primary hidden lg:block'}>
+                    className={
+                      'text-accent dark:text-accent-foreground hidden lg:block'
+                    }>
                     <span className={'block'}>
                       Ready to Swap Homes and Create Memories ?
                     </span>
                   </SectionHeading>
                   <SectionHeading
                     align='center'
-                    className={'text-primary lg:hidden block'}>
+                    className={
+                      'text-accent dark:text-accent-foreground lg:hidden block'
+                    }>
                     <span className={'block'}>
                       Ready to Swap Homes and Create Memories ?
                     </span>
@@ -54,7 +58,9 @@ export default function LikedProperty() {
 
                   <SectionDescription
                     align='right'
-                    className={'text-accent hidden lg:block'}>
+                    className={
+                      'text-accent dark:text-accent-foreground hidden lg:block font-body'
+                    }>
                     <span>Become part of a community that values trust, </span>
                     <span>diversity, and unforgettable experiences. Find </span>
                     <span>your perfect match with detailed profiles and </span>
@@ -62,7 +68,9 @@ export default function LikedProperty() {
                   </SectionDescription>
                   <SectionDescription
                     align='center'
-                    className={'text-accent lg:hidden block'}>
+                    className={
+                      'text-accent dark:text-accent-foreground lg:hidden block font-body'
+                    }>
                     <span>Become part of a community that values trust, </span>
                     <span>diversity, and unforgettable experiences. Find </span>
                     <span>your perfect match with detailed profiles and </span>
@@ -81,7 +89,7 @@ export default function LikedProperty() {
                   href='/swapings'
                   // locale={locale}
                   className={
-                    'text-primary-50 text-center ring-1 ring-primary-50 px-6 lg:px-8 py-2 rounded-lg flex items-center justify-center space-x-2 text-xs md:text-sm lg:text-base xl:text-lg shadow-lg hover:shadow-sm transition-all duration-300'
+                    'text-accent dark:text-accent-foreground text-center ring-1 ring-accent dark:ring-accent-foreground px-6 lg:px-8 py-2 rounded-lg flex items-center justify-center space-x-2 text-xs md:text-sm lg:text-base xl:text-lg shadow-lg hover:shadow-sm transition-all duration-300'
                   }>
                   <span>Visit this property now</span>
                   <span>

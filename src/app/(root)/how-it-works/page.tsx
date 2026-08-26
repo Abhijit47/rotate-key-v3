@@ -11,8 +11,11 @@ export default function HowItWorksPage() {
         description='"From Registration to Adventure - A Seamless Experience Awaits You"'
         buttonText='Create your account for free'
         buttonLink='/login'>
-        <span className={'text-primary-500'}>Rotate Keys</span>
-        <span className={'text-tertiary-50'}> : How does it works?</span>
+        <span className={'text-primary'}>Rotate Keys</span>
+        <span className={'text-muted dark:text-accent-foreground'}>
+          {' '}
+          : How does it works?
+        </span>
       </SectionBanner>
 
       <WorksSteps />

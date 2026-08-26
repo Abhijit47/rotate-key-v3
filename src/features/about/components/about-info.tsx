@@ -8,15 +8,18 @@ export default function AboutInfo() {
     <SectionWrapper className={'space-y-4 sm:space-y-6'}>
       <SectionHeadingGroup
         className={'space-y-4 md:space-y-6 lg:space-y-8 xl:space-y-10'}>
-        <SectionHeading>
+        <SectionHeading className='font-display'>
           <span className={'block text-foreground'}>Unlock the Door to</span>
           <span className={'block text-foreground'}>
             Your Next Adventure with
           </span>
-          <span className={'block text-primary-500'}>Rotate Key</span>
+          <span className={'block text-primary dark:text-primary'}>
+            Rotate Key
+          </span>
         </SectionHeading>
 
-        <SectionDescription className={'text-muted-foreground'}>
+        <SectionDescription
+          className={'text-muted-foreground max-w-4xl font-body'}>
           {/* Rotate Keys is not just a platform; it&apos;s a community of
           like-minded individuals sharing the joy of exploration and discovery.
           Your dream house swap is just a click away. Rotate Keys is not just a

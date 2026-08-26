@@ -75,7 +75,7 @@ export default function Testimonials() {
               <Card
                 className={cn(
                   currentSlide === idx &&
-                    'bg-primary-500 dark:bg-primary-700 ring-primary-500',
+                    'bg-primary dark:bg-primary ring-primary',
                   'gap-4 aspect-auto lg:aspect-square',
                 )}>
                 <CardHeader>
@@ -83,8 +83,8 @@ export default function Testimonials() {
                     <h5
                       className={cn(
                         currentSlide === idx
-                          ? 'text-primary-50 dark:text-primary-950'
-                          : 'text-foreground',
+                          ? 'text-background dark:text-foreground'
+                          : 'text-primary',
                       )}>
                       {testimonial.name}
                     </h5>
@@ -96,8 +96,8 @@ export default function Testimonials() {
                     <p
                       className={cn(
                         currentSlide === idx
-                          ? 'text-primary-50 dark:text-primary-950'
-                          : 'text-muted-foreground',
+                          ? 'text-accent dark:text-accent-foreground'
+                          : 'text-foreground dark:text-muted-foreground',
                       )}>
                       {testimonial.message}
                     </p>

@@ -1,6 +1,7 @@
 import { SearchParams } from 'nuqs/server';
 import { Suspense } from 'react';
 
+import SectionBanner from '@/components/shared/section-banner';
 import { PropertyFilterProvider } from '@/contexts/property-filter-context';
 import MyPropertyListings from '@/features/property/components/my-properties';
 import { PropertyErrorBoundary } from '@/features/property/components/property-listings';
@@ -32,9 +33,16 @@ export default async function MyPropertiesPage({ searchParams }: PageProps) {
           className={
             'max-w-(--breakpoint-xl) mx-auto px-4 2xl:px-0 space-y-8 py-8'
           }>
-          <section>
-            <h1 className={'text-3xl font-bold mb-4'}>My Properties</h1>
-          </section>
+          <SectionBanner
+            description='"List your property and let the world discover your perfect home."'
+            buttonText='Explore Swapings'
+            buttonLink='/swapings'>
+            <span className={'text-primary'}>Rotate Keys</span>
+            <span className={'text-muted dark:text-accent-foreground'}>
+              {' '}
+              : My Properties
+            </span>
+          </SectionBanner>
 
           <section>
             <Suspense fallback={<div>Loading Listings...</div>}>
