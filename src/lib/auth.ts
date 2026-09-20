@@ -25,44 +25,31 @@ const facebookClientSecret = env.FACEBOOK_CLIENT_SECRET;
 const googleClientId = env.GOOGLE_CLIENT_ID;
 const googleClientSecret = env.GOOGLE_CLIENT_SECRET;
 
-// const products = [
-//   {
-//     productId: env.POLAR_PRODUCT_FREE_ID,
-//     slug: 'free',
-//   },
-//   {
-//     productId: env.POLAR_PRODUCT_BASIC_ID,
-//     slug: 'basic-monthly',
-//   },
-//   {
-//     productId: 'ac96bf48-4e16-4943-9f65-5fe37afa6819',
-//     slug: 'basic-yearly',
-//   },
-//   {
-//     productId: env.POLAR_PRODUCT_PRO_ID,
-//     slug: 'pro',
-//   },
-// ];
 // TODO: Later will add through env
 const products = [
   {
-    productId: '75b68aa7-45d4-41a8-a658-9c0b9cd60695',
+    // productId: '75b68aa7-45d4-41a8-a658-9c0b9cd60695',
+    productId: env.POLAR_PRODUCT_FREE_ID,
     slug: 'free',
   },
   {
-    productId: 'd8839644-f591-4ae4-b4cf-5df7eebe1005',
+    // productId: 'd8839644-f591-4ae4-b4cf-5df7eebe1005',
+    productId: env.POLAR_PRODUCT_BASIC_MONTHLY_ID,
     slug: 'basic-monthly',
   },
   {
-    productId: 'ac96bf48-4e16-4943-9f65-5fe37afa6819',
+    // productId: 'ac96bf48-4e16-4943-9f65-5fe37afa6819',
+    productId: env.POLAR_PRODUCT_BASIC_YEARLY_ID,
     slug: 'basic-yearly',
   },
   {
-    productId: '44057f38-5c6b-431d-9633-be7ef9433c0e',
+    // productId: '44057f38-5c6b-431d-9633-be7ef9433c0e',
+    productId: env.POLAR_PRODUCT_PRO_MONTHLY_ID,
     slug: 'pro-monthly',
   },
   {
-    productId: 'e5cb95ff-a6be-4549-81d0-5c10170a52ca',
+    // productId: 'e5cb95ff-a6be-4549-81d0-5c10170a52ca',
+    productId: env.POLAR_PRODUCT_PRO_YEARLY_ID,
     slug: 'pro-yearly',
   },
 ];

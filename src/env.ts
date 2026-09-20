@@ -14,9 +14,13 @@ export const env = createEnv({
     POLAR_ACCESS_TOKEN: z.string().min(1),
     POLAR_SUCCESS_URL: z.url(),
     POLAR_WEBHOOK_SECRET: z.string().min(1),
+
     POLAR_PRODUCT_FREE_ID: z.string().min(1),
-    POLAR_PRODUCT_BASIC_ID: z.string().min(1),
-    POLAR_PRODUCT_PRO_ID: z.string().min(1),
+    POLAR_PRODUCT_BASIC_MONTHLY_ID: z.string().min(1),
+    POLAR_PRODUCT_BASIC_YEARLY_ID: z.string().min(1),
+    POLAR_PRODUCT_PRO_MONTHLY_ID: z.string().min(1),
+    POLAR_PRODUCT_PRO_YEARLY_ID: z.string().min(1),
+
     NOVU_SECRET_KEY: z.string().min(1),
     NOVU_US_API_URL: z.url(),
     NOVU_EU_API_URL: z.url(),

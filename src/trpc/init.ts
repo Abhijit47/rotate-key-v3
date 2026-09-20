@@ -5,6 +5,7 @@ import superjson from 'superjson';
 
 import { db } from '@/drizzle/db';
 import { property } from '@/drizzle/schema';
+import { env } from '@/env';
 import { auth } from '@/lib/auth';
 import { polarClient } from '@/lib/polar';
 import { initTRPC, TRPCError } from '@trpc/server';
@@ -49,12 +50,19 @@ export const protectedProcedure = baseProcedure.use(
 export const premiumProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
     const { user } = ctx.auth;
+    // const PRODUCT_TIER_MAP: Record<string, string> = {
+    //   '75b68aa7-45d4-41a8-a658-9c0b9cd60695': 'free',
+    //   'd8839644-f591-4ae4-b4cf-5df7eebe1005': 'basic-monthly',
+    //   'ac96bf48-4e16-4943-9f65-5fe37afa6819': 'basic-yearly',
+    //   '44057f38-5c6b-431d-9633-be7ef9433c0e': 'pro-monthly',
+    //   'e5cb95ff-a6be-4549-81d0-5c10170a52ca': 'pro-yearly',
+    // };
     const PRODUCT_TIER_MAP: Record<string, string> = {
-      '75b68aa7-45d4-41a8-a658-9c0b9cd60695': 'free',
-      'd8839644-f591-4ae4-b4cf-5df7eebe1005': 'basic-monthly',
-      'ac96bf48-4e16-4943-9f65-5fe37afa6819': 'basic-yearly',
-      '44057f38-5c6b-431d-9633-be7ef9433c0e': 'pro-monthly',
-      'e5cb95ff-a6be-4549-81d0-5c10170a52ca': 'pro-yearly',
+      [env.POLAR_PRODUCT_FREE_ID]: 'free',
+      [env.POLAR_PRODUCT_BASIC_MONTHLY_ID]: 'basic-monthly',
+      [env.POLAR_PRODUCT_BASIC_YEARLY_ID]: 'basic-yearly',
+      [env.POLAR_PRODUCT_PRO_MONTHLY_ID]: 'pro-monthly',
+      [env.POLAR_PRODUCT_PRO_YEARLY_ID]: 'pro-yearly',
     };
 
     let customer;
